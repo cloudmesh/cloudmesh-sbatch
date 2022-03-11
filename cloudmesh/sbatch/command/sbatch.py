@@ -16,8 +16,7 @@ class SbatchCommand(PluginCommand):
         ::
 
           Usage:
-                sbatch --file=FILE
-                sbatch list
+                sbatch --file=FILE ARGS...
 
           This command does some useful things.
 
