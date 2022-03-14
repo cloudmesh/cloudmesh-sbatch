@@ -35,9 +35,10 @@ class SBatch:
 
     def configure_sbatch(self,host):
         defaults = self.yaml['sbatch_setup'][f'{host}-{self.gpu}']
+        user = self.env['USER']
         sbatch_vars = {
             'SBATCH_GRES': f'gpu:{defaults["card_name"]}:{defaults["num_gpus"]}',
-            'SBATCH_JOB_NAME': 'mlcommons-science-earthquake-%u-%j',
+            'SBATCH_JOB_NAME': f'mlcommons-science-earthquake-{user}',
             'SBATCH_CPUS_ON_NODE': defaults['num_cpus'],
             'SBATCH_TIMELIMIT': defaults['time'],
         }
@@ -63,18 +64,19 @@ class SBatch:
             writefile(filename, self.content)
 
     def run(self, filename='submit-job.slurm'):
-        #import pdb; pdb.set_trace()
+        cwd = os.getcwd()
+        file_path = os.path.join(cwd, filename)
         self.configure_sbatch(host='rivanna')
         if self.params:
             self.get_parameters()
         self.update(self.env)
-        self.save(filename)
+        self.save(file_path)
         if not self.dryrun:
-            stdout, stderr = subprocess.Popen(['sbatch', filename], env=self.env, encoding='utf-8',
+            stdout, stderr = subprocess.Popen(['sbatch', file_path], env=self.env, encoding='utf-8',
                                           stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
             print(stdout)
             print(f"{stderr = }", file=sys.stderr)
-            Shell.run(f'rm {filename}') 
+            Shell.run(f'rm {file_path}')
 
 
     def template(self):
