@@ -68,7 +68,7 @@ class SbatchCommand(PluginCommand):
 
         if arguments.two:
 
-            banner("experimental next gen command")
+            banner("experimental next gen cms sbatch command")
             source = arguments.SOURCE
             if arguments.out is None:
                 destination = source.replace(".in.", "").replace(".in", "")
