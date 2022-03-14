@@ -39,7 +39,7 @@ class SBatch:
         sbatch_vars = {
             'SBATCH_GRES': f'gpu:{defaults["card_name"]}:{defaults["num_gpus"]}',
             'SBATCH_JOB_NAME': f'mlcommons-science-earthquake-{user}',
-            'SBATCH_CPUS_ON_NODE': defaults['num_cpus'],
+            'SBATCH_CPUS_ON_NODE': str(defaults['num_cpus']),
             'SBATCH_TIMELIMIT': defaults['time'],
         }
         for var, value in sbatch_vars.items():
