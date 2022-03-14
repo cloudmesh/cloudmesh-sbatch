@@ -1,33 +1,81 @@
 import os
+import yaml
 import textwrap
-from cloudmesh.common.util import readfile, writefile
+import subprocess
+from cloudmesh.common.util import readfile, writefile, path_expand
 from cloudmesh.common.util import yn_choice
 from cloudmesh.common.Shell import Shell
 
 class SBatch:
 
-    def __init__(self, filename):
-        self.filename = filename
-        self.content = readfile(filename)
+    def __init__(self,
+                 slurm_config,
+                 account='ds6011-sp22-002',
+                 params=None,
+                 gpu='k80',
+                 dryrun: bool = False,
+                 **kwargs):
+        self.account = account
+        self.slurm_config = slurm_config
+        with open(slurm_config, 'r') as file:
+            self.yaml = yaml.safe_load(file)
+        self.content = readfile(path_expand(self.yaml['slurm_template']))
+        self.params = params
+        self.gpu = gpu
+        self.dryrun = dryrun
+        self.env = os.environ.copy()
 
     @property
     def now(self):
         # there is a better way ;)
         return Shell.run("date").strip().replace(" ", "-")
 
+    def __str__(self):
+        return self.content
+
+    def configure_sbatch(self,host):
+        defaults = self.yaml['sbatch_setup'][f'{host}-{self.gpu}']
+        sbatch_vars = {
+            'SBATCH_GRES': f'gpu:{defaults["card_name"]}:{defaults["num_gpus"]}',
+            'SBATCH_JOB_NAME': 'mlcommons-science-earthquake-%u-%j',
+            'SBATCH_CPUS_ON_NODE': defaults['num_cpus'],
+            'SBATCH_TIMELIMIT': defaults['time'],
+        }
+        for var, value in sbatch_vars.items():
+            self.env[str(var)] = value
+        return self
+
+    def get_parameters(self):
+        #TODO finish when we decide how to impliment parameters
+        return -1
+
+    def update(self, *args):
+        #TODO will update parameters
+        # replace with the ergv and with the os.environ variables.
+        #self.content = self.content.format(**argv, **os.environ, date=self.now)
+        return -1
+
     def save(self, filename):
-        if os.path.exists(filename):
-            if yn_choice("File exists, would you like to overwrite?"):
+        if os.path.exists(path_expand(filename)):
+            if yn_choice(f"{filename} exists, would you like to overwrite?"):
                 writefile(filename, self.content)
         else:
             writefile(filename, self.content)
 
-    def update(self, **argv):
-        # replace with the ergv and with the os.environ variables.
-        self.content = self.content.format(**argv, **os.environ, date=self.now)
+    def run(self, filename='submit-job.slurm'):
+        #import pdb; pdb.set_trace()
+        self.configure_sbatch(host='rivanna')
+        if self.params:
+            self.get_parameters()
+        self.update(self.env)
+        self.save(filename)
+        if not self.dryrun:
+            stdout, stderr = subprocess.Popen(['sbatch', filename], env=self.env, encoding='utf-8',
+                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            print(stdout)
+            print(f"{stderr = }", file=sys.stderr)
+            Shell.run(f'rm {filename}') 
 
-    def __str__(self):
-        return self.content
 
     def template(self):
         #
