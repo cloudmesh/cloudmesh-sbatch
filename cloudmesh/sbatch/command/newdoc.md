@@ -1,7 +1,10 @@
+```
 [--source=SOURCE]
     the source of a template. If the filename has an .in. included it will be removed to create the destination, if the --destination  parameter is not specified
+
 [--destination=DESTINATION]
     if source is specified and destination is specified the source will be transformed into destination replacing all variables
+
 [--config=CONFIG...]
     a. if the config file is a yaml file (*.yaml or *.yml), all variables defined in config are substituted
         if the file looks like
@@ -32,3 +35,34 @@ can be substituted in the source
         Then in the source the variable with the following name will be substituted: DEFAULT.a
    d. if the configuration file is a json file the variables are substituted with a . in its name hierarchy
 Note that multiple configuration files can be specified in multiple different formats
+
+Examples:
+
+   configuration_in_python.py:
+   
+data = {
+    "name": "Gregor",
+    "address": {
+        "city": "Bloomington",
+        "state": "IN"
+
+    }
+}
+
+data = FlatDict(data, sep=".")
+   
+configuration_in_json. json
+
+TBD use same example
+
+configuration_in_yaml.yaml
+
+TBD use same example
+
+Please note that variables will be overwritten and the last value from an input configuration file will be the one used.
+
+Please note that with the python configuration and flatdict automatic generation of variables can be achieved easily
+
+
+```
+
