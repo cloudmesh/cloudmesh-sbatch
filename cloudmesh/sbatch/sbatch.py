@@ -35,6 +35,10 @@ class SBatch:
         return self.content
 
     def configure_sbatch(self,host):
+        """
+        Set the sbatch environmental variables based on yaml values
+        Append the variables to the users environment
+        """
         defaults = self.yaml['sbatch_setup'][f'{host}-{self.gpu}']
         user = self.env['USER']
         sbatch_vars = {
@@ -49,6 +53,8 @@ class SBatch:
 
     def get_parameters(self):
         #TODO finish when we decide how to impliment parameters
+        # already have most of the logic established for passing in
+        #  the parameters to the class
         return -1
 
     def update(self, *args):
@@ -58,6 +64,10 @@ class SBatch:
         return -1
 
     def save(self, filename):
+        """
+        Writes the custom slurm script to a file for submission
+        If the file already exists, the user will be prompted to override
+        """
         if os.path.exists(path_expand(filename)):
             if yn_choice(f"{filename} exists, would you like to overwrite?"):
                 writefile(filename, self.content)
@@ -65,6 +75,9 @@ class SBatch:
             writefile(filename, self.content)
 
     def run(self, filename='submit-job.slurm'):
+        """
+        Execute a custom slurm script to the cluster
+        """
         cwd = os.getcwd()
         file_path = os.path.join(cwd, filename)
         self.configure_sbatch(host='rivanna')
