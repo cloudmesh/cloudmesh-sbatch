@@ -1,3 +1,22 @@
+
+sbatch two [--config=CONFIG...] [--out=DESTINATION] [--attributes=PARAMS] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR]
+
+sbatch 
+    --config=a.py,b.json,c.yaml
+    --dir=     # cd dir
+    rivanna.in.slurm    -> desination rivanna.slurm
+    --attributes=\"a=1,b=5\" 
+
+    --experiment=epoch=[0-10:2],gpus[1,2,4]
+
+    for expemint in range(0-10:2):
+       for gpus in [1,2,4]:
+
+    --experiment=gpus[1,2,4],epoch=[0-10:2]
+
+    for gpus in [1,2,4]:
+       for expemint in range(0-10:2):
+
 ```
 [--source=SOURCE]
     the source of a template. If the filename has an .in. included it will be removed to create the destination, if the --destination  parameter is not specified
