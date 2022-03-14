@@ -157,7 +157,7 @@ class SbatchCommand(PluginCommand):
             else:
                 Console.error("only dryrun is implemented")
 
-            print(get_attribute_parameters(arguments.attributes))
+            # print(get_attribute_parameters(arguments.attributes))
 
         else:
 
