@@ -10,6 +10,11 @@ from cloudmesh.shell.command import PluginCommand
 from cloudmesh.shell.command import command
 from cloudmesh.common.parameter import Parameter
 import itertools
+from cloudmesh.common.util import banner
+from cloudmesh.common.util import yn_choice
+from cloudmesh.common.util import readfile
+from cloudmesh.common.FlatDict import FlatDict
+
 
 class SbatchCommand(PluginCommand):
 
@@ -21,6 +26,7 @@ class SbatchCommand(PluginCommand):
 
           Usage:
                 sbatch --slurm_config=CONFIG_FILE --account=ACCOUNT [--filename=FILENAME] [--attributes=PARAMS] [--gpu=GPU] [--dryrun]
+                sbatch two [--config=CONFIG...] [--out=DESTINATION] [--attributes=PARAMS] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR]
 
           This command does some useful things.
 
@@ -35,6 +41,12 @@ class SbatchCommand(PluginCommand):
               -h                help
               --dryrun          flag to skip submission
 
+          Description:
+
+               > Example:
+               > cms sbatch two slurm.in.sh --config=a.py,b.json,c.yaml --attributes=a:1,b:4 --dryrun --noos --dir=example
+
+
         """
         map_parameters(arguments,
                        "slurm_config",
@@ -42,7 +54,11 @@ class SbatchCommand(PluginCommand):
                        "filename",
                        "attributes",
                        "gpu",
-                       "dryrun")
+                       "dryrun",
+                       "config",
+                       "out",
+                       "dir"
+                       )
 
         try:
             os.path.exists(path_expand(arguments.slurm_config))
@@ -50,23 +66,105 @@ class SbatchCommand(PluginCommand):
         except Exception as e:
             print('slurm_template path does not exist')
 
-        if not arguments.filename:
-            arguments.filename = 'submit-job.slurm'
+        if arguments.two:
 
-        if arguments.gpu:
-            for gpu in Parameter.expand_string(arguments.gpu):
-                if arguments.attributes:
-                    params = dict()
-                    for attribute in arguments.attributes.split(';'):
-                        name, feature = attribute.split('=')
-                        params[f'{name}'] = Parameter.expand(feature)
-                    keys, values = zip(*params.items())
-                    permutations = [dict(zip(keys, value)) for value in itertools.product(*values)]
-                    for params in permutations:
-                        worker = SBatch(slurm_config, arguments.account, params=params, dryrun=arguments.dryrun)
-                        worker.run(arguments.filename)
+            banner("experimental next gen command")
+            source = arguments.SOURCE
+            if arguments.out is None:
+                destination = source.replace(".in.", "").replace(".in", "")
+            else:
+                destination = arguments.out
+            if source == destination:
+                if not yn_choice("The source and destination filenames are the same. Do you want to continue?"):
+                    return ""
+
+            attributes = arguments.attributes
+            gpu = arguments.gpu
+            directory = arguments.dir
+            dryrun = arguments.dryrun
+            config = (arguments.config[0]).split(",") # not soo good to split. maybe Parameter expand is better
+
+            if directory is not None:
+                source = f"{directory}/{source}"
+                destination = f"{directory}/{destination}"
+
+            print (f"Source:      {source}")
+            print (f"Destination: {destination}")
+            print(f"Attributes:   {attributes}")
+            print (f"GPU:         {gpu}")
+            print(f"Dryrun:       {dryrun}")
+            print(f"Config:       {config}")
+            print(f"Directory:    {directory}")
+
+            print()
+
+            if arguments["--noos"]:
+                data = {}
+            else:
+                data = dict(os.environ)
+            mod = {}
+            from pprint import pprint
+            import json
+            import yaml
+
+            for configfile in config:
+                if directory is not None:
+                    configfile = f"{directory}/{configfile}"
+                if ".py" in configfile:
+                    print(f"Reading variables from {configfile}")
+                    Console.error(" not yet implemented")
+
+                elif ".json" in configfile:
+
+                    print(f"Reading variables from {configfile}")
+                    content = readfile(configfile)
+                    values =  dict(FlatDict(json.loads(content), sep="__"))
+                    data.update(values)
+                    #pprint (data)
+
+                    Console.error(" not yet implemented")
+
+                elif ".yaml" in configfile:
+                    print(f"Reading variables from {configfile}")
+                    content = readfile(configfile)
+                    values = dict(FlatDict(yaml.safe_load(content), sep="__"))
+                    data.update(values)
+
+                    Console.error(" not yet implemented")
+
+            if dryrun:
+                banner("Attributes")
+                pprint (data)
+            content = readfile(source)
+
+            content = content.format(**data)
+
+            if dryrun:
+                banner("Script")
+                print (content)
+            else:
+                Console.error("only dryrun is implemented")
+
+
         else:
-            worker = SBatch(slurm_config, arguments.account, dryrun=arguments.dryrun)
-            worker.run(arguments.filename)
+
+            if not arguments.filename:
+                arguments.filename = 'submit-job.slurm'
+
+            if arguments.gpu:
+                for gpu in Parameter.expand_string(arguments.gpu):
+                    if arguments.attributes:
+                        params = dict()
+                        for attribute in arguments.attributes.split(';'):
+                            name, feature = attribute.split('=')
+                            params[f'{name}'] = Parameter.expand(feature)
+                        keys, values = zip(*params.items())
+                        permutations = [dict(zip(keys, value)) for value in itertools.product(*values)]
+                        for params in permutations:
+                            worker = SBatch(slurm_config, arguments.account, params=params, dryrun=arguments.dryrun)
+                            worker.run(arguments.filename)
+            else:
+                worker = SBatch(slurm_config, arguments.account, dryrun=arguments.dryrun)
+                worker.run(arguments.filename)
 
         return ""
