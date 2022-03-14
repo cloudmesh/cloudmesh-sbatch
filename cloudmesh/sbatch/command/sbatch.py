@@ -103,9 +103,21 @@ class SbatchCommand(PluginCommand):
             else:
                 data = dict(os.environ)
             mod = {}
+
+            def get_attribute_parameters(attributes):
+                params = dict()
+                for attribute in attributes.split(';'):
+                    name, feature = attribute.split('=')
+                    params[f'{name}'] = Parameter.expand(feature)
+                keys, values = zip(*params.items())
+                permutations = [dict(zip(keys, value)) for value in itertools.product(*values)]
+                return permutations
+
             from pprint import pprint
             import json
             import yaml
+
+
 
             for configfile in config:
                 if directory is not None:
@@ -145,6 +157,7 @@ class SbatchCommand(PluginCommand):
             else:
                 Console.error("only dryrun is implemented")
 
+            print(get_attribute_parameters(arguments.attributes))
 
         else:
 

@@ -20,6 +20,9 @@ class SBatch:
         self.slurm_config = slurm_config
         with open(slurm_config, 'r') as file:
             self.yaml = yaml.safe_load(file)
+        #
+        # TODO: this is hardcoded and must be changed
+        #
         self.content = readfile(path_expand(self.yaml['slurm_template']))
         self.params = params
         self.gpu = gpu
@@ -36,6 +39,8 @@ class SBatch:
 
     def configure_sbatch(self,host):
         """
+        TODO: this is all hardcoded and must be changed
+
         Set the sbatch environmental variables based on yaml values
         Append the variables to the users environment
         """
