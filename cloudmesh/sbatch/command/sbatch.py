@@ -13,6 +13,7 @@ import itertools
 from cloudmesh.common.util import banner
 from cloudmesh.common.util import yn_choice
 from cloudmesh.common.util import readfile
+from cloudmesh.common.util import writefile
 from cloudmesh.common.FlatDict import FlatDict
 
 
@@ -25,7 +26,7 @@ class SbatchCommand(PluginCommand):
         ::
 
           Usage:
-                sbatch [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT]
+                sbatch [--verbose] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT]
 
           This command does some useful things.
 
@@ -44,11 +45,12 @@ class SbatchCommand(PluginCommand):
 
                > Example:
                > cms sbatch two slurm.in.sh --config=a.py,b.json,c.yaml --attributes=a:1,b:4 --dryrun --noos --dir=example
-
-
+               > cms sbatch slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\"
+               > cms sbatch slurm.in.sh --config=a.py,b.json,c.yaml --attributes=a=1,b=4  --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\"
         """
+        verbose = arguments["--verbose"]
+
         map_parameters(arguments,
-                       "slurm_config",
                        "account",
                        "filename",
                        "attributes",
@@ -56,14 +58,9 @@ class SbatchCommand(PluginCommand):
                        "dryrun",
                        "config",
                        "out",
-                       "dir", "experiment"
+                       "dir",
+                       "experiment"
                        )
-
-        try:
-            os.path.exists(path_expand(arguments.slurm_config))
-            slurm_config = arguments.slurm_config
-        except Exception as e:
-            print('slurm_template path does not exist')
 
         #if arguments.old:
 
@@ -88,7 +85,8 @@ class SbatchCommand(PluginCommand):
 
         #else:
 
-        banner("experimental next gen cms sbatch command")
+        if verbose:
+            banner("experiment batch generator")
 
         from pprint import pprint
         import json
@@ -97,14 +95,12 @@ class SbatchCommand(PluginCommand):
 
         source = arguments.SOURCE
         if arguments.out is None:
-            destination = source.replace(".in.", "").replace(".in", "")
+            destination = source.replace(".in.", ".").replace(".in", "")
         else:
             destination = arguments.out
         if source == destination:
             if not yn_choice("The source and destination filenames are the same. Do you want to continue?"):
                 return ""
-
-
 
         gpu = arguments.gpu
         directory = arguments.dir
@@ -136,15 +132,32 @@ class SbatchCommand(PluginCommand):
             attributes = dict(entries)
             data.update(entries)
 
-        print (f"Source:      {source}")
-        print (f"Destination: {destination}")
-        print(f"Attributes:   {attributes}")
-        print (f"GPU:         {gpu}")
-        print(f"Dryrun:       {dryrun}")
-        print(f"Config:       {config}")
-        print(f"Directory:    {directory}")
-        print(f"Experiments:  {experiment}")
-        print()
+        from collections import OrderedDict
+        if arguments.experiment:
+            experiments = OrderedDict()
+            permutations = []
+            entries = experiment.split(' ')
+
+            for entry in entries:
+                name, parameters = entry.split('=')
+                experiments[name] = Parameter.expand(parameters)
+            keys, values = zip(*experiments.items())
+            permutations = [dict(zip(keys, value)) for value in itertools.product(*values)]
+            if verbose:
+                pprint (permutations)
+
+        if verbose:
+            print (f"Source:      {source}")
+            print (f"Destination: {destination}")
+            print(f"Attributes:   {attributes}")
+            print (f"GPU:         {gpu}")
+            print(f"Dryrun:       {dryrun}")
+            print(f"Config:       {config}")
+            print(f"Directory:    {directory}")
+            print(f"Experiments:  {experiment}")
+            print("Permutations")
+            pprint(permutations)
+            print()
 
 
         mod = {}
@@ -153,30 +166,27 @@ class SbatchCommand(PluginCommand):
             if directory is not None:
                 configfile = f"{directory}/{configfile}"
             if ".py" in configfile:
-                print(f"Reading variables from {configfile}")
-                Console.error(" not yet implemented")
+                if verbose:
+                    print(f"Reading variables from {configfile}")
+                Console.red("# ERROR: Importing python not yet implemented")
 
             elif ".json" in configfile:
-
-                print(f"Reading variables from {configfile}")
+                if verbose:
+                    print(f"Reading variables from {configfile}")
                 content = readfile(configfile)
                 values =  dict(FlatDict(json.loads(content), sep="__"))
                 data.update(values)
-                #pprint (data)
-
-                Console.error(" not yet implemented")
 
             elif ".yaml" in configfile:
-                print(f"Reading variables from {configfile}")
+                if verbose:
+                    print(f"Reading variables from {configfile}")
                 content = readfile(configfile)
                 values = dict(FlatDict(yaml.safe_load(content), sep="__"))
                 data.update(values)
 
-                Console.error(" not yet implemented")
-
         content = readfile(source)
 
-        if dryrun:
+        if dryrun or verbose:
             banner("Attributes")
             pprint (data)
             banner(f"Original Script {source}")
@@ -184,27 +194,19 @@ class SbatchCommand(PluginCommand):
             banner("end script")
         result = str(content).format(**data)
 
-        if dryrun:
+        if dryrun or verbose:
             banner("Script")
             print (result)
             banner("Script End")
-
         else:
-            Console.error("only dryrun is implemented")
+            writefile(destination, result)
 
-        from collections import OrderedDict
-        if arguments.experiment:
-            experiments = OrderedDict()
-            permutations = []
-            entries = experiment.split(' ')
-            print (entries)
+        for permutation in permutations:
+            values = ""
+            for attribute,value in permutation.items():
+                values = values + f"{attribute}={value} "
+            print (f"{values} sbatch {destination}")
 
-            for entry in entries:
-                name, parameters = entry.split('=')
-                experiments[name] = Parameter.expand(parameters)
-            keys, values = zip(*experiments.items())
-            permutations = [dict(zip(keys, value)) for value in itertools.product(*values)]
-            pprint (permutations)
 
         # print(get_attribute_parameters(arguments.attributes))
 
