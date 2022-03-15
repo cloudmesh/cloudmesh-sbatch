@@ -178,14 +178,13 @@ class SbatchCommand(PluginCommand):
                 banner(f"Original Script {source}")
                 print(content)
                 banner("end script")
-            print (type(data))
-            print(data)
-            print(content)
-            result = content.format(**data)
+            result = str(content).format(**data)
 
             if dryrun:
                 banner("Script")
                 print (result)
+                banner("Script End")
+
             else:
                 Console.error("only dryrun is implemented")
 
