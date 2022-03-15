@@ -25,8 +25,8 @@ class SbatchCommand(PluginCommand):
         ::
 
           Usage:
-                sbatch --slurm_config=CONFIG_FILE --account=ACCOUNT [--filename=FILENAME] [--attributes=PARAMS] [--gpu=GPU] [--dryrun]
-                sbatch two [--config=CONFIG...] [--out=DESTINATION] [--attributes=PARAMS] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR]
+                sbatch old --slurm_config=CONFIG_FILE --account=ACCOUNT [--filename=FILENAME] [--attributes=PARAMS] [--gpu=GPU] [--dryrun]
+                sbatch [--config=CONFIG...] [--out=DESTINATION] [--attributes=PARAMS] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR]
 
           This command does some useful things.
 
@@ -66,9 +66,36 @@ class SbatchCommand(PluginCommand):
         except Exception as e:
             print('slurm_template path does not exist')
 
-        if arguments.two:
+        if arguments.old:
+
+            if not arguments.filename:
+                arguments.filename = 'submit-job.slurm'
+
+            if arguments.gpu:
+                for gpu in Parameter.expand_string(arguments.gpu):
+                    if arguments.attributes:
+                        params = dict()
+                        for attribute in arguments.attributes.split(';'):
+                            name, feature = attribute.split('=')
+                            params[f'{name}'] = Parameter.expand(feature)
+                        keys, values = zip(*params.items())
+                        permutations = [dict(zip(keys, value)) for value in itertools.product(*values)]
+                        for params in permutations:
+                            worker = SBatch(slurm_config, arguments.account, params=params, dryrun=arguments.dryrun)
+                            worker.run(arguments.filename)
+            else:
+                worker = SBatch(slurm_config, arguments.account, dryrun=arguments.dryrun)
+                worker.run(arguments.filename)
+
+        else:
 
             banner("experimental next gen cms sbatch command")
+
+            from pprint import pprint
+            import json
+            import yaml
+
+
             source = arguments.SOURCE
             if arguments.out is None:
                 destination = source.replace(".in.", "").replace(".in", "")
@@ -78,15 +105,32 @@ class SbatchCommand(PluginCommand):
                 if not yn_choice("The source and destination filenames are the same. Do you want to continue?"):
                     return ""
 
-            attributes = arguments.attributes
+
+
             gpu = arguments.gpu
             directory = arguments.dir
             dryrun = arguments.dryrun
             config = (arguments.config[0]).split(",") # not soo good to split. maybe Parameter expand is better
 
+            if arguments["--noos"]:
+                data = {}
+            else:
+                data = dict(os.environ)
+
+
             if directory is not None:
                 source = f"{directory}/{source}"
                 destination = f"{directory}/{destination}"
+
+            if arguments.attributes:
+                entries = {}
+                attributes = arguments.attributes
+                attributes = attributes.split(",")
+                for attribute in arguments.attributes.split(','):
+                    name, value = attribute.split('=')
+                    entries[name] = value
+                attributes = dict(entries)
+                data.update(entries)
 
             print (f"Source:      {source}")
             print (f"Destination: {destination}")
@@ -98,26 +142,8 @@ class SbatchCommand(PluginCommand):
 
             print()
 
-            if arguments["--noos"]:
-                data = {}
-            else:
-                data = dict(os.environ)
+
             mod = {}
-
-            def get_attribute_parameters(attributes):
-                params = dict()
-                for attribute in attributes.split(';'):
-                    name, feature = attribute.split('=')
-                    params[f'{name}'] = Parameter.expand(feature)
-                keys, values = zip(*params.items())
-                permutations = [dict(zip(keys, value)) for value in itertools.product(*values)]
-                return permutations
-
-            from pprint import pprint
-            import json
-            import yaml
-
-
 
             for configfile in config:
                 if directory is not None:
@@ -144,40 +170,25 @@ class SbatchCommand(PluginCommand):
 
                     Console.error(" not yet implemented")
 
+            content = readfile(source)
+
             if dryrun:
                 banner("Attributes")
                 pprint (data)
-            content = readfile(source)
-
-            content = content.format(**data)
+                banner(f"Original Script {source}")
+                print(content)
+                banner("end script")
+            print (type(data))
+            print(data)
+            print(content)
+            result = content.format(**data)
 
             if dryrun:
                 banner("Script")
-                print (content)
+                print (result)
             else:
                 Console.error("only dryrun is implemented")
 
             # print(get_attribute_parameters(arguments.attributes))
-
-        else:
-
-            if not arguments.filename:
-                arguments.filename = 'submit-job.slurm'
-
-            if arguments.gpu:
-                for gpu in Parameter.expand_string(arguments.gpu):
-                    if arguments.attributes:
-                        params = dict()
-                        for attribute in arguments.attributes.split(';'):
-                            name, feature = attribute.split('=')
-                            params[f'{name}'] = Parameter.expand(feature)
-                        keys, values = zip(*params.items())
-                        permutations = [dict(zip(keys, value)) for value in itertools.product(*values)]
-                        for params in permutations:
-                            worker = SBatch(slurm_config, arguments.account, params=params, dryrun=arguments.dryrun)
-                            worker.run(arguments.filename)
-            else:
-                worker = SBatch(slurm_config, arguments.account, dryrun=arguments.dryrun)
-                worker.run(arguments.filename)
 
         return ""

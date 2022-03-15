@@ -1,6 +1,3 @@
-{
-    "name": "Gregor",
-    "address": {
-        "street": "Seasame Str."
-    }
-}
+name: "Gregor"
+address:
+  street": "Seasame Str."

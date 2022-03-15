@@ -1,3 +1,3 @@
-{name}
-
-{address__street}
+name={name}
+address={address__street}
+a={a}
