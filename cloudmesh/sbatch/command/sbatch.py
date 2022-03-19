@@ -99,7 +99,7 @@ class SbatchCommand(PluginCommand):
             banner("Begin SLURM startup)")
             os.system("sudo systemctl start slurmctld")
             os.system("sudo systemctl start slurmd")
-            os.system("sudo scontrol update nodename=localhost state=POWER_UP")
+            os.system("sudo scontrol update nodename=white state=idle")
             banner("sinfo")
             os.system("sinfo")
             banner("squeue")

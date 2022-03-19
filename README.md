@@ -142,7 +142,7 @@ save into gregor.slurm
 #SBATCH --mail-type=END,FAIL             # Mail events (NONE, BEGIN, END, FAIL, ALL)
 #SBATCH --mail-user=laszewski@gmail.com  # Where to send mail	
 #SBATCH --ntasks=1                       # Run on a single CPU
-#SBATCH --mem=1gb                        # Job memory request
+####  XBATCH --mem=1gb                        # Job memory request
 #SBATCH --time=00:05:00                  # Time limit hrs:min:sec
 #SBATCH --output=sgregors_test_%j.log    # Standard output and error log
 
@@ -191,3 +191,14 @@ srun gregor.slurm
 srun: Required node not available (down, drained or reserved)
 srun: job 7 queued and waiting for resources
 ```
+
+```
+sudo scontrol update nodename=localhost state=POWER_UP
+
+Valid states are: NoResp DRAIN FAIL FUTURE RESUME POWER_DOWN POWER_UP UNDRAIN
+
+```
+
+### Cheatsheet
+
+* <https://slurm.schedmd.com/pdfs/summary.pdf>
