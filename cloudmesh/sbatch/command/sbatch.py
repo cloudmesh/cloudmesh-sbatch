@@ -27,6 +27,8 @@ class SbatchCommand(PluginCommand):
 
           Usage:
                 sbatch [--verbose] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT]
+                sbatch slurm start
+                sbatch slurm stop
 
           This command does some useful things.
 
@@ -91,6 +93,23 @@ class SbatchCommand(PluginCommand):
         from pprint import pprint
         import json
         import yaml
+
+
+        if arguments.start:
+            banner("Begin SLURM startup)")
+            os.system("sudo systemctl start slurmctld")
+            os.system("sudo systemctl start slurmd")
+            os.system("sudo scontrol update nodename=localhost state=POWER_UP")
+            banner("sinfo")
+            os.system("sinfo")
+            banner("squeue")
+            os.system("squeue")
+            banner ("End of SLURM startup ")
+            return ""
+        elif arguments.stop:
+            os.system("sudo systemctl stop slurmd")
+            os.system("sudo systemctl stop slurmctld")
+            return ""
 
 
         source = arguments.SOURCE
@@ -205,7 +224,8 @@ class SbatchCommand(PluginCommand):
             values = ""
             for attribute,value in permutation.items():
                 values = values + f"{attribute}={value} "
-            print (f"{values} sbatch {destination}")
+                script = f"{destination}{values}".replace("=","_")
+            print (f"{values} sbatch {destination} {script}")
 
 
         # print(get_attribute_parameters(arguments.attributes))
