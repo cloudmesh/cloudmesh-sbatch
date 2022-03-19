@@ -29,6 +29,7 @@ class SbatchCommand(PluginCommand):
                 sbatch [--verbose] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT]
                 sbatch slurm start
                 sbatch slurm stop
+                sbatch slurm info
 
           This command does some useful things.
 
@@ -94,23 +95,30 @@ class SbatchCommand(PluginCommand):
         import json
         import yaml
 
+        if arguments.slurm:
+            if arguments.start:
+                banner("Begin SLURM startup)")
+                os.system("sudo systemctl start slurmctld")
+                os.system("sudo systemctl start slurmd")
+                os.system("sudo scontrol update nodename=white state=idle")
+                banner("sinfo")
+                os.system("sinfo")
+                banner("squeue")
+                os.system("squeue")
+                banner ("End of SLURM startup ")
+                return ""
+            elif arguments.stop:
+                os.system("sudo systemctl stop slurmd")
+                os.system("sudo systemctl stop slurmctld")
+                return ""
+            elif arguments.info:
+                for command in ["sudo tail /var/log/slurm-llnl/slurmd.log",
+                                "sudo tail /var/log/slurm-llnl/slurmctld.log",
+                                "sinfo -R"]:
+                    banner(command)
+                    os.system(command)
 
-        if arguments.start:
-            banner("Begin SLURM startup)")
-            os.system("sudo systemctl start slurmctld")
-            os.system("sudo systemctl start slurmd")
-            os.system("sudo scontrol update nodename=white state=idle")
-            banner("sinfo")
-            os.system("sinfo")
-            banner("squeue")
-            os.system("squeue")
-            banner ("End of SLURM startup ")
             return ""
-        elif arguments.stop:
-            os.system("sudo systemctl stop slurmd")
-            os.system("sudo systemctl stop slurmctld")
-            return ""
-
 
         source = arguments.SOURCE
         if arguments.out is None:
