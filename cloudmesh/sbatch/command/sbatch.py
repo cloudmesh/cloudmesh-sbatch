@@ -224,16 +224,15 @@ class SbatchCommand(PluginCommand):
                     account = data['user__account']
                 else:
                     Console.red("# ERROR: Account is either unavailable or not defined")
-
-            #result = str(content).format(**data)
-            result = content
+            if 'user__runpath' in data.keys():
+                sbatch_runpath = data['user__runpath']
+            else:
+                Console.red("# ERROR: Must define a directory for the runpath")
 
             if dryrun or verbose:
                 banner("Script")
                 print (result)
                 banner("Script End")
-            else:
-                writefile(destination, result)
 
             destination_temp = destination.replace(".slurm","-")
             for permutation in permutations:
@@ -246,24 +245,30 @@ class SbatchCommand(PluginCommand):
                 path = f"{destination_temp}{values}".replace("=","_")+".slurm"
                 job_directory = path.replace(".slurm","")
                 if directory is not None:
+                    sbatch_directory = job_directory.split("/")[-1]
                     script = path.split("/")[-1]
                 else:
+                    sbatch_directory = job_directory
                     script = path
-                os.mkdir(job_directory)
-                with open(os.path.join(job_directory,"config.json"),"w") as outfile:
+                #TODO clean up these paths used above
+                cluster_directory = os.path.join(sbatch_runpath,os.environ['USER'],sbatch_directory)
+                os.mkdir(cluster_directory)
+                with open(os.path.join(cluster_directory,"config.json"),"w") as outfile:
                     json.dump(data, outfile, indent=2)
-                writefile(os.path.join(job_directory,script), result)
-                job_directory = os.path.abspath(job_directory)
+                result = content.replace("SBATCH_RUNSTAMP",sbatch_directory)
+                result = result.replace("SBATCH_RUNPATH",sbatch_runpath)
+                writefile(os.path.join(cluster_directory,script), result)
+                cluster_directory = os.path.abspath(cluster_directory)
                 if account is not None:
                     if arguments.gpu:
                         for gpu in Parameter.expand_string(arguments.gpu):
-                            worker = SBatch(path=job_directory,
+                            worker = SBatch(path=cluster_directory,
                                             account=arguments.account,
                                             gpu=gpu,
                                             dryrun=arguments.dryrun)
                             worker.run(arguments.filename)
                     else:
-                        worker = SBatch(path=job_directory,
+                        worker = SBatch(path=cluster_directory,
                                         account=arguments.account,
                                         dryrun=arguments.dryrun)
                         worker.run(arguments.filename)
