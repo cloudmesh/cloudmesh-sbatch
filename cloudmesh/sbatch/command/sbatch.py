@@ -273,12 +273,12 @@ class SbatchCommand(PluginCommand):
                                             account=arguments.account,
                                             gpu=gpu,
                                             dryrun=arguments.dryrun)
-                            worker.run(arguments.filename)
+                            worker.run(filename=script)
                     else:
                         worker = SBatch(path=cluster_directory,
                                         account=arguments.account,
                                         dryrun=arguments.dryrun)
-                        worker.run(arguments.filename)
+                        worker.run(filename=script)
 
                 else:
                     Console.red("# ERROR: Account is either unavailable or not defined")

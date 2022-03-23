@@ -37,8 +37,8 @@ class SBatch:
         return self.content
 
     @staticmethod
-    def filter_dict(dictionary, string):
-        filtered = {key.split('__',1)[1]: value for (key, value)
+    def filter_dict(dictionary, string, seperator="__"):
+        filtered = {key.split(seperator,1)[1]: value for (key, value)
                     in dictionary.items() if string in key}
         return filtered
 
@@ -88,7 +88,6 @@ class SBatch:
         """
         Execute a custom slurm script to the cluster
         """
-        filename = [file for file in os.listdir(self.path) if file.endswith('.slurm')][0]
         file_path = os.path.join(self.path,filename)
         self.configure_sbatch(host='rivanna')
         if self.params:
