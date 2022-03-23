@@ -100,7 +100,7 @@ class SBatch:
                                           stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
             print(stdout)
             print(f"{stderr = }", file=sys.stderr)
-            Shell.run(f'rm {file_path}')
+            #Shell.run(f'rm {file_path}')
 
 
     def template(self):
