@@ -1,5 +1,6 @@
 #from cloudmesh.sbatch.api.manager import Manager
 import os
+import configparser
 from cloudmesh.common.console import Console
 from cloudmesh.common.util import path_expand
 from pprint import pprint
@@ -186,7 +187,6 @@ class SbatchCommand(PluginCommand):
             pprint(permutations)
             print()
 
-
         mod = {}
 
         for configfile in config:
@@ -196,7 +196,7 @@ class SbatchCommand(PluginCommand):
                 if verbose:
                     print(f"Reading variables from {configfile}")
                 Console.red("# ERROR: Importing python not yet implemented")
-
+                continue
             elif ".json" in configfile:
                 if verbose:
                     print(f"Reading variables from {configfile}")
@@ -210,32 +210,60 @@ class SbatchCommand(PluginCommand):
                 content = readfile(configfile)
                 values = dict(FlatDict(yaml.safe_load(content), sep="__"))
                 data.update(values)
+            content = readfile(source)
+            if dryrun or verbose:
+                banner("Attributes")
+                pprint (data)
+                banner(f"Original Script {source}")
+                print(content)
+                banner("end script")
 
-        content = readfile(source)
+            #result = str(content).format(**data)
+            result = content
 
-        if dryrun or verbose:
-            banner("Attributes")
-            pprint (data)
-            banner(f"Original Script {source}")
-            print(content)
-            banner("end script")
-        result = str(content).format(**data)
+            if dryrun or verbose:
+                banner("Script")
+                print (result)
+                banner("Script End")
+            else:
+                writefile(destination, result)
 
-        if dryrun or verbose:
-            banner("Script")
-            print (result)
-            banner("Script End")
-        else:
-            writefile(destination, result)
+            destination_temp = destination.replace(".slurm","-")
+            for permutation in permutations:
+                values = ""
+                for attribute,value in permutation.items():
+                    values = values + f"{attribute}={value}-"
+                    if f"model_parameters__{attribute}" in data.keys():
+                        data[f"model_parameters__{attribute}"] = value
+                values = values[:-1]
+                path = f"{destination_temp}{values}".replace("=","_")+".slurm"
+                job_directory = path.replace(".slurm","")
+                if directory is not None:
+                    script = path.split("/")[-1]
+                else:
+                    script = path
+                os.mkdir(job_directory)
+                with open(os.path.join(job_directory,"config.json"),"w") as outfile:
+                    json.dump(data, outfile, indent=2)
+                writefile(os.path.join(job_directory,script), result)
+                job_directory = os.path.abspath(job_directory)
+                if arguments.account is not None:
+                    if arguments.gpu:
+                        for gpu in Parameter.expand_string(arguments.gpu):
+                            worker = SBatch(path=job_directory,
+                                            account=arguments.account,
+                                            gpu=gpu,
+                                            dryrun=arguments.dryrun)
+                            worker.run(arguments.filename)
+                    else:
+                        worker = SBatch(path=job_directory,
+                                        account=arguments.account,
+                                        dryrun=arguments.dryrun)
+                        worker.run(arguments.filename)
 
-        for permutation in permutations:
-            values = ""
-            for attribute,value in permutation.items():
-                values = values + f"{attribute}={value} "
-                script = f"{destination}{values}".replace("=","_")
-            print (f"{values} sbatch {destination} {script}")
+                else:
+                    Console.red("# ERROR: Importing python not yet implemented")
 
+            # print(get_attribute_parameters(arguments.attributes))
 
-        # print(get_attribute_parameters(arguments.attributes))
-
-        return ""
+            return ""
