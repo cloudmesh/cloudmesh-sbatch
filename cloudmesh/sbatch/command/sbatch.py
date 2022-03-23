@@ -252,7 +252,7 @@ class SbatchCommand(PluginCommand):
                     script = path
                 #TODO clean up these paths used above
                 cluster_directory = os.path.join(sbatch_runpath,os.environ['USER'],sbatch_directory)
-                os.mkdir(cluster_directory)
+                os.makedirs(cluster_directory)
                 with open(os.path.join(cluster_directory,"config.json"),"w") as outfile:
                     json.dump(data, outfile, indent=2)
                 result = content.replace("SBATCH_RUNSTAMP",sbatch_directory)
