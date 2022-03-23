@@ -27,7 +27,7 @@ class SbatchCommand(PluginCommand):
         ::
 
           Usage:
-                sbatch [--verbose] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT]
+                sbatch [--verbose] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT] [--account=ACCOUNT]
                 sbatch slurm start
                 sbatch slurm stop
                 sbatch slurm info
@@ -130,6 +130,7 @@ class SbatchCommand(PluginCommand):
             if not yn_choice("The source and destination filenames are the same. Do you want to continue?"):
                 return ""
 
+        account = arguments.account
         gpu = arguments.gpu
         directory = arguments.dir
         dryrun = arguments.dryrun
@@ -218,6 +219,12 @@ class SbatchCommand(PluginCommand):
                 print(content)
                 banner("end script")
 
+            if account is None:
+                if 'user__account' in data.keys():
+                    account = data['user__account']
+                else:
+                    Console.red("# ERROR: Account is either unavailable or not defined")
+
             #result = str(content).format(**data)
             result = content
 
@@ -247,7 +254,7 @@ class SbatchCommand(PluginCommand):
                     json.dump(data, outfile, indent=2)
                 writefile(os.path.join(job_directory,script), result)
                 job_directory = os.path.abspath(job_directory)
-                if arguments.account is not None:
+                if account is not None:
                     if arguments.gpu:
                         for gpu in Parameter.expand_string(arguments.gpu):
                             worker = SBatch(path=job_directory,
@@ -262,7 +269,7 @@ class SbatchCommand(PluginCommand):
                         worker.run(arguments.filename)
 
                 else:
-                    Console.red("# ERROR: Importing python not yet implemented")
+                    Console.red("# ERROR: Account is either unavailable or not defined")
 
             # print(get_attribute_parameters(arguments.attributes))
 
