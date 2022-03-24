@@ -15,7 +15,7 @@ from cloudmesh.common.util import yn_choice
 from cloudmesh.common.util import readfile
 from cloudmesh.common.util import writefile
 from cloudmesh.common.FlatDict import FlatDict
-
+from cloudmesh.sbatch.slurm import Slurm
 
 class SbatchCommand(PluginCommand):
 
@@ -95,30 +95,17 @@ class SbatchCommand(PluginCommand):
         import json
         import yaml
 
+
         if arguments.slurm:
             if arguments.start:
-                banner("Begin SLURM startup)")
-                os.system("sudo systemctl start slurmctld")
-                os.system("sudo systemctl start slurmd")
-                os.system("sudo scontrol update nodename=white state=idle")
-                banner("sinfo")
-                os.system("sinfo")
-                banner("squeue")
-                os.system("squeue")
-                banner ("End of SLURM startup ")
-                return ""
+                Slurm.start()
             elif arguments.stop:
-                os.system("sudo systemctl stop slurmd")
-                os.system("sudo systemctl stop slurmctld")
-                return ""
+                Slurm.stop()
             elif arguments.info:
-                for command in ["sudo tail /var/log/slurm-llnl/slurmd.log",
-                                "sudo tail /var/log/slurm-llnl/slurmctld.log",
-                                "sinfo -R"]:
-                    banner(command)
-                    os.system(command)
+                Slurm.status()
 
             return ""
+
 
         sbatch = SBatch()
 
