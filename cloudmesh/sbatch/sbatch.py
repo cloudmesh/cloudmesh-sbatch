@@ -74,11 +74,11 @@ class SBatch:
         content = readfile(filename)
 
         if suffix.lower() in [".json"]:
-            values = dict(FlatDict(json.loads(content), sep="__"))
+            values = dict(FlatDict(json.loads(content), sep="."))
             self.data.update(values)
         elif suffix.lower() in [".yaml"]:
             content = readfile(filename)
-            values = dict(FlatDict(yaml.safe_load(content), sep="__"))
+            values = dict(FlatDict(yaml.safe_load(content), sep="."))
             self.data.update(values)
         elif suffix.lower() in [".py"]:
             Console.red("# ERROR: Importing python not yet implemented")
@@ -88,8 +88,11 @@ class SBatch:
 
 
     def generate(self, script):
-        self.script = script
-        self.content = script.format(**self.data)
+        self.content = self.script = script
+        for attribute, value in self.data.items():
+            frame = "{" + attribute + "}"
+            if frame in self.content:
+                self.content = self.content.replace(frame, value)
         return self.content
 
     @property
