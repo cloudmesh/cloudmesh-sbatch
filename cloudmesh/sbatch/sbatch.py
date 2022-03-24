@@ -16,7 +16,7 @@ from cloudmesh.common.parameter import Parameter
 from collections import OrderedDict
 import itertools
 import textwrap
-
+from cloudmesh.common.Printer import Printer
 
 class SBatch:
 
@@ -139,9 +139,9 @@ class SBatch:
                     values = values + f"{attribute}={value} "
                     script = f"{self.destination}{values}".replace("=", "_")
                 print(f"{values} sbatch {self.destination} {script}")
-        elif mode in ["flat", "f"]:
-            configs = []
-            scripts = []
+        elif mode.startswith("f"):
+            configuration = {}
+            self.script_variables=[]
             suffix = self._suffix(self.destination)
             name = self.destination.replace(suffix, "")
             directory = os.path.dirname(name)
@@ -149,20 +149,31 @@ class SBatch:
                 values = []
                 for attribute, value in permutation.items():
                     values.append(f"{attribute}_{value}")
+                assignments = []
+                for attribute, value in permutation.items():
+                    assignments.append(f"{attribute}={value}")
+                assignments = " ".join(assignments)
+
                 identifier = "_".join(values)
                 print(identifier)
                 script = f"{name}_{identifier}{suffix}"
-                scripts.append(script)
                 config = f"{directory}/config_{identifier}.yaml"
-                configs.append(config)
+                variables = self.data
+                variables.update(permutation.items())
+
+                configuration[identifier] = {
+                    "id": identifier,
+                    "experiment": assignments,
+                    "script": script,
+                    "config": config,
+                    "variables": variables
+                }
 
             banner("Script generation")
 
-            pprint(scripts)
-            print()
+            pprint(configuration)
 
-            pprint(configs)
-            print()
+            print (Printer.write(configuration, order=["id", "experiment", "script", "config"]))
 
             if not yn_choice("The listed scripts will be gnerated, Continue"):
                 return
@@ -173,8 +184,49 @@ class SBatch:
             #
             Console.error("script generation ont yet implemented")
 
-        elif mode.startswith("hi") or mode in ["hierachy", "hierahical", "h"]:
-            Console.error("Mode hierachy not yet implemented")
+        elif mode.startswith("h"):
+            configuration = {}
+            self.script_variables = []
+            suffix = self._suffix(self.destination)
+            name = self.destination.replace(suffix, "")
+            directory = os.path.dirname(name)
+            for permutation in self.permutations:
+                values = []
+                for attribute, value in permutation.items():
+                    values.append(f"{attribute}_{value}")
+                assignments = []
+                for attribute, value in permutation.items():
+                    assignments.append(f"{attribute}={value}")
+                assignments = " ".join(assignments)
+
+                identifier = "_".join(values)
+                print(identifier)
+                script = f"{directory}/{identifier}/slurm.sh"
+                config = f"{directory}/{identifier}/config.yaml"
+                variables = self.data
+                variables.update(permutation.items())
+
+                configuration[identifier] = {
+                    "id": identifier,
+                    "experiment": assignments,
+                    "script": script,
+                    "config": config,
+                    "variables": variables
+                }
+
+            banner("Script generation")
+
+            pprint(configuration)
+
+            print(Printer.write(configuration, order=["id", "experiment", "script", "config"]))
+
+            #if not yn_choice("The listed scripts will be gnerated, Continue"):
+            #    return
+
+            #
+            # now generate the scripts
+            #
+            Console.error("script generation ont yet implemented")
 
 
     @property
