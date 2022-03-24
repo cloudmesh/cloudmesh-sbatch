@@ -1,21 +1,15 @@
-#from cloudmesh.sbatch.api.manager import Manager
-import os
-from cloudmesh.common.console import Console
-from cloudmesh.common.util import path_expand
 from pprint import pprint
-from cloudmesh.common.debug import VERBOSE
-from cloudmesh.shell.command import map_parameters
-from cloudmesh.sbatch.sbatch import SBatch
-from cloudmesh.shell.command import PluginCommand
-from cloudmesh.shell.command import command
-from cloudmesh.common.parameter import Parameter
-import itertools
+
 from cloudmesh.common.util import banner
-from cloudmesh.common.util import yn_choice
 from cloudmesh.common.util import readfile
 from cloudmesh.common.util import writefile
-from cloudmesh.common.FlatDict import FlatDict
+from cloudmesh.common.util import yn_choice
+from cloudmesh.sbatch.sbatch import SBatch
 from cloudmesh.sbatch.slurm import Slurm
+from cloudmesh.shell.command import PluginCommand
+from cloudmesh.shell.command import command
+from cloudmesh.shell.command import map_parameters
+
 
 class SbatchCommand(PluginCommand):
 
@@ -65,36 +59,8 @@ class SbatchCommand(PluginCommand):
                        "experiment"
                        )
 
-        #if arguments.old:
-
-        #    if not arguments.filename:
-        #        arguments.filename = 'submit-job.slurm'
-
-        #    if arguments.gpu:
-        #        for gpu in Parameter.expand_string(arguments.gpu):
-        #            if arguments.attributes:
-        #                params = dict()
-        #                for attribute in arguments.attributes.split(';'):
-        #                    name, feature = attribute.split('=')
-        #                    params[f'{name}'] = Parameter.expand(feature)
-        #                keys, values = zip(*params.items())
-        #                permutations = [dict(zip(keys, value)) for value in itertools.product(*values)]
-        #                for params in permutations:
-        #                    worker = SBatch(slurm_config, arguments.account, params=params, dryrun=arguments.dryrun)
-        #                    worker.run(arguments.filename)
-        #    else:
-        #        worker = SBatch(slurm_config, arguments.account, dryrun=arguments.dryrun)
-        #        worker.run(arguments.filename)
-
-        #else:
-
         if verbose:
             banner("experiment batch generator")
-
-        from pprint import pprint
-        import json
-        import yaml
-
 
         if arguments.slurm:
             if arguments.start:
@@ -106,99 +72,77 @@ class SbatchCommand(PluginCommand):
 
             return ""
 
+        elif arguments.generate:
 
-        sbatch = SBatch()
+            sbatch = SBatch()
 
-        source = arguments.SOURCE
-        if arguments.out is None:
-            destination = source.replace(".in.", ".").replace(".in", "")
-        else:
-            destination = arguments.out
-        if source == destination:
-            if not yn_choice("The source and destination filenames are the same. Do you want to continue?"):
-                return ""
+            sbatch.source = arguments.SOURCE
 
-        gpu = arguments.gpu
-        directory = arguments.dir
-        dryrun = arguments.dryrun
-        config = (arguments.config[0]).split(",") # not soo good to split. maybe Parameter expand is better
+            if arguments.out is None:
+                sbatch.destination = sbatch.source.replace(".in.", ".").replace(".in", "")
+            else:
+                sbatch.destination = arguments.out
+            if sbatch.source == sbatch.destination:
+                if not yn_choice("The source and destination filenames are the same. Do you want to continue?"):
+                    return ""
 
-        experiment = arguments.experiment
+            sbatch.attributes = arguments.gpu
+            sbatch.directory = arguments.dir
+            sbatch.dryrun = arguments.dryrun
+            sbatch.config = (arguments.config[0]).split(",") # not soo good to split. maybe Parameter expand is better
 
-        experiments = None
+            experiment = arguments.experiment
 
+            experiments = None
 
-        if not arguments["--noos"]:
-            sbatch.update_from_os_environ()
+            if not arguments["--noos"]:
+                sbatch.update_from_os_environ()
 
-        if directory is not None:
-            source = f"{directory}/{source}"
-            destination = f"{directory}/{destination}"
+            if sbatch.directory is not None:
+                sbatch.source = f"{sbatch.directory}/{sbatch.source}"
+                sbatch.destination = f"{sbatch.directory}/{sbatch.destination}"
 
-        if arguments.attributes:
-            attributes = sbatch.update_from_attribute_str(arguments.attributes)
+            if arguments.attributes:
+                sbatch.attributes = sbatch.update_from_attribute_str(arguments.attributes)
 
-        from collections import OrderedDict
-        if arguments.experiment:
-            experiments = OrderedDict()
-            permutations = []
-            entries = experiment.split(' ')
+            if arguments.experiment:
+                permutations = sbatch.generate_experiment_permutations(arguments.experiment)
 
-            for entry in entries:
-                name, parameters = entry.split('=')
-                experiments[name] = Parameter.expand(parameters)
-            keys, values = zip(*experiments.items())
-            permutations = [dict(zip(keys, value)) for value in itertools.product(*values)]
             if verbose:
-                pprint (permutations)
+                print(f"Experiments:  {arguments.experiment}")
+                sbatch.info()
+                print()
 
-        if verbose:
-            print(f"Source:       {source}")
-            print(f"Destination:  {destination}")
-            print(f"Attributes:   {attributes}")
-            print(f"GPU:          {gpu}")
-            print(f"Dryrun:       {dryrun}")
-            print(f"Config:       {config}")
-            print(f"Directory:    {directory}")
-            print(f"Experiments:  {experiment}")
-            print("Permutations")
-            pprint(permutations)
-            print()
-            sbatch.info()
+            for configfile in sbatch.config:
+                if sbatch.directory is not None:
+                    configfile = f"{sbatch.directory}/{configfile}"
+                sbatch.update_from_file(configfile)
 
+            content = readfile(sbatch.source)
 
-        mod = {}
+            if sbatch.dryrun or verbose:
+                banner("Attributes")
+                pprint (sbatch.data)
+                banner(f"Original Script {sbatch.source}")
+                print(content)
+                banner("end script")
+            result = sbatch.generate(content)
 
-        for configfile in config:
-            if directory is not None:
-                configfile = f"{directory}/{configfile}"
-            data = sbatch.update_from_file(configfile)
+            if sbatch.dryrun or verbose:
+                banner("Script")
+                print (result)
+                banner("Script End")
+            else:
+                writefile(sbatch.destination, result)
 
-        content = readfile(source)
-
-        if dryrun or verbose:
-            banner("Attributes")
-            pprint (sbatch.data)
-            banner(f"Original Script {source}")
-            print(content)
-            banner("end script")
-        result = sbatch.generate(content)
-
-        if dryrun or verbose:
-            banner("Script")
-            print (result)
-            banner("Script End")
-        else:
-            writefile(destination, result)
-
-        for permutation in permutations:
-            values = ""
-            for attribute,value in permutation.items():
-                values = values + f"{attribute}={value} "
-                script = f"{destination}{values}".replace("=","_")
-            print (f"{values} sbatch {destination} {script}")
+            for permutation in permutations:
+                values = ""
+                for attribute,value in permutation.items():
+                    values = values + f"{attribute}={value} "
+                    script = f"{sbatch.destination}{values}".replace("=","_")
+                print (f"{values} sbatch {sbatch.destination} {script}")
 
 
-        # print(get_attribute_parameters(arguments.attributes))
+            # print(get_attribute_parameters(arguments.attributes))
 
         return ""

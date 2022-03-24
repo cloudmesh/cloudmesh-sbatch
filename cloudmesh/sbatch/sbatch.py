@@ -12,6 +12,11 @@ from cloudmesh.common.console import Console
 from cloudmesh.common.FlatDict import FlatDict
 import json
 from cloudmesh.common.util import banner
+from cloudmesh.common.parameter import Parameter
+from collections import OrderedDict
+import itertools
+import textwrap
+
 
 class SBatch:
 
@@ -20,6 +25,7 @@ class SBatch:
         self.data = {}
         self.template = None
         self.verbose = verbose
+        self.gpu = None
         print(self.data)
 
     def info(self):
@@ -86,7 +92,6 @@ class SBatch:
             Console.red("# ERROR: Importing jupyter notebooks not yet implemented")
         return self.data
 
-
     def generate(self, script):
         self.content = self.script = script
         for attribute, value in self.data.items():
@@ -94,6 +99,26 @@ class SBatch:
             if frame in self.content:
                 self.content = self.content.replace(frame, value)
         return self.content
+
+    def generate_experiment_permutations(self, variable_str):
+        """
+        creates permutations over the variable use dto define an experiment parameter sweep
+
+        :param variable_str: epoch=[1-3] x=[1,4] y=[10,11]
+        :type variable_str: str
+        :return: list with permutations over the experiment variables
+        :rtype: dict of strings
+        """
+        experiments = OrderedDict()
+        permutations = []
+        entries = variable_str.split(' ')
+
+        for entry in entries:
+            name, parameters = entry.split('=')
+            experiments[name] = Parameter.expand(parameters)
+        keys, values = zip(*experiments.items())
+        self.permutations = [dict(zip(keys, value)) for value in itertools.product(*values)]
+        return self.permutations
 
     @property
     def now(self):
