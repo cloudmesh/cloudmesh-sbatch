@@ -20,7 +20,7 @@ class SbatchCommand(PluginCommand):
         ::
 
           Usage:
-                sbatch generate [--verbose] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT]
+                sbatch generate [--verbose] [--mode=MODE] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT]
                 sbatch run FILENAME
                 sbatch slurm start
                 sbatch slurm stop
@@ -29,15 +29,24 @@ class SbatchCommand(PluginCommand):
           This command does some useful things.
 
           Arguments:
+              FILENAME       name of a slurm script generated with sbatch
               CONFIG_FILE    yaml file with configuration
               ACCOUNT        account name for host system
-              FILENAME       name for slurm script
+              SOURCE         name for slurm script
               PARAMS         parameter lists for experimentation
               GPU            name of gpu
 
           Options:
-              -h                help
-              --dryrun          flag to skip submission
+              -h                        help
+              --dryrun                  flag to skip submission
+              --config=CONFIG...        TBD
+              --attributes=PARAMS       TBD
+              --out=DESTINATION         TBD
+              --gpu=GPU                 TBD
+              --noos                    TBD
+              --experiment=EXPERIMENT   TBD
+              --account=ACCOUNT         TBD
+              --mode=MODE               one of "flat", "debug", "hierachical" can als just use "f". "d", "h" [default: debug]
 
           Description:
 
@@ -56,7 +65,8 @@ class SbatchCommand(PluginCommand):
                        "config",
                        "out",
                        "dir",
-                       "experiment"
+                       "experiment",
+                       "mode"
                        )
 
         if verbose:
@@ -135,13 +145,7 @@ class SbatchCommand(PluginCommand):
             else:
                 writefile(sbatch.destination, result)
 
-            for permutation in permutations:
-                values = ""
-                for attribute,value in permutation.items():
-                    values = values + f"{attribute}={value} "
-                    script = f"{sbatch.destination}{values}".replace("=","_")
-                print (f"{values} sbatch {sbatch.destination} {script}")
-
+            sbatch.generate_experiment_slurm_scripts(mode=arguments.mode)
 
             # print(get_attribute_parameters(arguments.attributes))
 
