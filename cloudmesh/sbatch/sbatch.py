@@ -21,12 +21,10 @@ from cloudmesh.common.Printer import Printer
 class SBatch:
 
     def __init__(self, verbose=False):
-        banner("init")
         self.data = {}
         self.template = None
         self.verbose = verbose
         self.gpu = None
-        print(self.data)
 
     def info(self):
         for a in ["source",
@@ -177,12 +175,18 @@ class SBatch:
             banner("Script generation")
 
             pprint(configuration)
-
+            self.configuration_parameters = configuration
             print (Printer.write(configuration, order=["id", "experiment", "script", "config"]))
 
-            if not yn_choice("The listed scripts will be gnerated, Continue"):
-                return
+            # if not yn_choice("The listed scripts will be gnerated, Continue"):
+            #    return
 
+            #
+            # now generate the scripts
+            #
+            self.generate_setup_from_configuration(configuration)
+
+            Console.error("script generation ont yet implemented")
 
             #
             # now generate the scripts
@@ -226,6 +230,7 @@ class SBatch:
 
             print(Printer.write(configuration, order=["id", "experiment", "script", "config", "directory"]))
 
+            self.configuration_parameters = configuration
             #if not yn_choice("The listed scripts will be gnerated, Continue"):
             #    return
 
@@ -235,6 +240,20 @@ class SBatch:
             self.generate_setup_from_configuration(configuration)
 
             Console.error("script generation ont yet implemented")
+
+    def generate_submit(self, name=None):
+        experiments = self.configuration_parameters = json.loads(readfile(name))
+
+        if experiments is None:
+            Console.error ("please define the experiment parameters")
+            return ""
+
+        for entry in experiments:
+            experiment = experiments[entry]
+            parameters = experiment["experiment"]
+            directory = experiment["directory"]
+            script = os.path.basename(experiment["script"])
+            print (f"{parameters} sbatch -D {directory} {script}")
 
     def generate_setup_from_configuration(self, configuration):
         for identifier in configuration:
@@ -279,6 +298,11 @@ class SBatch:
                 writefile(filename, self.content)
         else:
             writefile(filename, self.content)
+
+    def save_experiment_configuration(self, name=None):
+        if name is not None:
+            content = json.dumps(self.configuration_parameters, indent=2)
+            writefile(name, content)
 
     '''
     def run(self, filename='submit-job.slurm'):

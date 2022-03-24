@@ -9,7 +9,7 @@ from cloudmesh.sbatch.slurm import Slurm
 from cloudmesh.shell.command import PluginCommand
 from cloudmesh.shell.command import command
 from cloudmesh.shell.command import map_parameters
-
+# from cloudmesh.common.debug import VERBOSE
 
 class SbatchCommand(PluginCommand):
 
@@ -20,8 +20,8 @@ class SbatchCommand(PluginCommand):
         ::
 
           Usage:
-                sbatch generate [--verbose] [--mode=MODE] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT]
-                sbatch run FILENAME
+                sbatch generate submit [--verbose] --name=NAME
+                sbatch generate [--verbose] [--mode=MODE] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT] --name=NAME
                 sbatch slurm start
                 sbatch slurm stop
                 sbatch slurm info
@@ -47,6 +47,7 @@ class SbatchCommand(PluginCommand):
               --experiment=EXPERIMENT   TBD
               --account=ACCOUNT         TBD
               --mode=MODE               one of "flat", "debug", "hierachical" can als just use "f". "d", "h" [default: debug]
+              --name=NAME               name of the experiment configuration file
 
           Description:
 
@@ -66,10 +67,12 @@ class SbatchCommand(PluginCommand):
                        "dryrun",
                        "config",
                        "out",
-                       "dir",
                        "experiment",
-                       "mode"
+                       "mode",
+                       "name"
                        )
+
+        # VERBOSE(arguments)
 
         if verbose:
             banner("experiment batch generator")
@@ -81,6 +84,22 @@ class SbatchCommand(PluginCommand):
                 Slurm.stop()
             elif arguments.info:
                 Slurm.status()
+
+            return ""
+
+        if arguments.name is not None:
+            if not arguments.name.endswith(".json"):
+                arguments.name = arguments.name + ".json"
+
+
+        if arguments.generate and arguments.submit:
+
+            # sbatch generate submit [--verbose] [--mode=MODE] [--experiment=EXPERIMENT] [--dir=DIR]
+
+            sbatch = SBatch()
+            sbatch.verbose = arguments.verbose
+
+            sbatch.generate_submit(name=arguments.name)
 
             return ""
 
@@ -99,7 +118,7 @@ class SbatchCommand(PluginCommand):
                     return ""
 
             sbatch.attributes = arguments.gpu
-            sbatch.directory = arguments.dir
+            sbatch.directory = arguments["--dir"]
             sbatch.dryrun = arguments.dryrun
             sbatch.config = (arguments.config[0]).split(",") # not soo good to split. maybe Parameter expand is better
 
@@ -149,6 +168,7 @@ class SbatchCommand(PluginCommand):
 
             sbatch.generate_experiment_slurm_scripts(mode=arguments.mode)
 
+            sbatch.save_experiment_configuration(name=arguments.name)
             # print(get_attribute_parameters(arguments.attributes))
 
         return ""
