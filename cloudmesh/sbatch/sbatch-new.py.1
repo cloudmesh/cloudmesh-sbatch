@@ -1,6 +1,7 @@
 import os
 import sys
 import yaml
+import json
 import textwrap
 import subprocess
 from cloudmesh.common.util import readfile, writefile, path_expand
@@ -8,87 +9,56 @@ from cloudmesh.common.util import yn_choice
 from cloudmesh.common.Shell import Shell
 from pprint import pprint
 import pathlib
-from cloudmesh.common.console import Console
-from cloudmesh.common.FlatDict import FlatDict
-import json
-from cloudmesh.common.util import banner
+
 
 class SBatch:
 
-    def __init__(self, verbose=False):
-        banner("init")
+    #  sbatch [--verbose] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun]
+    #         [--noos] [--dir=DIR] [--experiment=EXPERIMENT] [--account=ACCOUNT]
+    #
+
+
+    def __init__(self,
+                 verbose=False,
+                 config=None, # dict
+                 attributes=None,
+                 output=None,
+                 gpu=None,
+                 source=None,
+                 dryrun=False,
+                 noos=False,
+                 directory=".",
+                 experiment=None,
+                 account=None):
+        self.source = source
+        self.destination = None
+        self.attributes = attributes
+        self.gpu = gpu
+        self.dryrun = None
+        self.config = None
+        self.directory = directory
+        self.experiment = experiment
+        self.permutations = None
+
         self.data = {}
-        self.template = None
-        self.verbose = verbose
-        print(self.data)
 
-    def info(self):
-        for a in ["source",
-                    "destination",
-                    "attributes",
-                    "gpu",
-                    "dryrun",
-                    "config",
-                    "directory",
-                    "experiment",
-                    "permutations"
-                          ]:
-            print(f'{a:<12}: {self.data.get(a)}')
-
-        print()
-
-    def set_attribute(self, attribute, value):
-        self.data[attribute] = value
-
-    def update_from_dict(self, d):
-        self.data.update(d)
-
-    def update_from_attribute_str(self, attributes):
-        """
-        attributes are of the form "a=1,b=3"
-
-        :param attributes:
-        :type attributes:
-        :return:
-        :rtype:
-        """
-        attributes = attributes.split(",")
-        entries = {}
-        for attribute in attributes:
-            name, value = attribute.split('=')
-            entries[name] = value
-        self.data.update(entries)
-        return entries
-
-    def update_from_os_environ(self, load=True):
+    def load_os_environ(self, load=True):
         if load:
             self.data.update(dict(os.environ))
         return self.data
 
-
-    def update_from_file(self, filename):
-        if self.verbose:
-            print(f"Reading variables from {filename}")
-
-        suffix = pathlib.Path(filename).suffix
-        content = readfile(filename)
-
-        if suffix.lower() in [".json"]:
-            values = dict(FlatDict(json.loads(content), sep="__"))
-            self.data.update(values)
-        elif suffix.lower() in [".yaml"]:
-            content = readfile(filename)
-            values = dict(FlatDict(yaml.safe_load(content), sep="__"))
-            self.data.update(values)
-        elif suffix.lower() in [".py"]:
-            Console.red("# ERROR: Importing python not yet implemented")
-        elif suffix.lower() in [".ipynb"]:
-            Console.red("# ERROR: Importing jupyter notebooks not yet implemented")
-        return self.data
-
-
-    def generate(self):
-        self.content = self.content.format(**self.data)
+    def info(self):
+        print(f"Source:      {self.source}")
+        print(f"Destination: {self.destination}")
+        print(f"Attributes:  {self.attributes}")
+        print(f"GPU:         {self.gpu}")
+        print(f"Dryrun:      {self.dryrun}")
+        print(f"Config:      {self.config}")
+        print(f"Directory:   {self.directory}")
+        print(f"Experiments: {self.experiment}")
+        print("Permutations")
+        pprint(self.permutations)
+        print()
 
     @property
     def now(self):
@@ -98,6 +68,12 @@ class SBatch:
     def __str__(self):
         return self.content
 
+    @staticmethod
+    def filter_dict(dictionary, string, seperator="__"):
+        filtered = {key.split(seperator,1)[1]: value for (key, value)
+                    in dictionary.items() if string in key}
+        return filtered
+
     def configure_sbatch(self,host):
         """
         TODO: this is all hardcoded and must be changed
@@ -105,8 +81,9 @@ class SBatch:
         Set the sbatch environmental variables based on yaml values
         Append the variables to the users environment
         """
-        defaults = self.yaml['sbatch_setup'][f'{host}-{self.gpu}']
+        defaults = SBatch.filter_dict(self.cluster_setup, f"{host}-{self.gpu}")
         user = self.env['USER']
+        # THIS IA ALL WRONG
         sbatch_vars = {
             'SBATCH_GRES': f'gpu:{defaults["card_name"]}:{defaults["num_gpus"]}',
             'SBATCH_JOB_NAME': f'mlcommons-science-earthquake-{user}',
@@ -144,19 +121,18 @@ class SBatch:
         """
         Execute a custom slurm script to the cluster
         """
-        cwd = os.getcwd()
-        file_path = os.path.join(cwd, filename)
+        file_path = os.path.join(self.path,filename)
         self.configure_sbatch(host='rivanna')
         if self.params:
             self.get_parameters()
-        self.data.update(self.env)
-        self.save(file_path)
+        self.update(self.env)
+        #self.save(file_path)
         if not self.dryrun:
             stdout, stderr = subprocess.Popen(['sbatch', file_path], env=self.env, encoding='utf-8',
                                           stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
             print(stdout)
             print(f"{stderr = }", file=sys.stderr)
-            Shell.run(f'rm {file_path}')
+            #Shell.run(f'rm {file_path}')
 
 
     def template(self):

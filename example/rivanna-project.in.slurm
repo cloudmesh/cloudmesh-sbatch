@@ -2,22 +2,22 @@
 #SBATCH --job-name=mlcommons-science-eq-%u-%j
 #SBATCH --output=mlcommons-science-eq-%u-%j.out
 #SBATCH --error=mlcommons-science-eq-%u-%j.err
-#SBATCH --partition=gpu
+#SBATCH --partition={partition}
 #SBATCH -c 6
-#SBATCH --time=5:00:00
-#SBATCH --gres=gpu:a100:1
+#SBATCH --time={time}
+#SBATCH --gres={gpu}
 #SBATCH --mail-user=%u@virginia.edu
 #SBATCH --mail-type=ALL
 #SBATCH --account=ds6011-sp22-002
 
 PYTHON_VERSION="3.10.2"
 
-RUNSTAMP="${RUNSTAMP:-SBATCH_RUNSTAMP}"
-BRANCH="${BRANCH:-main}"
-BRANCH_SAFE=${BRANCH/\//-}
+RUNSTAMP="${{RUNSTAMP:-SBATCH_RUNSTAMP}}"
+BRANCH="${{BRANCH:-main}}"
+BRANCH_SAFE=${{BRANCH/\//-}}
 FORK=${FORK:-"laszewsk"}
 
-HOME=${BASE:-SBATCH_RUNPATH/$USER}
+HOME=${{BASE:-SBATCH_RUNPATH/$USER}}
 RUN_BASE=${RUN_BASE:-${HOME}/${RUNSTAMP}}
 VENV_PATH=${HOME}/venv-${PYTHON_VERSION}
 USER=${USER:-unknown}
@@ -30,6 +30,7 @@ RESOURCE_DIR="/project/ds6011-sp22-002"
 TFT_EPOCHS=2
 
 trap "rm -f ${VENV_PATH}.lock ${HOME}/mlcommons.lock; exit" 1 2 3 6 15
+
 
 
 echo "Working in <$(pwd)>"

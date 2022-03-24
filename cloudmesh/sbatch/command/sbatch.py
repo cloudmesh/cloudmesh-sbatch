@@ -1,6 +1,5 @@
 #from cloudmesh.sbatch.api.manager import Manager
 import os
-import configparser
 from cloudmesh.common.console import Console
 from cloudmesh.common.util import path_expand
 from pprint import pprint
@@ -27,7 +26,8 @@ class SbatchCommand(PluginCommand):
         ::
 
           Usage:
-                sbatch [--verbose] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT] [--account=ACCOUNT]
+                sbatch generate [--verbose] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT]
+                sbatch run FILENAME
                 sbatch slurm start
                 sbatch slurm stop
                 sbatch slurm info
@@ -48,9 +48,8 @@ class SbatchCommand(PluginCommand):
           Description:
 
                > Example:
-               > cms sbatch two slurm.in.sh --config=a.py,b.json,c.yaml --attributes=a:1,b:4 --dryrun --noos --dir=example
-               > cms sbatch slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\"
-               > cms sbatch slurm.in.sh --config=a.py,b.json,c.yaml --attributes=a=1,b=4  --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\"
+               > cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\"
+               > cms sbatch generate slurm.in.sh --config=a.py,b.json,c.yaml --attributes=a=1,b=4  --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\"
         """
         verbose = arguments["--verbose"]
 
@@ -121,6 +120,8 @@ class SbatchCommand(PluginCommand):
 
             return ""
 
+        sbatch = SBatch()
+
         source = arguments.SOURCE
         if arguments.out is None:
             destination = source.replace(".in.", ".").replace(".in", "")
@@ -130,7 +131,6 @@ class SbatchCommand(PluginCommand):
             if not yn_choice("The source and destination filenames are the same. Do you want to continue?"):
                 return ""
 
-        account = arguments.account
         gpu = arguments.gpu
         directory = arguments.dir
         dryrun = arguments.dryrun
@@ -141,25 +141,15 @@ class SbatchCommand(PluginCommand):
         experiments = None
 
 
-        if arguments["--noos"]:
-            data = {}
-        else:
-            data = dict(os.environ)
-
+        if not arguments["--noos"]:
+            sbatch.update_from_os_environ()
 
         if directory is not None:
             source = f"{directory}/{source}"
             destination = f"{directory}/{destination}"
 
         if arguments.attributes:
-            entries = {}
-            attributes = arguments.attributes
-            attributes = attributes.split(",")
-            for attribute in arguments.attributes.split(','):
-                name, value = attribute.split('=')
-                entries[name] = value
-            attributes = dict(entries)
-            data.update(entries)
+            attributes = sbatch.update_from_attribute_str(arguments.attributes)
 
         from collections import OrderedDict
         if arguments.experiment:
@@ -176,10 +166,10 @@ class SbatchCommand(PluginCommand):
                 pprint (permutations)
 
         if verbose:
-            print (f"Source:      {source}")
-            print (f"Destination: {destination}")
+            print(f"Source:       {source}")
+            print(f"Destination:  {destination}")
             print(f"Attributes:   {attributes}")
-            print (f"GPU:         {gpu}")
+            print(f"GPU:          {gpu}")
             print(f"Dryrun:       {dryrun}")
             print(f"Config:       {config}")
             print(f"Directory:    {directory}")
@@ -187,102 +177,41 @@ class SbatchCommand(PluginCommand):
             print("Permutations")
             pprint(permutations)
             print()
+            sbatch.info()
+
 
         mod = {}
 
         for configfile in config:
             if directory is not None:
                 configfile = f"{directory}/{configfile}"
-            if ".py" in configfile:
-                if verbose:
-                    print(f"Reading variables from {configfile}")
-                Console.red("# ERROR: Importing python not yet implemented")
-                continue
-            elif ".json" in configfile:
-                if verbose:
-                    print(f"Reading variables from {configfile}")
-                content = readfile(configfile)
-                values =  dict(FlatDict(json.loads(content), sep="__"))
-                data.update(values)
+            data = sbatch.update_from_file(configfile)
 
-            elif ".yaml" in configfile:
-                if verbose:
-                    print(f"Reading variables from {configfile}")
-                content = readfile(configfile)
-                values = dict(FlatDict(yaml.safe_load(content), sep="__"))
-                data.update(values)
-            content = readfile(source)
-            if dryrun or verbose:
-                banner("Attributes")
-                pprint (data)
-                banner(f"Original Script {source}")
-                print(content)
-                banner("end script")
+        content = readfile(source)
 
-            if account is None:
-                if 'user__account' in data.keys():
-                    account = data['user__account']
-                else:
-                    Console.red("# ERROR: Account is either unavailable or not defined")
-            if 'user__runpath' in data.keys():
-                sbatch_runpath = data['user__runpath']
-            else:
-                Console.red("# ERROR: Must define a directory for the runpath")
+        if dryrun or verbose:
+            banner("Attributes")
+            pprint (sbatch.data)
+            banner(f"Original Script {source}")
+            print(content)
+            banner("end script")
+        result = str(content).format(**sbatch.data)
 
-            if dryrun or verbose:
-                banner("Script")
-                print (result)
-                banner("Script End")
+        if dryrun or verbose:
+            banner("Script")
+            print (result)
+            banner("Script End")
+        else:
+            writefile(destination, result)
 
-            destination_temp = destination.replace(".slurm","-")
-            for permutation in permutations:
-                values = ""
-                for attribute,value in permutation.items():
-                    values = values + f"{attribute}={value}-"
-                    if f"model_parameters__{attribute}" in data.keys():
-                        data[f"model_parameters__{attribute}"] = value
-                values = values[:-1]
-                path = f"{destination_temp}{values}".replace("=","_")+".slurm"
-                job_directory = path.replace(".slurm","")
-                if directory is not None:
-                    sbatch_directory = job_directory.split("/")[-1]
-                    script = path.split("/")[-1]
-                else:
-                    sbatch_directory = job_directory
-                    script = path
-                #TODO clean up these paths used above
-                cluster_directory = os.path.join(sbatch_runpath,os.environ['USER'],sbatch_directory)
-                #user_directory = os.path.join(sbatch_runpath, os.environ['USER'])
-                #if not os.path.exists(cluster_directory):
-                #    if not os.path.exists(user_directory):
-                #        if not os.path.exists(sbatch_runpath):
-                #            os.mkdir(sbatch_runpath)
-                #        os.mkdir(user_directory)
-                #    os.mkdir(cluster_directory)
-                os.makedirs(cluster_directory)
-                with open(os.path.join(cluster_directory,"config.json"),"w") as outfile:
-                    json.dump(data, outfile, indent=2)
-                result = content.replace("SBATCH_RUNSTAMP",sbatch_directory)
-                result = result.replace("SBATCH_RUNPATH",sbatch_runpath)
-                writefile(os.path.join(cluster_directory,script), result)
-                cluster_directory = os.path.abspath(cluster_directory)
-                if account is not None:
-                    if arguments.gpu:
-                        for gpu in Parameter.expand_string(arguments.gpu):
-                            worker = SBatch(path=cluster_directory,
-                                            account=arguments.account,
-                                            gpu=gpu,
-                                            dryrun=arguments.dryrun)
-                            worker.run(filename=script)
-                    else:
-                        worker = SBatch(path=cluster_directory,
-                                        account=arguments.account,
-                                        dryrun=arguments.dryrun)
-                        worker.run(filename=script)
+        for permutation in permutations:
+            values = ""
+            for attribute,value in permutation.items():
+                values = values + f"{attribute}={value} "
+                script = f"{destination}{values}".replace("=","_")
+            print (f"{values} sbatch {destination} {script}")
 
-                else:
-                    Console.red("# ERROR: Account is either unavailable or not defined")
 
-            # print(get_attribute_parameters(arguments.attributes))
+        # print(get_attribute_parameters(arguments.attributes))
 
-            return ""
+        return ""
