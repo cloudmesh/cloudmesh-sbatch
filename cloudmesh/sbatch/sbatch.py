@@ -1,6 +1,7 @@
 import os
 import sys
 import yaml
+import json
 import textwrap
 import subprocess
 from cloudmesh.common.util import readfile, writefile, path_expand
@@ -10,21 +11,19 @@ from cloudmesh.common.Shell import Shell
 class SBatch:
 
     def __init__(self,
-                 slurm_config,
+                 path=None,
                  account='ds6011-sp22-002',
                  params=None,
                  gpu='k80',
                  dryrun: bool = False,
                  **kwargs):
+        self.path = path
         self.account = account
-        self.slurm_config = slurm_config
-        with open(slurm_config, 'r') as file:
-            self.yaml = yaml.safe_load(file)
-        #
-        # TODO: this is hardcoded and must be changed
-        #
-        self.content = readfile(path_expand(self.yaml['slurm_template']))
+        self.config_path = os.path.join(path,'config.json')
+        with open(self.config_path, 'r') as file:
+            self.json = json.load(file)
         self.params = params
+        self.cluster_setup = SBatch.filter_dict(self.json, 'cluster_setup')
         self.gpu = gpu
         self.dryrun = dryrun
         self.env = os.environ.copy()
@@ -37,6 +36,12 @@ class SBatch:
     def __str__(self):
         return self.content
 
+    @staticmethod
+    def filter_dict(dictionary, string, seperator="__"):
+        filtered = {key.split(seperator,1)[1]: value for (key, value)
+                    in dictionary.items() if string in key}
+        return filtered
+
     def configure_sbatch(self,host):
         """
         TODO: this is all hardcoded and must be changed
@@ -44,7 +49,7 @@ class SBatch:
         Set the sbatch environmental variables based on yaml values
         Append the variables to the users environment
         """
-        defaults = self.yaml['sbatch_setup'][f'{host}-{self.gpu}']
+        defaults = SBatch.filter_dict(self.cluster_setup, f"{host}-{self.gpu}")
         user = self.env['USER']
         sbatch_vars = {
             'SBATCH_GRES': f'gpu:{defaults["card_name"]}:{defaults["num_gpus"]}',
@@ -83,19 +88,18 @@ class SBatch:
         """
         Execute a custom slurm script to the cluster
         """
-        cwd = os.getcwd()
-        file_path = os.path.join(cwd, filename)
+        file_path = os.path.join(self.path,filename)
         self.configure_sbatch(host='rivanna')
         if self.params:
             self.get_parameters()
         self.update(self.env)
-        self.save(file_path)
+        #self.save(file_path)
         if not self.dryrun:
             stdout, stderr = subprocess.Popen(['sbatch', file_path], env=self.env, encoding='utf-8',
                                           stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
             print(stdout)
             print(f"{stderr = }", file=sys.stderr)
-            Shell.run(f'rm {file_path}')
+            #Shell.run(f'rm {file_path}')
 
 
     def template(self):
