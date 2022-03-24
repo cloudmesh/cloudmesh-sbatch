@@ -94,13 +94,17 @@ class SBatch:
             Console.red("# ERROR: Importing jupyter notebooks not yet implemented")
         return self.data
 
-    def generate(self, script):
-        self.content = self.script = script
-        for attribute, value in self.data.items():
+    def generate(self, script, data=None):
+        if data is None:
+            data = self.data
+        content =  script
+        for attribute, value in data.items():
             frame = "{" + attribute + "}"
-            if frame in self.content:
-                self.content = self.content.replace(frame, value)
-        return self.content
+            if frame in content:
+                content = content.replace(frame, value)
+        return content
+
+
 
     def generate_experiment_permutations(self, variable_str):
         """
@@ -163,6 +167,7 @@ class SBatch:
 
                 configuration[identifier] = {
                     "id": identifier,
+                    "directory": directory,
                     "experiment": assignments,
                     "script": script,
                     "config": config,
@@ -208,6 +213,7 @@ class SBatch:
 
                 configuration[identifier] = {
                     "id": identifier,
+                    "directory": f"{directory}/{identifier}",
                     "experiment": assignments,
                     "script": script,
                     "config": config,
@@ -218,7 +224,7 @@ class SBatch:
 
             pprint(configuration)
 
-            print(Printer.write(configuration, order=["id", "experiment", "script", "config"]))
+            print(Printer.write(configuration, order=["id", "experiment", "script", "config", "directory"]))
 
             #if not yn_choice("The listed scripts will be gnerated, Continue"):
             #    return
@@ -226,8 +232,34 @@ class SBatch:
             #
             # now generate the scripts
             #
+            self.generate_setup_from_configuration(configuration)
+
             Console.error("script generation ont yet implemented")
 
+    def generate_setup_from_configuration(self, configuration):
+        for identifier in configuration:
+            Console.blue(f"setup experiment {identifier}")
+            experiment = configuration[identifier]
+            Shell.mkdir(experiment["directory"])
+
+            #
+            # Generate config.yml
+            #
+            Console.blue(f"* write file {experiment['config']}")
+
+            writefile(experiment["config"], yaml.dump(experiment["variables"], indent=2))
+            content_config = readfile(experiment["config"])
+            try:
+                check = yaml.safe_load(content_config)
+            except Exception as e:
+                print (e)
+                Console.error("We had issues with our check for the config.yaml file")
+            #
+            # Generate slurm.sh
+            #
+            content_script = readfile(self.source)
+            content_script = self.generate(content_script, experiment["variables"])
+            writefile (experiment["script"], content_script)
 
     @property
     def now(self):
