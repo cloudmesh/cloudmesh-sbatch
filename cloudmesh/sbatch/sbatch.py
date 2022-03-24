@@ -140,7 +140,39 @@ class SBatch:
                     script = f"{self.destination}{values}".replace("=", "_")
                 print(f"{values} sbatch {self.destination} {script}")
         elif mode in ["flat", "f"]:
-            Console.error("Mode flat not yet implemented")
+            configs = []
+            scripts = []
+            suffix = self._suffix(self.destination)
+            name = self.destination.replace(suffix, "")
+            directory = os.path.dirname(name)
+            for permutation in self.permutations:
+                values = []
+                for attribute, value in permutation.items():
+                    values.append(f"{attribute}_{value}")
+                identifier = "_".join(values)
+                print(identifier)
+                script = f"{name}_{identifier}{suffix}"
+                scripts.append(script)
+                config = f"{directory}/config_{identifier}.yaml"
+                configs.append(config)
+
+            banner("Script generation")
+
+            pprint(scripts)
+            print()
+
+            pprint(configs)
+            print()
+
+            if not yn_choice("The listed scripts will be gnerated, Continue"):
+                return
+
+
+            #
+            # now generate the scripts
+            #
+            Console.error("script generation ont yet implemented")
+
         elif mode.startswith("hi") or mode in ["hierachy", "hierahical", "h"]:
             Console.error("Mode hierachy not yet implemented")
 
