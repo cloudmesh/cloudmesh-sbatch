@@ -195,7 +195,7 @@ class SbatchCommand(PluginCommand):
             banner(f"Original Script {source}")
             print(content)
             banner("end script")
-        result = str(content).format(**sbatch.data)
+        result = sbatch.generate(content)
 
         if dryrun or verbose:
             banner("Script")

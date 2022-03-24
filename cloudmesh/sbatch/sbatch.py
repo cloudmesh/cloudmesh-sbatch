@@ -87,8 +87,10 @@ class SBatch:
         return self.data
 
 
-    def generate(self):
-        self.content = self.content.format(**self.data)
+    def generate(self, script):
+        self.script = script
+        self.content = script.format(**self.data)
+        return self.content
 
     @property
     def now(self):
