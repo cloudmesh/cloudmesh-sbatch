@@ -212,8 +212,8 @@ class SBatch:
                 print(identifier)
                 script = f"{directory}/{identifier}/slurm.sh"
                 config = f"{directory}/{identifier}/config.yaml"
-                variables = self.data
-                variables.update(permutation.items())
+                variables = dict(self.data)
+                variables.update(permutation)
 
                 configuration[identifier] = {
                     "id": identifier,
@@ -257,14 +257,14 @@ class SBatch:
 
     def generate_setup_from_configuration(self, configuration):
         for identifier in configuration:
-            Console.blue(f"setup experiment {identifier}")
+            Console.info(f"setup experiment {identifier}")
             experiment = configuration[identifier]
             Shell.mkdir(experiment["directory"])
 
             #
             # Generate config.yml
             #
-            Console.blue(f"* write file {experiment['config']}")
+            Console.info(f"* write file {experiment['config']}")
 
             writefile(experiment["config"], yaml.dump(experiment["variables"], indent=2))
             content_config = readfile(experiment["config"])
