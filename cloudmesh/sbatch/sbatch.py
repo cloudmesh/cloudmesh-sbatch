@@ -133,7 +133,6 @@ class SBatch:
 
     def generate_experiment_slurm_scripts(self, mode="flat"):
         mode = mode.lower()
-        print ("MMM", mode)
         if mode in ["debug", "d"]:
             for permutation in self.permutations:
                 values = ""
