@@ -15,7 +15,7 @@ queue:
     card_name: k80
     num_cpus: 6
     num_gpus: 1
-    time: '12:00:00'
+    time: 12:00:00
 
   p100:
     card_name: p100

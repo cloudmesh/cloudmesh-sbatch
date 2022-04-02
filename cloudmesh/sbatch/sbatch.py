@@ -56,11 +56,15 @@ class SBatch:
         :return:
         :rtype:
         """
+        # replace the next lines with
+        # entries = Parameter.arguments_to_dict(attributes)
+        # start delete
         attributes = attributes.split(",")
         entries = {}
         for attribute in attributes:
             name, value = attribute.split('=')
             entries[name] = value
+        # end delete
         self.data.update(entries)
         return entries
 
