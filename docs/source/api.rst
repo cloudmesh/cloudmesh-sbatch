@@ -5,5 +5,3 @@ API
    :toctree: generated
 
    cloudmesh.sbatch
-
-

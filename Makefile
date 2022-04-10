@@ -1,8 +1,10 @@
 package=sbatch
 UNAME=$(shell uname)
 VERSION=`head -1 VERSION`
+OPEN=gopen
 
-.PHONY: conda
+
+.PHONY: conda doc
 
 define banner
 	@echo
@@ -14,6 +16,12 @@ endef
 source:
 	$(call banner, "Install cloudmesh-common")
 	pip install -e . -U
+
+doc:
+	cd docs; make clean; make html
+
+view:
+	${OPEN} docs/build/html/index.html
 
 flake8:
 	cd ..; flake8 --max-line-length 124 --ignore=E722 cloudmesh-$(package)/cloudmesh
