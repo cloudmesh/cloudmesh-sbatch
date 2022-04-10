@@ -2,23 +2,21 @@ import itertools
 import json
 import os
 import pathlib
-import yaml
 import textwrap
 import typing
-
 from collections import OrderedDict
 from datetime import datetime
 from pprint import pprint
 
-from cloudmesh.common.util import readfile, writefile, path_expand
-from cloudmesh.common.util import yn_choice
+import yaml
+
+from cloudmesh.common.FlatDict import FlatDict
+from cloudmesh.common.Printer import Printer
 from cloudmesh.common.Shell import Shell
 from cloudmesh.common.console import Console
-from cloudmesh.common.FlatDict import FlatDict
-from cloudmesh.common.util import banner
 from cloudmesh.common.parameter import Parameter
-from cloudmesh.common.Printer import Printer
-
+from cloudmesh.common.util import banner
+from cloudmesh.common.util import readfile, writefile
 
 PathLike = typing.Union[str, pathlib.Path]
 DictOrList = typing.Union[dict, list]
@@ -113,6 +111,7 @@ class SBatch:
         Returns:
             Fluent API of the current object.
         """
+
         def _apply_leaf(my_dict: DictOrList, my_lambda: typing.Callable, *args, **kwargs) -> dict:
             """Walks python dictionary and applies a lambda to all leaf nodes.
 
@@ -141,6 +140,7 @@ class SBatch:
                 else:
                     new_dict[key] = my_lambda(str(value), *args, **kwargs)
             return new_dict
+
         with open(yaml_file, 'rb') as f:
             yaml_data = yaml.safe_load(f)
 
@@ -324,12 +324,12 @@ class SBatch:
             variables.update(permutation.items())
 
             configuration[identifier] = {
-                "id"        : identifier,
-                "directory" : directory,
+                "id": identifier,
+                "directory": directory,
                 "experiment": assignments,
-                "script"    : script,
-                "config"    : config,
-                "variables" : variables
+                "script": script,
+                "config": config,
+                "variables": variables
             }
 
         banner("Script generation")
@@ -361,12 +361,12 @@ class SBatch:
             variables.update(permutation)
 
             configuration[identifier] = {
-                "id"        : identifier,
-                "directory" : f"{directory}/{identifier}",
+                "id": identifier,
+                "directory": f"{directory}/{identifier}",
                 "experiment": assignments,
-                "script"    : script,
-                "config"    : config,
-                "variables" : variables
+                "script": script,
+                "config": config,
+                "variables": variables
             }
 
         banner("Script generation")
@@ -471,7 +471,6 @@ class SBatch:
         if name is not None:
             content = json.dumps(self.configuration_parameters, indent=2)
             writefile(name, content)
-
 
     '''
     def run(self, filename='submit-job.slurm'):
