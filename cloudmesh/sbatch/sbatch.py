@@ -174,7 +174,7 @@ class SBatch:
             A list of dictionaries containing the resulting cartisian product.
 
         For example::
-        
+
             my_dict = {"key1": ["value1", "value2"], "key2": ["value3", "value4"]}
             out = permutation_generator(my_dict)
             out # [{"key1": "value1", "key2": 'value3"},
