@@ -15,7 +15,6 @@ Generation of experimat submission scripts based on parameter permuattions.
 .. toctree::
    :maxdepth: 2
 
-   api
    modules
 
 Indices and tables
