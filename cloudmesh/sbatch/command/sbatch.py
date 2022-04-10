@@ -27,7 +27,10 @@ class SbatchCommand(PluginCommand):
                 sbatch slurm stop
                 sbatch slurm info
 
-          This command does some useful things.
+          This command creates a number of batch scripts with parameters
+          defined by attributs, configuration files, as well ass experiment
+          parameters. The experiment parameters are permutated over so that
+          a parameter sweep can be created easily using it.
 
           Arguments:
               FILENAME       name of a slurm script generated with sbatch
@@ -53,11 +56,43 @@ class SbatchCommand(PluginCommand):
 
           Description:
 
-               > Example:
-               > cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" --name=a
-               > cms sbatch generate slurm.in.sh --config=a.py,b.json,c.yaml --attributes=a=1,b=4  --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" --name=a
-               > cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=name=gregor,a=1,b=4 --dryrun --noos --dir=example --experiment="epoch=[1-3] x=[1,4] y=[10,11]" --mode=f --name=a
-               > cms sbatch generate slurm.in.sh --config=c.yaml --experiment-file=experiments.yaml --noos --dir=example
+               TODO: explain the differences
+
+               > Examples:
+
+               > cms sbatch generate slurm.in.sh --verbose
+               >     --config=a.py,b.json,c.yaml
+               >     --attributes=a=1,b=4
+               >     --dryrun
+               >     --noos
+               >     --dir=example
+               >     --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\"
+               >     --name=a
+
+               > cms sbatch generate slurm.in.sh
+               >     --config=a.py,b.json,c.yaml
+               >     --attributes=a=1,b=4
+               >     --noos
+               >     --dir=example
+               >     --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\"
+               >     --name=a
+
+               > cms sbatch generate slurm.in.sh
+               >     --verbose
+               >     --config=a.py,b.json,c.yaml
+               >     --attributes=name=gregor,a=1,b=4
+               >     --dryrun
+               >     --noos
+               >     --dir=example
+               >     --experiment="epoch=[1-3] x=[1,4] y=[10,11]"
+               >     --mode=f
+               >     --name=a
+
+               > cms sbatch generate slurm.in.sh
+               >     --config=c.yaml
+               >     --experiment-file=experiments.yaml
+               >     --noos
+               >     --dir=example
 
                > cms sbatch generate submit --name=a
 

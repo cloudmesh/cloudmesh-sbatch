@@ -10,6 +10,13 @@ Generation of experimat submission scripts based on parameter permuattions.
 
    cloudmesh.sbatch
 
+.. rubric:: CLI
+
+.. toctree::
+   :maxdepth: 2
+
+   manual/sbatch
+
 .. rubric:: Modules
 
 .. toctree::
