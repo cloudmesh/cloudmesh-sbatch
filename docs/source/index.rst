@@ -1,16 +1,24 @@
-.. cloudmesh-sbatch documentation master file, created by
-   sphinx-quickstart on Sun Apr 10 08:31:26 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+cloudmesh-sbatch
+================
 
-Welcome to cloudmesh-sbatch's documentation!
-============================================
+Generation of experimat submission scripts based on parameter permuattions.
+
+.. automodule:: cloudmesh
+    :members:
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
 
+Sources
+=======
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Sources:
+
+   source/generated/cloudmesh.sbatch
 
 Indices and tables
 ==================
