@@ -22,7 +22,7 @@ class SbatchCommand(PluginCommand):
 
           Usage:
                 sbatch generate submit [--verbose] --name=NAME
-                sbatch generate [--verbose] [--mode=MODE] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT] --name=NAME
+                sbatch generate  [SOURCE] [--verbose]  [--experiments-file=EXPERIMENTS] [--mode=MODE] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT] --name=NAME
                 sbatch slurm start
                 sbatch slurm stop
                 sbatch slurm info
@@ -41,6 +41,7 @@ class SbatchCommand(PluginCommand):
               -h                        help
               --dryrun                  flag to skip submission
               --config=CONFIG...        TBD
+              --experiment-file=EXPERIMENTS TBD
               --attributes=PARAMS       TBD
               --out=DESTINATION         TBD
               --gpu=GPU                 TBD
@@ -56,6 +57,7 @@ class SbatchCommand(PluginCommand):
                > cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" --name=a
                > cms sbatch generate slurm.in.sh --config=a.py,b.json,c.yaml --attributes=a=1,b=4  --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" --name=a
                > cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=name=gregor,a=1,b=4 --dryrun --noos --dir=example --experiment="epoch=[1-3] x=[1,4] y=[10,11]" --mode=f --name=a
+               > cms sbatch generate slurm.in.sh --config=c.yaml --experiment-file=experiments.yaml --noos --dir=example
 
                > cms sbatch generate submit --name=a
 
@@ -72,8 +74,7 @@ class SbatchCommand(PluginCommand):
                        "out",
                        "experiment",
                        "mode",
-                       "name"
-                       )
+                       "name")
 
         # VERBOSE(arguments)
 
@@ -94,7 +95,6 @@ class SbatchCommand(PluginCommand):
             if not arguments.name.endswith(".json"):
                 arguments.name = arguments.name + ".json"
 
-
         if arguments.generate and arguments.submit:
 
             # sbatch generate submit [--verbose] [--mode=MODE] [--experiment=EXPERIMENT] [--dir=DIR]
@@ -109,35 +109,22 @@ class SbatchCommand(PluginCommand):
         elif arguments.generate:
 
             sbatch = SBatch()
+            if "--experiments-file" in arguments:
+                sbatch.from_yaml(arguments["--experiments-file"])
 
-            sbatch.source = arguments.SOURCE
+            sbatch.debug_state("run1,,")
 
-            if arguments.out is None:
-                sbatch.destination = sbatch.source.replace(".in.", ".").replace(".in", "")
-            else:
-                sbatch.destination = arguments.out
-            if sbatch.source == sbatch.destination:
+            sbatch.cli_builder(arguments)
+            sbatch.debug_state("run2,,")
+
+            if sbatch.source is not None:
+                sbatch.register_script(sbatch.source)
+
+            if sbatch.source == sbatch.script_out:
                 if not yn_choice("The source and destination filenames are the same. Do you want to continue?"):
                     return ""
 
-            sbatch.attributes = arguments.gpu
-            sbatch.directory = arguments["--dir"]
-            sbatch.dryrun = arguments.dryrun
-            sbatch.config = (arguments.config[0]).split(",") # not soo good to split. maybe Parameter expand is better
-
-            experiment = arguments.experiment
-
             experiments = None
-
-            if not arguments["--noos"]:
-                sbatch.update_from_os_environ()
-
-            if sbatch.directory is not None:
-                sbatch.source = f"{sbatch.directory}/{sbatch.source}"
-                sbatch.destination = f"{sbatch.directory}/{sbatch.destination}"
-
-            if arguments.attributes:
-                sbatch.attributes = sbatch.update_from_attribute_str(arguments.attributes)
 
             if arguments.experiment:
                 permutations = sbatch.generate_experiment_permutations(arguments.experiment)
@@ -147,31 +134,24 @@ class SbatchCommand(PluginCommand):
                 sbatch.info()
                 print()
 
-            for configfile in sbatch.config:
-                if sbatch.directory is not None:
-                    configfile = f"{sbatch.directory}/{configfile}"
-                sbatch.update_from_file(configfile)
-
-            content = readfile(sbatch.source)
-
             if sbatch.dryrun or verbose:
                 banner("Attributes")
                 pprint (sbatch.data)
                 banner(f"Original Script {sbatch.source}")
-                print(content)
+                print(sbatch.template_content)
                 banner("end script")
-            result = sbatch.generate(content)
+            result = sbatch.generate()
 
             if sbatch.dryrun or verbose:
                 banner("Script")
-                print (result)
+                print(result)
                 banner("Script End")
             else:
-                writefile(sbatch.destination, result)
+                writefile(sbatch.script_out, result)
 
-            sbatch.generate_experiment_slurm_scripts(mode=arguments.mode)
+            sbatch.generate_experiment_slurm_scripts()
 
-            sbatch.save_experiment_configuration(name=arguments.name)
+            sbatch.save_experiment_configuration()
             # print(get_attribute_parameters(arguments.attributes))
 
         return ""
