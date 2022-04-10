@@ -91,7 +91,14 @@ class SBatch:
     def from_yaml(self, yaml_file: PathLike):
         """Configures the object from a standard YAML structure.
 
-        This supports the following YAML structures:
+        Args:
+            yaml_file: The path to the yaml file to parse
+
+        Returns:
+            Fluent API of the current object.
+
+        The yaml file supports the following YAML structure::
+
             template: path
             config: path
             name: str
@@ -105,11 +112,6 @@ class SBatch:
             mode: str
             dir: path
 
-        Args:
-            yaml_file: The path to the yaml file to parse
-
-        Returns:
-            Fluent API of the current object.
         """
 
         def _apply_leaf(my_dict: DictOrList, my_lambda: typing.Callable, *args, **kwargs) -> dict:
@@ -165,7 +167,14 @@ class SBatch:
     def permutation_generator(exp_dict: dict) -> list:
         """Creates a cartisian product of a {key: list, ...} object.
 
-        For example
+        Args:
+            exp_dict: The dictionary to process
+
+        Returns:
+            A list of dictionaries containing the resulting cartisian product.
+
+        For example::
+        
             my_dict = {"key1": ["value1", "value2"], "key2": ["value3", "value4"]}
             out = permutation_generator(my_dict)
             out # [{"key1": "value1", "key2": 'value3"},
@@ -173,11 +182,6 @@ class SBatch:
                 #  {"key1": "value2", "key2": "value3"},
                 #  {"key1": "value2", "key2": "value4"}
 
-        Args:
-            exp_dict: The dictionary to process
-
-        Returns:
-            A list of dictionaries containing the resulting cartisian product.
         """
         keys, values = zip(*exp_dict.items())
         return [dict(zip(keys, value)) for value in itertools.product(*values)]
