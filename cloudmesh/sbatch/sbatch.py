@@ -1,3 +1,22 @@
+"""
+API to create multiple batch scripts based on parameters you specify.
+
+The parameters are permutated on and for each a specific batch script
+is created. The batch scripts are placed either in a directory hierarchy,
+or in the same directory.
+
+The API is also accessible through a commandline interface and both are
+aligned in functionality with each other.
+
+The command line interface is documented at ... TODO: autogeneate with cms man
+
+The logic is documented at TODO: create a manual
+
+A video about this effort is located at TODO: locate video, post to gregor as mp4 so he can edit with macOS
+
+sbatch reads in a template slurm script that is augmented with {variables}. These {variables}
+will be replaced from a dictionary.
+"""
 import itertools
 import json
 import os
@@ -27,6 +46,14 @@ OptStr = typing.Optional[str]
 class SBatch:
 
     def __init__(self, mode: str = "flat", verbose: bool = False):
+        """
+
+        Args:
+            mode (str): if specified as flat the batch scripts are written in a single directory. Otherwise
+                        hierarchical directories are created that include each the batch scripts. When
+                        the scripts are executed. The outputs are written into that directory.
+            verbose (bool): If True some debug information is written while using it.
+        """
         self.name: OptStr = None
         self.data: dict = dict()
         self.verbose: bool = verbose
@@ -43,6 +70,10 @@ class SBatch:
 
     def cli_builder(self, arguments: typing.Any):
         """Configures the object from command.sbatch CLI arguments
+
+        TODO: arguments is typically a dict or a dotdict. Why is this typing.Any?
+
+        TODO: what is Fluent ?
 
         Args:
             arguments: The docopts object from the cms sbatch command.
@@ -74,12 +105,12 @@ class SBatch:
         return self
 
     def register_script(self, script):
-        """Registers and reads the template script in for processing
+        """Registers and reads the template script in for processing.
 
         This method must be run at least once prior to generating the slurm script output.
 
         Args:
-            script: A string that is the path to the template script.
+            script (string): A string that is the path to the template script.
 
         Returns:
             The text of the template file unaltered.
@@ -91,8 +122,10 @@ class SBatch:
     def from_yaml(self, yaml_file: PathLike):
         """Configures the object from a standard YAML structure.
 
+        TODO: what is fluent?
+
         Args:
-            yaml_file: The path to the yaml file to parse
+            yaml_file (string or path): The path to the yaml file to parse
 
         Returns:
             Fluent API of the current object.
@@ -111,7 +144,6 @@ class SBatch:
               property: substitution
             mode: str
             dir: path
-
         """
 
         def _apply_leaf(my_dict: DictOrList, my_lambda: typing.Callable, *args, **kwargs) -> dict:
@@ -197,10 +229,13 @@ class SBatch:
     def update_from_attribute_str(self, attributes: str) -> dict:
         """attributes are of the form "a=1,b=3"
 
+        TODO: this function seems to be a duplicate from a feature included in cloudmesh.common.Parameter
+
         Args:
-            attributes:
+            attributes: a Parameterized string of the form "a=1,b=2"
 
         Returns:
+            A dict with the parameters
 
         """
         entries = Parameter.arguments_to_dict(attributes)
@@ -222,6 +257,16 @@ class SBatch:
 
     @staticmethod
     def _suffix(path: PathLike) -> str:
+        """
+        returns the suffix of a filename
+
+        Args:
+            path (path or string):
+
+        Returns:
+            The suffx of the filename
+
+        """
         return pathlib.Path(path).suffix
 
     def update_from_file(self, filename: PathLike) -> dict:
@@ -311,6 +356,7 @@ class SBatch:
 
         Returns:
             None.
+
         Side Effects:
             Writes two files for each established experiment.
         """
@@ -349,6 +395,7 @@ class SBatch:
 
         Returns:
             None.
+
         Side Effects:
             Writes two files for each established experiment, each in their own directory.
         """
@@ -405,6 +452,15 @@ class SBatch:
             self._generate_hierarchical()
 
     def generate_submit(self, name: PathLike = None):
+        """
+        Generates the slurm submit script based on parameters set.
+
+        Args:
+            name (str): name of the configuration file
+
+        Returns:
+
+        """
         experiments = self.configuration_parameters = json.loads(readfile(name))
 
         if experiments is None:
@@ -419,6 +475,15 @@ class SBatch:
             print(f"{parameters} sbatch -D {directory} {script}")
 
     def generate_setup_from_configuration(self, configuration: dict):
+        """
+        TODO: ...
+
+        Args:
+            configuration (dict):
+
+        Returns:
+
+        """
         pprint(configuration)
         for identifier in configuration:
             Console.info(f"setup experiment {identifier}")
@@ -443,6 +508,13 @@ class SBatch:
 
     @property
     def now(self) -> str:
+        """
+        The current time in format "%Y-m-%d"
+
+        Returns:
+             time in format "%Y-m-%d"
+
+        """
         return datetime.now().strftime("%Y-m-%d")
 
     def debug_state(self, key=""):
@@ -472,6 +544,15 @@ class SBatch:
             """)
 
     def save_experiment_configuration(self, name: str = None):
+        """
+        Writes the experminent configuration to a file
+
+        Args:
+            name (str): The path representing the filename location
+
+        Returns:
+
+        """
         if name is not None:
             content = json.dumps(self.configuration_parameters, indent=2)
             writefile(name, content)
