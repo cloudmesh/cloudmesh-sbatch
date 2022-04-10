@@ -1,82 +1,234 @@
+import itertools
+import json
 import os
-import sys
+import pathlib
 import yaml
 import textwrap
-import subprocess
+import typing
+
+from collections import OrderedDict
+from datetime import datetime
+from pprint import pprint
+
 from cloudmesh.common.util import readfile, writefile, path_expand
 from cloudmesh.common.util import yn_choice
 from cloudmesh.common.Shell import Shell
-from pprint import pprint
-import pathlib
 from cloudmesh.common.console import Console
 from cloudmesh.common.FlatDict import FlatDict
-import json
 from cloudmesh.common.util import banner
 from cloudmesh.common.parameter import Parameter
-from collections import OrderedDict
-import itertools
-import textwrap
 from cloudmesh.common.Printer import Printer
+
+
+PathLike = typing.Union[str, pathlib.Path]
+DictOrList = typing.Union[dict, list]
+OptPath = typing.Optional[PathLike]
+OptStr = typing.Optional[str]
+
 
 class SBatch:
 
-    def __init__(self, verbose=False):
-        self.data = {}
-        self.template = None
-        self.verbose = verbose
-        self.gpu = None
+    def __init__(self, mode: str = "flat", verbose: bool = False):
+        self.name: OptStr = None
+        self.data: dict = dict()
+        self.verbose: bool = verbose
+        self.source: OptPath = None
+        self.script_out: OptPath = None
+        self.out_directory: OptPath = "."
+        self.attributes: dict[str, str] = dict()
+        self.dryrun: bool = True
+        self.execution_mode: str = mode
+        self.permutations: list[typing.Any] = list()
+        self.configuration_parameters = None
+        self.template_path = None
+        self.template_content = None
 
-    def info(self):
-        for a in ["source",
-                    "destination",
-                    "attributes",
-                    "gpu",
-                    "dryrun",
-                    "config",
-                    "directory",
-                    "experiment",
-                    "permutations"
-                          ]:
-            print(f'{a:<12}: {self.data.get(a)}')
+    def cli_builder(self, arguments: typing.Any):
+        """Configures the object from command.sbatch CLI arguments
 
-        print()
+        Args:
+            arguments: The docopts object from the cms sbatch command.
 
-    def set_attribute(self, attribute, value):
+        Returns:
+            Fluent API of the current object.
+        """
+        self.source = arguments.get('SOURCE', self.source)
+        self.dryrun = arguments.get('dryrun', self.dryrun)
+        if self.execution_mode is not None and arguments.execution_mode != 'debug':
+            self.execution_mode = arguments['mode']
+
+        if self.script_out is None and arguments.out is None:
+            self.script_out = self.source.replace(".in.", ".").replace(".in", "")
+        else:
+            self.script_out = arguments.get('out', self.script_out)
+
+        if arguments['--dir']:
+            self.out_directory = arguments['--dir']
+
+        if not arguments["--noos"]:
+            self.update_from_os_environ()
+
+        if arguments.attributes:
+            self.attributes = self.update_from_attribute_str(arguments.attributes)
+
+        for configfile in Parameter.expand(arguments.config):
+            self.update_from_file(configfile)
+        return self
+
+    def register_script(self, script):
+        """Registers and reads the template script in for processing
+
+        This method must be run at least once prior to generating the slurm script output.
+
+        Args:
+            script: A string that is the path to the template script.
+
+        Returns:
+            The text of the template file unaltered.
+        """
+        self.template_path = script
+        self.template_content = readfile(script)
+        return self.template_content
+
+    def from_yaml(self, yaml_file: PathLike):
+        """Configures the object from a standard YAML structure.
+
+        This supports the following YAML structures:
+            template: path
+            config: path
+            name: str
+            experiments:
+              card_name: Parameter.expand string
+              gpu_count: Parameter.expand string
+              cpu_num: Parameter.expand string
+              mem: Parameter.expand string
+            attributes:
+              property: substitution
+            mode: str
+            dir: path
+
+        Args:
+            yaml_file: The path to the yaml file to parse
+
+        Returns:
+            Fluent API of the current object.
+        """
+        def _apply_leaf(my_dict: DictOrList, my_lambda: typing.Callable, *args, **kwargs) -> dict:
+            """Walks python dictionary and applies a lambda to all leaf nodes.
+
+            Args:
+                my_dict: The dictionary to process
+                my_lambda: The lambda function to apply to the leaf nodes.
+                *args: positional arguments passed directly to my_lambda
+                **kwargs: keyword arguments passed directoy to my_lambda
+
+            Returns:
+                A new dictionary that has applied the my_lambda function on
+                each leaf node.
+            """
+            new_dict = dict(my_dict)
+            for key, value in new_dict.items():
+                if isinstance(value, dict):
+                    new_dict[key] = _apply_leaf(value, my_lambda, *args, **kwargs)
+                elif isinstance(value, list):
+                    inner_list = list()
+                    for x in value:
+                        if isinstance(x, dict) or isinstance(x, list):
+                            inner_list.append(_apply_leaf(x, my_lambda, *args, **kwargs))
+                        else:
+                            inner_list.append(my_lambda(x, **kwargs))
+                        new_dict[key] = inner_list
+                else:
+                    new_dict[key] = my_lambda(str(value), *args, **kwargs)
+            return new_dict
+        with open(yaml_file, 'rb') as f:
+            yaml_data = yaml.safe_load(f)
+
+        if 'template' in yaml_data:
+            self.register_script(yaml_data['template'])
+        if 'config' in yaml_data:
+            self.update_from_file(yaml_data['config'])
+        self.name = yaml_data.get('name', self.name)
+        self.execution_mode = yaml_data.get('mode', self.execution_mode)
+        if 'dir' in yaml_data:
+            self.out_directory = yaml_data['dir']
+        if 'experiments' in yaml_data:
+            experiments = _apply_leaf(yaml_data['experiments'], Parameter.expand)
+            perms = self.permutation_generator(experiments)
+            self.permutations = self.permutations + perms
+        if 'attributes' in yaml_data:
+            self.attributes.update(yaml_data['attributes'])
+
+        return self
+
+    @staticmethod
+    def permutation_generator(exp_dict: dict) -> list:
+        """Creates a cartisian product of a {key: list, ...} object.
+
+        For example
+            my_dict = {"key1": ["value1", "value2"], "key2": ["value3", "value4"]}
+            out = permutation_generator(my_dict)
+            out # [{"key1": "value1", "key2": 'value3"},
+                #  {"key1": "value1", "key2": "value4"},
+                #  {"key1": "value2", "key2": "value3"},
+                #  {"key1": "value2", "key2": "value4"}
+
+        Args:
+            exp_dict: The dictionary to process
+
+        Returns:
+            A list of dictionaries containing the resulting cartisian product.
+        """
+        keys, values = zip(*exp_dict.items())
+        return [dict(zip(keys, value)) for value in itertools.product(*values)]
+
+    def set_attribute(self, attribute: str, value: typing.Any):
         self.data[attribute] = value
+        return self
 
-    def update_from_dict(self, d):
+    def update_from_dict(self, d: typing.Any):
         self.data.update(d)
+        return self
 
-    def update_from_attribute_str(self, attributes):
-        """
-        attributes are of the form "a=1,b=3"
+    def update_from_attribute_str(self, attributes: str) -> dict:
+        """attributes are of the form "a=1,b=3"
 
-        :param attributes:
-        :type attributes:
-        :return:
-        :rtype:
+        Args:
+            attributes:
+
+        Returns:
+
         """
-        # replace the next lines with
-        # entries = Parameter.arguments_to_dict(attributes)
-        # start delete
-        attributes = attributes.split(",")
-        entries = {}
-        for attribute in attributes:
-            name, value = attribute.split('=')
-            entries[name] = value
-        # end delete
+        entries = Parameter.arguments_to_dict(attributes)
         self.data.update(entries)
         return entries
 
-    def update_from_os_environ(self, load=True):
+    def update_from_os_environ(self, load: bool = True) -> dict:
+        """Updates the config file output to include OS environment variables
+
+        Args:
+            load: When true, loads the environment variables into the config.
+
+        Returns:
+            The current value of the data file.
+        """
         if load:
             self.data.update(dict(os.environ))
         return self.data
 
-    def _suffix(self, path):
+    @staticmethod
+    def _suffix(path: PathLike) -> str:
         return pathlib.Path(path).suffix
 
-    def update_from_file(self, filename):
+    def update_from_file(self, filename: PathLike) -> dict:
+        """Updates the run configuration file with the data within the passed file.
+
+        Args:
+            filename: The path to the configuration file (json or yaml)
+
+        Returns:
+            The modified data object.
+        """
         if self.verbose:
             print(f"Reading variables from {filename}")
 
@@ -86,169 +238,173 @@ class SBatch:
         if suffix.lower() in [".json"]:
             values = dict(FlatDict(json.loads(content), sep="."))
             self.data.update(values)
-        elif suffix.lower() in [".yaml"]:
+        elif suffix.lower() in [".yaml", ".yml"]:
             content = readfile(filename)
             values = dict(FlatDict(yaml.safe_load(content), sep="."))
             self.data.update(values)
         elif suffix.lower() in [".py"]:
-            Console.red("# ERROR: Importing python not yet implemented")
+            Console.error("# ERROR: Importing python not yet implemented")
         elif suffix.lower() in [".ipynb"]:
-            Console.red("# ERROR: Importing jupyter notebooks not yet implemented")
+            Console.error("# ERROR: Importing jupyter notebooks not yet implemented")
         return self.data
 
-    def generate(self, script, data=None):
+    def generate(self, script: str = None, data: dict = None, fences=("{", "}")) -> str:
+        """Expands the script template given the passed configuration.
+
+        Args:
+            script: The string contents of the script file.
+            data: A single-level dictionary used to replace strings that match the key with its values.
+            fences: A 2 position tuple, that encloses template variables (start and end).
+
+        Returns:
+            The script that has expanded its values based on `data`.
+        """
         if data is None:
-            data = self.data
-        content =  script
+            data = self.attributes
+        if script is None:
+            script = self.template_content
+        content = script
         for attribute, value in data.items():
-            frame = "{" + attribute + "}"
+            if self.verbose:
+                print(f"Expanding {fences[0] + attribute + fences[1]} with {value}")
+            frame = fences[0] + attribute + fences[1]
             if frame in content:
-                content = content.replace(frame, value)
+                content = content.replace(frame, str(value))
         return content
 
+    def generate_experiment_permutations(self, variable_str: str) -> list[typing.Any]:
+        """Generates experiment permutations based on the passed string and appends it to the current instance.
 
+        Args:
+            variable_str: A Parameter.expand string (such as epoch=[1-3] x=[1,4] y=[10,11])
 
-    def generate_experiment_permutations(self, variable_str):
-        """
-        creates permutations over the variable use dto define an experiment parameter sweep
-
-        :param variable_str: epoch=[1-3] x=[1,4] y=[10,11]
-        :type variable_str: str
-        :return: list with permutations over the experiment variables
-        :rtype: dict of strings
+        Returns:
+            list with permutations over the experiment variables
         """
         experiments = OrderedDict()
-        permutations = []
-        entries = variable_str.split(' ')
+        my_params = Parameter.arguments_to_dict(variable_str)
 
-        for entry in entries:
-            name, parameters = entry.split('=')
-            experiments[name] = Parameter.expand(parameters)
-        keys, values = zip(*experiments.items())
-        self.permutations = [dict(zip(keys, value)) for value in itertools.product(*values)]
+        for k, v in my_params:
+            experiments[k] = Parameter.expand(v)
+        self.permutations.append(self.permutation_generator(experiments))
         return self.permutations
 
-    #for permutation in self.permutations:
-    #    values = ""
-    #    for attribute, value in permutation.items():
-    #        values = values + f"{attribute}={value} "
-    #        script = f"{self.destination}{values}".replace("=", "_")
-    #    print(f"{values} sbatch {self.destination} {script}")
+    @staticmethod
+    def _bootstrap_generator(permutation):
+        values = list()
+        for attribute, value in permutation.items():
+            values.append(f"{attribute}_{value}")
+        assignments = list()
+        for attribute, value in permutation.items():
+            assignments.append(f"{attribute}={value}")
+        assignments = " ".join(assignments)
 
-    def generate_experiment_slurm_scripts(self, mode="flat"):
-        mode = mode.lower()
+        identifier = "_".join(values)
+        return identifier, assignments, values
+
+    def _generate_flat(self):
+        """Runs process to build out all templates in a flat-style
+
+        Returns:
+            None.
+        Side Effects:
+            Writes two files for each established experiment.
+        """
+        configuration = dict()
+        suffix = self._suffix(self.script_out)
+        name = self.script_out.replace(suffix, "")
+        directory = self.out_directory
+
+        for permutation in self.permutations:
+            identifier, assignments, values = self._bootstrap_generator(permutation)
+            print(identifier)
+            script = f"{name}_{identifier}{suffix}"
+            config = f"{directory}/config_{identifier}.yaml"
+            variables = self.data
+            variables.update(permutation.items())
+
+            configuration[identifier] = {
+                "id"        : identifier,
+                "directory" : directory,
+                "experiment": assignments,
+                "script"    : script,
+                "config"    : config,
+                "variables" : variables
+            }
+
+        banner("Script generation")
+
+        self.configuration_parameters = configuration
+        print(Printer.write(configuration, order=["id", "experiment", "script", "config"]))
+        self.generate_setup_from_configuration(configuration)
+
+        Console.error("script generation nott yet implemented")
+
+    def _generate_hierarchical(self):
+        """Runs process to build out all templates in a hierarchical-style
+
+        Returns:
+            None.
+        Side Effects:
+            Writes two files for each established experiment, each in their own directory.
+        """
+        configuration = dict()
+        suffix = self._suffix(self.script_out)
+        name = self.script_out.replace(suffix, "")
+        directory = self.out_directory
+        for permutation in self.permutations:
+            identifier, assignments, values = self._bootstrap_generator(permutation)
+            print(identifier)
+            script = f"{directory}/{identifier}/slurm.sh"
+            config = f"{directory}/{identifier}/config.yaml"
+            variables = dict(self.data)
+            variables.update(permutation)
+
+            configuration[identifier] = {
+                "id"        : identifier,
+                "directory" : f"{directory}/{identifier}",
+                "experiment": assignments,
+                "script"    : script,
+                "config"    : config,
+                "variables" : variables
+            }
+
+        banner("Script generation")
+
+        print(Printer.write(configuration, order=["id", "experiment", "script", "config", "directory"]))
+
+        self.configuration_parameters = configuration
+        self.generate_setup_from_configuration(configuration)
+
+        Console.error("script generation ont yet implemented")
+
+    def generate_experiment_slurm_scripts(self, mode: str = None):
+        """Utility method to genrerate either hierarchical or flat outputs; or debug.
+
+        Args:
+            mode: The mode of operation.  One of: "debug", "flat", "hierarchical"
+
+        Returns:
+
+        """
+        mode = mode if mode else self.execution_mode
         if mode in ["debug", "d"]:
             for permutation in self.permutations:
                 values = ""
                 for attribute, value in permutation.items():
                     values = values + f"{attribute}={value} "
-                    script = f"{self.destination}{values}".replace("=", "_")
-                print(f"{values} sbatch {self.destination} {script}")
+                    script = f"{self.out_directory}/{self.script_out}{values}".replace("=", "_")
+                print(f"{values} sbatch {self.script_out} {script}")
         elif mode.startswith("f"):
-            configuration = {}
-            self.script_variables=[]
-            suffix = self._suffix(self.destination)
-            name = self.destination.replace(suffix, "")
-            directory = os.path.dirname(name)
-            for permutation in self.permutations:
-                values = []
-                for attribute, value in permutation.items():
-                    values.append(f"{attribute}_{value}")
-                assignments = []
-                for attribute, value in permutation.items():
-                    assignments.append(f"{attribute}={value}")
-                assignments = " ".join(assignments)
-
-                identifier = "_".join(values)
-                print(identifier)
-                script = f"{name}_{identifier}{suffix}"
-                config = f"{directory}/config_{identifier}.yaml"
-                variables = self.data
-                variables.update(permutation.items())
-
-                configuration[identifier] = {
-                    "id": identifier,
-                    "directory": directory,
-                    "experiment": assignments,
-                    "script": script,
-                    "config": config,
-                    "variables": variables
-                }
-
-            banner("Script generation")
-
-            pprint(configuration)
-            self.configuration_parameters = configuration
-            print (Printer.write(configuration, order=["id", "experiment", "script", "config"]))
-
-            # if not yn_choice("The listed scripts will be gnerated, Continue"):
-            #    return
-
-            #
-            # now generate the scripts
-            #
-            self.generate_setup_from_configuration(configuration)
-
-            Console.error("script generation ont yet implemented")
-
-            #
-            # now generate the scripts
-            #
-            Console.error("script generation ont yet implemented")
-
+            self._generate_flat()
         elif mode.startswith("h"):
-            configuration = {}
-            self.script_variables = []
-            suffix = self._suffix(self.destination)
-            name = self.destination.replace(suffix, "")
-            directory = os.path.dirname(name)
-            for permutation in self.permutations:
-                values = []
-                for attribute, value in permutation.items():
-                    values.append(f"{attribute}_{value}")
-                assignments = []
-                for attribute, value in permutation.items():
-                    assignments.append(f"{attribute}={value}")
-                assignments = " ".join(assignments)
+            self._generate_hierarchical()
 
-                identifier = "_".join(values)
-                print(identifier)
-                script = f"{directory}/{identifier}/slurm.sh"
-                config = f"{directory}/{identifier}/config.yaml"
-                variables = dict(self.data)
-                variables.update(permutation)
-
-                configuration[identifier] = {
-                    "id": identifier,
-                    "directory": f"{directory}/{identifier}",
-                    "experiment": assignments,
-                    "script": script,
-                    "config": config,
-                    "variables": variables
-                }
-
-            banner("Script generation")
-
-            pprint(configuration)
-
-            print(Printer.write(configuration, order=["id", "experiment", "script", "config", "directory"]))
-
-            self.configuration_parameters = configuration
-            #if not yn_choice("The listed scripts will be gnerated, Continue"):
-            #    return
-
-            #
-            # now generate the scripts
-            #
-            self.generate_setup_from_configuration(configuration)
-
-            Console.error("script generation ont yet implemented")
-
-    def generate_submit(self, name=None):
+    def generate_submit(self, name: PathLike = None):
         experiments = self.configuration_parameters = json.loads(readfile(name))
 
         if experiments is None:
-            Console.error ("please define the experiment parameters")
+            Console.error("please define the experiment parameters")
             return ""
 
         for entry in experiments:
@@ -256,17 +412,16 @@ class SBatch:
             parameters = experiment["experiment"]
             directory = experiment["directory"]
             script = os.path.basename(experiment["script"])
-            print (f"{parameters} sbatch -D {directory} {script}")
+            print(f"{parameters} sbatch -D {directory} {script}")
 
-    def generate_setup_from_configuration(self, configuration):
+    def generate_setup_from_configuration(self, configuration: dict):
+        pprint(configuration)
         for identifier in configuration:
             Console.info(f"setup experiment {identifier}")
             experiment = configuration[identifier]
             Shell.mkdir(experiment["directory"])
 
-            #
             # Generate config.yml
-            #
             Console.info(f"* write file {experiment['config']}")
 
             writefile(experiment["config"], yaml.dump(experiment["variables"], indent=2))
@@ -274,38 +429,49 @@ class SBatch:
             try:
                 check = yaml.safe_load(content_config)
             except Exception as e:
-                print (e)
+                print(e)
                 Console.error("We had issues with our check for the config.yaml file")
-            #
+
             # Generate slurm.sh
-            #
             content_script = readfile(self.source)
             content_script = self.generate(content_script, experiment["variables"])
-            writefile (experiment["script"], content_script)
+            writefile(experiment["script"], content_script)
 
     @property
-    def now(self):
-        # there is a better way ;)
-        return Shell.run("date").strip().replace(" ", "-")
+    def now(self) -> str:
+        return datetime.now().strftime("%Y-m-%d")
 
-    def __str__(self):
-        return self.content
+    def debug_state(self, key=""):
+        """Outputs the current state of persistent values in class.
 
-    def save_slurm_script(self, filename):
+        Args:
+            key: A string to prefix the string with.
+
+        Returns:
+            A mutliline string with all class variables in a key = value pattern.
         """
-        Writes the custom slurm script to a file for submission
-        If the file already exists, the user will be prompted to override
-        """
-        if os.path.exists(path_expand(filename)):
-            if yn_choice(f"{filename} exists, would you like to overwrite?"):
-                writefile(filename, self.content)
-        else:
-            writefile(filename, self.content)
+        return textwrap.dedent(f"""
+        {key}===OBJ===
+        {key}   {self.name = }
+        {key}   {self.data = }
+        {key}   {self.verbose = }
+        {key}   {self.source = }
+        {key}   {self.script_out = }
+        {key}   {self.out_directory = }
+        {key}   {self.attributes = }
+        {key}   {self.dryrun = }
+        {key}   {self.execution_mode = }
+        {key}   {self.permutations = }
+        {key}   {self.configuration_parameters = }
+        {key}   {self.template_path = }
+        {key}===END===
+            """)
 
-    def save_experiment_configuration(self, name=None):
+    def save_experiment_configuration(self, name: str = None):
         if name is not None:
             content = json.dumps(self.configuration_parameters, indent=2)
             writefile(name, content)
+
 
     '''
     def run(self, filename='submit-job.slurm'):
