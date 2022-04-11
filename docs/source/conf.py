@@ -14,7 +14,7 @@ import os
 import sys
 import cloudmesh.sbatch
 # sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('../cloudmesh'))
+sys.path.insert(0, os.path.abspath('../../cloudmesh'))
 
 
 # -- Project information -----------------------------------------------------
