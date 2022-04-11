@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cloudmesh.sbatch.slurm &mdash; cloudmesh-sbatch 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> cloudmesh-sbatch
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../generated/cloudmesh.sbatch.html">cloudmesh.sbatch</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../manual/sbatch.html">Command sbatch</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cloudmesh</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">cloudmesh-sbatch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>cloudmesh.sbatch.slurm</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cloudmesh.sbatch.slurm</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Management of Slurm on the localhost.</span>
+
+<span class="sd">This command is useful if you like to develop</span>
+<span class="sd">advances APIs using slurm, but do not want to do</span>
+<span class="sd">it on a production computer.</span>
+
+<span class="sd">Curerntly onlu ubuntu 20.04 is supported.</span>
+
+<span class="sd">The service can either be used as a commandline tool or as API.</span>
+<span class="sd">If you  use the commandline YOU wnat to do the following.</span>
+<span class="sd">First, you need to start the service with::</span>
+
+<span class="sd">    cms sbatch slurm start</span>
+
+<span class="sd">Next, you can test the status with::</span>
+
+<span class="sd">    cms sbatch slurm status</span>
+
+<span class="sd">To submit jobs you can now use the regular slurm commands such as::</span>
+
+<span class="sd">    srun</span>
+<span class="sd">    sbatch</span>
+<span class="sd">    squeue</span>
+
+<span class="sd">To stop the service please use::</span>
+
+<span class="sd">    cms sbatch slurm stop</span>
+
+<span class="sd">The API reflects what we do on the commandline and we have the methods::</span>
+
+<span class="sd">    Slurm.start()</span>
+<span class="sd">    Slurm.stop()</span>
+<span class="sd">    Slurm.status()</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">cloudmesh.common.util</span> <span class="kn">import</span> <span class="n">banner</span>
+
+<div class="viewcode-block" id="Slurm"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.slurm.Slurm">[docs]</a><span class="k">class</span> <span class="nc">Slurm</span><span class="p">:</span>
+
+<div class="viewcode-block" id="Slurm.start"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.slurm.Slurm.start">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">start</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Starts the SLurm service oon your local machine.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            On stdout prints the action information</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;Begin SLURM startup)&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;sudo systemctl start slurmctld&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;sudo systemctl start slurmd&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;sudo scontrol update nodename=white state=idle&quot;</span><span class="p">)</span>
+        <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;sinfo&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;sinfo&quot;</span><span class="p">)</span>
+        <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;squeue&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;squeue&quot;</span><span class="p">)</span>
+        <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;End of SLURM startup &quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Slurm.stop"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.slurm.Slurm.stop">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stops the SLurm service oon your local machine.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            On stdout prints the action information</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;sudo systemctl stop slurmd&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;sudo systemctl stop slurmctld&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Slurm.status"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.slurm.Slurm.status">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">status</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shows the status of the SLurm service oon your local machine.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            On stdout prints the action information</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;sudo tail /var/log/slurm-llnl/slurmd.log&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;sudo tail /var/log/slurm-llnl/slurmctld.log&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;sinfo -R&quot;</span><span class="p">]:</span>
+            <span class="n">banner</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Gregor von Laszewski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

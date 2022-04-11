@@ -1,0 +1,82 @@
+Command sbatch
+==============
+
+::
+
+  Usage:
+        sbatch generate submit [--verbose] --name=NAME
+        sbatch generate  [SOURCE] [--verbose]  [--experiments-file=EXPERIMENTS] [--mode=MODE] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT] --name=NAME
+        sbatch slurm start
+        sbatch slurm stop
+        sbatch slurm info
+
+  This command creates a number of batch scripts with parameters
+  defined by attributs, configuration files, as well ass experiment
+  parameters. The experiment parameters are permutated over so that
+  a parameter sweep can be created easily using it.
+
+  Arguments:
+      FILENAME       name of a slurm script generated with sbatch
+      CONFIG_FILE    yaml file with configuration
+      ACCOUNT        account name for host system
+      SOURCE         name for slurm script
+      PARAMS         parameter lists for experimentation
+      GPU            name of gpu
+
+  Options:
+      -h                        help
+      --dryrun                  flag to skip submission
+      --config=CONFIG...        TBD
+      --experiment-file=EXPERIMENTS TBD
+      --attributes=PARAMS       TBD
+      --out=DESTINATION         TBD
+      --gpu=GPU                 TBD
+      --noos                    TBD
+      --experiment=EXPERIMENT   TBD
+      --account=ACCOUNT         TBD
+      --mode=MODE               one of "flat", "debug", "hierachical" can als just use "f". "d", "h" [default: debug]
+      --name=NAME               name of the experiment configuration file
+
+  Description:
+
+       TODO: explain the differences
+
+       > Examples:
+
+       > cms sbatch generate slurm.in.sh --verbose
+       >     --config=a.py,b.json,c.yaml
+       >     --attributes=a=1,b=4
+       >     --dryrun
+       >     --noos
+       >     --dir=example
+       >     --experiment="epoch=[1-3] x=[1,4] y=[10,11]"
+       >     --name=a
+
+       > cms sbatch generate slurm.in.sh
+       >     --config=a.py,b.json,c.yaml
+       >     --attributes=a=1,b=4
+       >     --noos
+       >     --dir=example
+       >     --experiment="epoch=[1-3] x=[1,4] y=[10,11]"
+       >     --name=a
+
+       > cms sbatch generate slurm.in.sh
+       >     --verbose
+       >     --config=a.py,b.json,c.yaml
+       >     --attributes=name=gregor,a=1,b=4
+       >     --dryrun
+       >     --noos
+       >     --dir=example
+       >     --experiment="epoch=[1-3] x=[1,4] y=[10,11]"
+       >     --mode=f
+       >     --name=a
+
+       > cms sbatch generate slurm.in.sh
+       >     --config=c.yaml
+       >     --experiment-file=experiments.yaml
+       >     --noos
+       >     --dir=example
+
+       > cms sbatch generate submit --name=a
+
+

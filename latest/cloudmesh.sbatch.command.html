@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cloudmesh.sbatch.command package &mdash; cloudmesh-sbatch 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="cloudmesh.sbatch package" href="cloudmesh.sbatch.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> cloudmesh-sbatch
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="generated/cloudmesh.sbatch.html">cloudmesh.sbatch</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="manual/sbatch.html">Command sbatch</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cloudmesh</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cloudmesh.html">cloudmesh package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cloudmesh.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="cloudmesh.sbatch.html">cloudmesh.sbatch package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cloudmesh.html#module-cloudmesh">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">cloudmesh-sbatch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">cloudmesh</a> &raquo;</li>
+          <li><a href="cloudmesh.html">cloudmesh package</a> &raquo;</li>
+          <li><a href="cloudmesh.sbatch.html">cloudmesh.sbatch package</a> &raquo;</li>
+      <li>cloudmesh.sbatch.command package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cloudmesh.sbatch.command.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cloudmesh-sbatch-command-package">
+<h1>cloudmesh.sbatch.command package<a class="headerlink" href="#cloudmesh-sbatch-command-package" title="Permalink to this headline"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-cloudmesh.sbatch.command.sbatch">
+<span id="cloudmesh-sbatch-command-sbatch-module"></span><h2>cloudmesh.sbatch.command.sbatch module<a class="headerlink" href="#module-cloudmesh.sbatch.command.sbatch" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="cloudmesh.sbatch.command.sbatch.SbatchCommand">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cloudmesh.sbatch.command.sbatch.</span></span><span class="sig-name descname"><span class="pre">SbatchCommand</span></span><a class="reference internal" href="_modules/cloudmesh/sbatch/command/sbatch.html#SbatchCommand"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.command.sbatch.SbatchCommand" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cloudmesh.shell.command.PluginCommand</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cloudmesh.sbatch.command.sbatch.SbatchCommand.do_sbatch">
+<span class="sig-name descname"><span class="pre">do_sbatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cloudmesh.sbatch.command.sbatch.SbatchCommand.do_sbatch" title="Permalink to this definition"></a></dt>
+<dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span>
+      <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">submit</span> <span class="p">[</span><span class="o">--</span><span class="n">verbose</span><span class="p">]</span> <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">NAME</span>
+      <span class="n">sbatch</span> <span class="n">generate</span>  <span class="p">[</span><span class="n">SOURCE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">verbose</span><span class="p">]</span>  <span class="p">[</span><span class="o">--</span><span class="n">experiments</span><span class="o">-</span><span class="n">file</span><span class="o">=</span><span class="n">EXPERIMENTS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">mode</span><span class="o">=</span><span class="n">MODE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">CONFIG</span><span class="o">...</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">attributes</span><span class="o">=</span><span class="n">PARAMS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">out</span><span class="o">=</span><span class="n">DESTINATION</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">gpu</span><span class="o">=</span><span class="n">GPU</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">dryrun</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">noos</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="nb">dir</span><span class="o">=</span><span class="n">DIR</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">experiment</span><span class="o">=</span><span class="n">EXPERIMENT</span><span class="p">]</span> <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">NAME</span>
+      <span class="n">sbatch</span> <span class="n">slurm</span> <span class="n">start</span>
+      <span class="n">sbatch</span> <span class="n">slurm</span> <span class="n">stop</span>
+      <span class="n">sbatch</span> <span class="n">slurm</span> <span class="n">info</span>
+
+<span class="n">This</span> <span class="n">command</span> <span class="n">creates</span> <span class="n">a</span> <span class="n">number</span> <span class="n">of</span> <span class="n">batch</span> <span class="n">scripts</span> <span class="k">with</span> <span class="n">parameters</span>
+<span class="n">defined</span> <span class="n">by</span> <span class="n">attributs</span><span class="p">,</span> <span class="n">configuration</span> <span class="n">files</span><span class="p">,</span> <span class="k">as</span> <span class="n">well</span> <span class="n">ass</span> <span class="n">experiment</span>
+<span class="n">parameters</span><span class="o">.</span> <span class="n">The</span> <span class="n">experiment</span> <span class="n">parameters</span> <span class="n">are</span> <span class="n">permutated</span> <span class="n">over</span> <span class="n">so</span> <span class="n">that</span>
+<span class="n">a</span> <span class="n">parameter</span> <span class="n">sweep</span> <span class="n">can</span> <span class="n">be</span> <span class="n">created</span> <span class="n">easily</span> <span class="n">using</span> <span class="n">it</span><span class="o">.</span>
+
+<span class="n">Arguments</span><span class="p">:</span>
+    <span class="n">FILENAME</span>       <span class="n">name</span> <span class="n">of</span> <span class="n">a</span> <span class="n">slurm</span> <span class="n">script</span> <span class="n">generated</span> <span class="k">with</span> <span class="n">sbatch</span>
+    <span class="n">CONFIG_FILE</span>    <span class="n">yaml</span> <span class="n">file</span> <span class="k">with</span> <span class="n">configuration</span>
+    <span class="n">ACCOUNT</span>        <span class="n">account</span> <span class="n">name</span> <span class="k">for</span> <span class="n">host</span> <span class="n">system</span>
+    <span class="n">SOURCE</span>         <span class="n">name</span> <span class="k">for</span> <span class="n">slurm</span> <span class="n">script</span>
+    <span class="n">PARAMS</span>         <span class="n">parameter</span> <span class="n">lists</span> <span class="k">for</span> <span class="n">experimentation</span>
+    <span class="n">GPU</span>            <span class="n">name</span> <span class="n">of</span> <span class="n">gpu</span>
+
+<span class="n">Options</span><span class="p">:</span>
+    <span class="o">-</span><span class="n">h</span>                        <span class="n">help</span>
+    <span class="o">--</span><span class="n">dryrun</span>                  <span class="n">flag</span> <span class="n">to</span> <span class="n">skip</span> <span class="n">submission</span>
+    <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">CONFIG</span><span class="o">...</span>        <span class="n">TBD</span>
+    <span class="o">--</span><span class="n">experiment</span><span class="o">-</span><span class="n">file</span><span class="o">=</span><span class="n">EXPERIMENTS</span> <span class="n">TBD</span>
+    <span class="o">--</span><span class="n">attributes</span><span class="o">=</span><span class="n">PARAMS</span>       <span class="n">TBD</span>
+    <span class="o">--</span><span class="n">out</span><span class="o">=</span><span class="n">DESTINATION</span>         <span class="n">TBD</span>
+    <span class="o">--</span><span class="n">gpu</span><span class="o">=</span><span class="n">GPU</span>                 <span class="n">TBD</span>
+    <span class="o">--</span><span class="n">noos</span>                    <span class="n">TBD</span>
+    <span class="o">--</span><span class="n">experiment</span><span class="o">=</span><span class="n">EXPERIMENT</span>   <span class="n">TBD</span>
+    <span class="o">--</span><span class="n">account</span><span class="o">=</span><span class="n">ACCOUNT</span>         <span class="n">TBD</span>
+    <span class="o">--</span><span class="n">mode</span><span class="o">=</span><span class="n">MODE</span>               <span class="n">one</span> <span class="n">of</span> <span class="s2">&quot;flat&quot;</span><span class="p">,</span> <span class="s2">&quot;debug&quot;</span><span class="p">,</span> <span class="s2">&quot;hierachical&quot;</span> <span class="n">can</span> <span class="n">als</span> <span class="n">just</span> <span class="n">use</span> <span class="s2">&quot;f&quot;</span><span class="o">.</span> <span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span> <span class="p">[</span><span class="n">default</span><span class="p">:</span> <span class="n">debug</span><span class="p">]</span>
+    <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">NAME</span>               <span class="n">name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">experiment</span> <span class="n">configuration</span> <span class="n">file</span>
+
+<span class="n">Description</span><span class="p">:</span>
+
+     <span class="n">TODO</span><span class="p">:</span> <span class="n">explain</span> <span class="n">the</span> <span class="n">differences</span>
+
+     <span class="o">&gt;</span> <span class="n">Examples</span><span class="p">:</span>
+
+     <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">slurm</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">verbose</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">py</span><span class="p">,</span><span class="n">b</span><span class="o">.</span><span class="n">json</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">yaml</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">attributes</span><span class="o">=</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="mi">4</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">dryrun</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">noos</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="nb">dir</span><span class="o">=</span><span class="n">example</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">experiment</span><span class="o">=</span><span class="s2">&quot;epoch=[1-3] x=[1,4] y=[10,11]&quot;</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">a</span>
+
+     <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">slurm</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">py</span><span class="p">,</span><span class="n">b</span><span class="o">.</span><span class="n">json</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">yaml</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">attributes</span><span class="o">=</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="mi">4</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">noos</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="nb">dir</span><span class="o">=</span><span class="n">example</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">experiment</span><span class="o">=</span><span class="s2">&quot;epoch=[1-3] x=[1,4] y=[10,11]&quot;</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">a</span>
+
+     <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">slurm</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">verbose</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">py</span><span class="p">,</span><span class="n">b</span><span class="o">.</span><span class="n">json</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">yaml</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">attributes</span><span class="o">=</span><span class="n">name</span><span class="o">=</span><span class="n">gregor</span><span class="p">,</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="mi">4</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">dryrun</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">noos</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="nb">dir</span><span class="o">=</span><span class="n">example</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">experiment</span><span class="o">=</span><span class="s2">&quot;epoch=[1-3] x=[1,4] y=[10,11]&quot;</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">mode</span><span class="o">=</span><span class="n">f</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">a</span>
+
+     <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">slurm</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">yaml</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">experiment</span><span class="o">-</span><span class="n">file</span><span class="o">=</span><span class="n">experiments</span><span class="o">.</span><span class="n">yaml</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="n">noos</span>
+     <span class="o">&gt;</span>     <span class="o">--</span><span class="nb">dir</span><span class="o">=</span><span class="n">example</span>
+
+     <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">submit</span> <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">a</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-cloudmesh.sbatch.command">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cloudmesh.sbatch.command" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cloudmesh.sbatch.html" class="btn btn-neutral float-left" title="cloudmesh.sbatch package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Gregor von Laszewski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
