@@ -181,6 +181,7 @@
                        <span class="s2">&quot;experiment&quot;</span><span class="p">,</span>
                        <span class="s2">&quot;mode&quot;</span><span class="p">,</span>
                        <span class="s2">&quot;name&quot;</span><span class="p">)</span>
+        <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;experiments_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;--experiments-file&quot;</span><span class="p">]</span>
 
 
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
@@ -217,8 +218,8 @@
         <span class="k">elif</span> <span class="n">arguments</span><span class="o">.</span><span class="n">generate</span><span class="p">:</span>
 
             <span class="n">sbatch</span> <span class="o">=</span> <span class="n">SBatch</span><span class="p">()</span>
-            <span class="k">if</span> <span class="s2">&quot;--experiments-file&quot;</span> <span class="ow">in</span> <span class="n">arguments</span><span class="p">:</span>
-                <span class="n">sbatch</span><span class="o">.</span><span class="n">from_yaml</span><span class="p">(</span><span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;--experiments-file&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">experiments_file</span><span class="p">:</span>
+                <span class="n">sbatch</span><span class="o">.</span><span class="n">from_yaml</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">experiments_file</span><span class="p">)</span>
 
             <span class="n">sbatch</span><span class="o">.</span><span class="n">debug_state</span><span class="p">(</span><span class="s2">&quot;run1,,&quot;</span><span class="p">)</span>
 
