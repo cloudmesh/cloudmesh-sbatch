@@ -110,6 +110,7 @@ class SbatchCommand(PluginCommand):
                        "experiment",
                        "mode",
                        "name")
+        arguments["experiments_file"] = arguments["--experiments-file"]
 
 
         if verbose:
@@ -146,8 +147,8 @@ class SbatchCommand(PluginCommand):
         elif arguments.generate:
 
             sbatch = SBatch()
-            if "--experiments-file" in arguments:
-                sbatch.from_yaml(arguments["--experiments-file"])
+            if arguments.experiments_file:
+                sbatch.from_yaml(arguments.experiments_file)
 
             sbatch.debug_state("run1,,")
 
