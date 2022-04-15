@@ -9,7 +9,7 @@ from cloudmesh.sbatch.slurm import Slurm
 from cloudmesh.shell.command import PluginCommand
 from cloudmesh.shell.command import command
 from cloudmesh.shell.command import map_parameters
-# from cloudmesh.common.debug import VERBOSE
+from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.variables import Variables
 
 class SbatchCommand(PluginCommand):
@@ -111,7 +111,6 @@ class SbatchCommand(PluginCommand):
                        "mode",
                        "name")
 
-        # VERBOSE(arguments)
 
         if verbose:
             banner("experiment batch generator")
@@ -129,6 +128,9 @@ class SbatchCommand(PluginCommand):
         if arguments.name is not None:
             if not arguments.name.endswith(".json"):
                 arguments.name = arguments.name + ".json"
+
+        VERBOSE(arguments)
+
 
         if arguments.generate and arguments.submit:
 
