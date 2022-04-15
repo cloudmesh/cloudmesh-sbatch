@@ -107,6 +107,7 @@
 <span class="kn">from</span> <span class="nn">cloudmesh.common.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.util</span> <span class="kn">import</span> <span class="n">banner</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.util</span> <span class="kn">import</span> <span class="n">readfile</span><span class="p">,</span> <span class="n">writefile</span>
+<span class="kn">from</span> <span class="nn">cloudmesh.common.variables</span> <span class="kn">import</span> <span class="n">Variables</span>
 
 <span class="n">PathLike</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">]</span>
 <span class="n">DictOrList</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span>
@@ -312,6 +313,21 @@
         <span class="n">entries</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">arguments_to_dict</span><span class="p">(</span><span class="n">attributes</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">entries</span></div>
+
+<div class="viewcode-block" id="SBatch.update_from_cloudmesh_variables"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_cloudmesh_variables">[docs]</a>    <span class="k">def</span> <span class="nf">update_from_cloudmesh_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Updates the config file output to include OS environment variables</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            load: When true, loads the environment variables into the config.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The current value of the data file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">Variables</span><span class="p">()</span>
+        <span class="n">cm_variables</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">({</span><span class="s2">&quot;cloudmesh&quot;</span><span class="p">:</span> <span class="n">v</span><span class="p">}))</span>
+        <span class="k">if</span> <span class="n">load</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">cm_variables</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span></div>
 
 <div class="viewcode-block" id="SBatch.update_from_os_environ"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_os_environ">[docs]</a>    <span class="k">def</span> <span class="nf">update_from_os_environ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Updates the config file output to include OS environment variables</span>
