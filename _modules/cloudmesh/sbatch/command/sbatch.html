@@ -80,7 +80,7 @@
 <span class="kn">from</span> <span class="nn">cloudmesh.shell.command</span> <span class="kn">import</span> <span class="n">PluginCommand</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.shell.command</span> <span class="kn">import</span> <span class="n">command</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.shell.command</span> <span class="kn">import</span> <span class="n">map_parameters</span>
-<span class="c1"># from cloudmesh.common.debug import VERBOSE</span>
+<span class="kn">from</span> <span class="nn">cloudmesh.common.debug</span> <span class="kn">import</span> <span class="n">VERBOSE</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.variables</span> <span class="kn">import</span> <span class="n">Variables</span>
 
 <div class="viewcode-block" id="SbatchCommand"><a class="viewcode-back" href="../../../../cloudmesh.sbatch.command.html#cloudmesh.sbatch.command.sbatch.SbatchCommand">[docs]</a><span class="k">class</span> <span class="nc">SbatchCommand</span><span class="p">(</span><span class="n">PluginCommand</span><span class="p">):</span>
@@ -182,7 +182,6 @@
                        <span class="s2">&quot;mode&quot;</span><span class="p">,</span>
                        <span class="s2">&quot;name&quot;</span><span class="p">)</span>
 
-        <span class="c1"># VERBOSE(arguments)</span>
 
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;experiment batch generator&quot;</span><span class="p">)</span>
@@ -200,6 +199,9 @@
         <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">arguments</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">):</span>
                 <span class="n">arguments</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span>
+
+        <span class="n">VERBOSE</span><span class="p">(</span><span class="n">arguments</span><span class="p">)</span>
+
 
         <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">generate</span> <span class="ow">and</span> <span class="n">arguments</span><span class="o">.</span><span class="n">submit</span><span class="p">:</span>
 
