@@ -36,6 +36,7 @@ from cloudmesh.common.console import Console
 from cloudmesh.common.parameter import Parameter
 from cloudmesh.common.util import banner
 from cloudmesh.common.util import readfile, writefile
+from cloudmesh.common.variables import Variables
 
 PathLike = typing.Union[str, pathlib.Path]
 DictOrList = typing.Union[dict, list]
@@ -241,6 +242,21 @@ class SBatch:
         entries = Parameter.arguments_to_dict(attributes)
         self.data.update(entries)
         return entries
+
+    def update_from_cloudmesh_variables(self, load: bool = True) -> dict:
+        """Updates the config file output to include OS environment variables
+
+        Args:
+            load: When true, loads the environment variables into the config.
+
+        Returns:
+            The current value of the data file.
+        """
+        v = Variables()
+        cm_variables = dict(FlatDict({"cloudmesh": v}))
+        if load:
+            self.data.update(cm_variables)
+        return self.data
 
     def update_from_os_environ(self, load: bool = True) -> dict:
         """Updates the config file output to include OS environment variables
