@@ -67,7 +67,10 @@ class TestConfig:
         VERBOSE(result)
 
         assert "Error" not in result
-
+        assert 'name=Gregor' in result
+        assert 'address=Seasame Str.' in result
+        assert 'a=1' in result
+        assert 'debug=True' in result
 
     def test_flat(self):
         HEADING()
