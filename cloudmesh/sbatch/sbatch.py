@@ -26,6 +26,7 @@ class SBatch:
         self.template = None
         self.verbose = verbose
         self.gpu = None
+        self.configuration_parameters = None
 
     def info(self):
         for a in ["source",
@@ -77,9 +78,7 @@ class SBatch:
     def update_from_cm_variables(self, load=True):
         if load:
             variables = Variables()
-            print ("KKKKKK", variables.dict())
             v = FlatDict({"cloudmesh": variables.dict()}, sep=".")
-            print ("VVVVV", v)
 
             self.data.update(dict(v))
         return self.data

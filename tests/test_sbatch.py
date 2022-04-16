@@ -33,7 +33,7 @@ class TestConfig:
         VERBOSE(result)
         assert "sbatch" in result
 
-    def test_oneline_command(self):
+    def test_oneline_noos_command(self):
         HEADING()
         clean()
         Benchmark.Start()
@@ -46,6 +46,26 @@ class TestConfig:
         VERBOSE(result)
         assert "Error" not in result
 
+
+    def test_oneline_os_command(self):
+        HEADING()
+        clean()
+        Benchmark.Start()
+        command = remove_spaces(
+            "cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun "
+            "--dir=example --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a")
+        print(command)
+        result = Shell.run(command)
+        Benchmark.Stop()
+        VERBOSE(result)
+        assert "Error" not in result
+        assert 'name=Gregor' in result
+        assert 'address=Seasame Str.' in result
+        assert 'a=1' in result
+        assert 'debug=True' in result
+        assert os.environ["USER"] in result
+
+
     def test_hierachy(self):
         HEADING()
         clean()
@@ -56,9 +76,8 @@ class TestConfig:
                    --config=a.py,b.json,c.yaml 
                    --attributes=a=1,b=4 
                    --dryrun 
-                   --noos 
                    --dir=example 
-                   --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" 
+                   --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
                    --name=a
             """)
         print(command)
@@ -71,6 +90,7 @@ class TestConfig:
         assert 'address=Seasame Str.' in result
         assert 'a=1' in result
         assert 'debug=True' in result
+        assert os.environ["USER"] in result
 
     def test_flat(self):
         HEADING()
@@ -85,7 +105,7 @@ class TestConfig:
                    --dryrun 
                    --noos 
                    --dir=example 
-                   --experiment="epoch=[1-3] x=[1,4] y=[10,11]" 
+                   --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
                    --mode=f 
                    --name=a
             """)
@@ -107,7 +127,7 @@ class TestConfig:
                        --config=a.py,b.json,c.yaml 
                        --attributes=a=1,b=4 
                        --dir=example 
-                       --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" 
+                       --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
                        --name=a
             """
         )
