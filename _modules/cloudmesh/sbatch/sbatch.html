@@ -69,26 +69,25 @@
            <div itemprop="articleBody">
              
   <h1>Source code for cloudmesh.sbatch.sbatch</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+<span></span><span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+
 <span class="kn">import</span> <span class="nn">yaml</span>
-<span class="kn">import</span> <span class="nn">textwrap</span>
-<span class="kn">import</span> <span class="nn">subprocess</span>
+
+<span class="kn">from</span> <span class="nn">cloudmesh.common.FlatDict</span> <span class="kn">import</span> <span class="n">FlatDict</span>
+<span class="kn">from</span> <span class="nn">cloudmesh.common.Printer</span> <span class="kn">import</span> <span class="n">Printer</span>
+<span class="kn">from</span> <span class="nn">cloudmesh.common.Shell</span> <span class="kn">import</span> <span class="n">Shell</span>
+<span class="kn">from</span> <span class="nn">cloudmesh.common.console</span> <span class="kn">import</span> <span class="n">Console</span>
+<span class="kn">from</span> <span class="nn">cloudmesh.common.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
+<span class="kn">from</span> <span class="nn">cloudmesh.common.util</span> <span class="kn">import</span> <span class="n">banner</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.util</span> <span class="kn">import</span> <span class="n">readfile</span><span class="p">,</span> <span class="n">writefile</span><span class="p">,</span> <span class="n">path_expand</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.util</span> <span class="kn">import</span> <span class="n">yn_choice</span>
-<span class="kn">from</span> <span class="nn">cloudmesh.common.Shell</span> <span class="kn">import</span> <span class="n">Shell</span>
-<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
-<span class="kn">import</span> <span class="nn">pathlib</span>
-<span class="kn">from</span> <span class="nn">cloudmesh.common.console</span> <span class="kn">import</span> <span class="n">Console</span>
-<span class="kn">from</span> <span class="nn">cloudmesh.common.FlatDict</span> <span class="kn">import</span> <span class="n">FlatDict</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">from</span> <span class="nn">cloudmesh.common.util</span> <span class="kn">import</span> <span class="n">banner</span>
-<span class="kn">from</span> <span class="nn">cloudmesh.common.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
-<span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">import</span> <span class="nn">textwrap</span>
-<span class="kn">from</span> <span class="nn">cloudmesh.common.Printer</span> <span class="kn">import</span> <span class="n">Printer</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.variables</span> <span class="kn">import</span> <span class="n">Variables</span>
+
 
 <div class="viewcode-block" id="SBatch"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch">[docs]</a><span class="k">class</span> <span class="nc">SBatch</span><span class="p">:</span>
 
@@ -108,10 +107,15 @@
                     <span class="s2">&quot;config&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;directory&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;experiment&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;permutations&quot;</span>
-                          <span class="p">]:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">a</span><span class="si">:</span><span class="s1">&lt;12</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
+                  <span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">a</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">a</span><span class="si">:</span><span class="s1">&lt;12</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;permutations:&quot;</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;permutations&quot;</span><span class="p">)</span>
+        <span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="SBatch.set_attribute"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.set_attribute">[docs]</a>    <span class="k">def</span> <span class="nf">set_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>

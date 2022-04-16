@@ -84,6 +84,7 @@
 <span class="kn">from</span> <span class="nn">cloudmesh.common.variables</span> <span class="kn">import</span> <span class="n">Variables</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
 
+
 <div class="viewcode-block" id="SbatchCommand"><a class="viewcode-back" href="../../../../cloudmesh.sbatch.command.html#cloudmesh.sbatch.command.sbatch.SbatchCommand">[docs]</a><span class="k">class</span> <span class="nc">SbatchCommand</span><span class="p">(</span><span class="n">PluginCommand</span><span class="p">):</span>
 
     <span class="c1"># noinspection PyUnusedLocal</span>
@@ -206,6 +207,7 @@
                 <span class="n">sbatch</span><span class="o">.</span><span class="n">destination</span> <span class="o">=</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.in.&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.in&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">sbatch</span><span class="o">.</span><span class="n">destination</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">out</span>
+
             <span class="k">if</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">destination</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">yn_choice</span><span class="p">(</span><span class="s2">&quot;The source and destination filenames are the same. Do you want to continue?&quot;</span><span class="p">):</span>
                     <span class="k">return</span> <span class="s2">&quot;&quot;</span>
@@ -214,6 +216,7 @@
             <span class="n">sbatch</span><span class="o">.</span><span class="n">directory</span> <span class="o">=</span> <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;--dir&quot;</span><span class="p">]</span>
             <span class="n">sbatch</span><span class="o">.</span><span class="n">dryrun</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">dryrun</span>
             <span class="n">sbatch</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">config</span>
+            <span class="n">sbatch</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">SOURCE</span>
 
             <span class="n">experiment</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">experiment</span>
 
@@ -236,15 +239,11 @@
             <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">experiment</span><span class="p">:</span>
                 <span class="n">sbatch</span><span class="o">.</span><span class="n">permutations</span> <span class="o">=</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">generate_experiment_permutations</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">experiment</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Experiments:  </span><span class="si">{</span><span class="n">arguments</span><span class="o">.</span><span class="n">experiment</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="n">sbatch</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
-                <span class="nb">print</span><span class="p">()</span>
-
             <span class="k">for</span> <span class="n">configfile</span> <span class="ow">in</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">config</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">configfile</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sbatch</span><span class="o">.</span><span class="n">directory</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">configfile</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="n">sbatch</span><span class="o">.</span><span class="n">update_from_file</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span>
+
 
             <span class="n">content</span> <span class="o">=</span> <span class="n">readfile</span><span class="p">(</span><span class="n">sbatch</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
 
@@ -256,6 +255,11 @@
                 <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;end script&quot;</span><span class="p">)</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
 
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Experiments:  </span><span class="si">{</span><span class="n">arguments</span><span class="o">.</span><span class="n">experiment</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">sbatch</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+                <span class="nb">print</span><span class="p">()</span>
+
             <span class="k">if</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">dryrun</span> <span class="ow">or</span> <span class="n">verbose</span><span class="p">:</span>
                 <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;Script&quot;</span><span class="p">)</span>
                 <span class="nb">print</span> <span class="p">(</span><span class="n">result</span><span class="p">)</span>
@@ -266,7 +270,6 @@
             <span class="n">sbatch</span><span class="o">.</span><span class="n">generate_experiment_slurm_scripts</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="n">arguments</span><span class="o">.</span><span class="n">mode</span><span class="p">)</span>
 
             <span class="n">sbatch</span><span class="o">.</span><span class="n">save_experiment_configuration</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">arguments</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="c1"># print(get_attribute_parameters(arguments.attributes))</span>
 
         <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
 </pre></div>
