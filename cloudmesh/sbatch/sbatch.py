@@ -17,6 +17,7 @@ from collections import OrderedDict
 import itertools
 import textwrap
 from cloudmesh.common.Printer import Printer
+from cloudmesh.common.variables import Variables
 
 class SBatch:
 
@@ -71,6 +72,16 @@ class SBatch:
     def update_from_os_environ(self, load=True):
         if load:
             self.data.update(dict(os.environ))
+        return self.data
+
+    def update_from_cm_variables(self, load=True):
+        if load:
+            variables = Variables()
+            print ("KKKKKK", variables.dict())
+            v = FlatDict({"cloudmesh": variables.dict()}, sep=".")
+            print ("VVVVV", v)
+
+            self.data.update(dict(v))
         return self.data
 
     def _suffix(self, path):

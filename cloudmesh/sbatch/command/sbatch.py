@@ -9,7 +9,7 @@ from cloudmesh.sbatch.slurm import Slurm
 from cloudmesh.shell.command import PluginCommand
 from cloudmesh.shell.command import command
 from cloudmesh.shell.command import map_parameters
-# from cloudmesh.common.debug import VERBOSE
+from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.variables import Variables
 
 class SbatchCommand(PluginCommand):
@@ -22,7 +22,7 @@ class SbatchCommand(PluginCommand):
 
           Usage:
                 sbatch generate submit [--verbose] --name=NAME
-                sbatch generate [--verbose] [--mode=MODE] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT] --name=NAME
+                sbatch generate [--verbose] [--mode=MODE] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT] --name=NAME
                 sbatch slurm start
                 sbatch slurm stop
                 sbatch slurm info
@@ -45,6 +45,7 @@ class SbatchCommand(PluginCommand):
               --out=DESTINATION         TBD
               --gpu=GPU                 TBD
               --noos                    TBD
+              --nocm                    TBD
               --experiment=EXPERIMENT   TBD
               --account=ACCOUNT         TBD
               --mode=MODE               one of "flat", "debug", "hierachical" can als just use "f". "d", "h" [default: debug]
@@ -91,7 +92,6 @@ class SbatchCommand(PluginCommand):
         #               "name"
         #               )
 
-        # VERBOSE(arguments)
 
         if verbose:
             banner("experiment batch generator")
@@ -110,6 +110,7 @@ class SbatchCommand(PluginCommand):
             if not arguments.name.endswith(".json"):
                 arguments.name = arguments.name + ".json"
 
+        VERBOSE(arguments)
 
         if arguments.generate and arguments.submit:
 
@@ -147,6 +148,10 @@ class SbatchCommand(PluginCommand):
 
             if not arguments["--noos"]:
                 sbatch.update_from_os_environ()
+
+            if not arguments["--nocm"]:
+                sbatch.update_from_cm_variables()
+
 
             if sbatch.directory is not None:
                 sbatch.source = f"{sbatch.directory}/{sbatch.source}"
