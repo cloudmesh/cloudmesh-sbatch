@@ -1,7 +1,0 @@
-model_parameters:
-  DLAnalysisOnly: 'False'
-  DLRestorefromcheckpoint: 'False'
-  DLinputCheckpointpostfix: '1'
-  TFTTransformerepochs: 20
-  debugging_set_log_device_placement: 'False'
-  set_soft_device_placement: 'False'

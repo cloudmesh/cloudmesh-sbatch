@@ -1,7 +1,7 @@
 ###############################################################
 # cd tests; pytest -v --capture=no test_sbatch.py
 # cd tests; pytest -v  test_sbatch.py
-# cd tests; pytest -v --capture=no  test_sbatch..py::Test_sbatch::<METHODNAME>
+# cd tests; pytest -v --capture=no  test_sbatch.py::Test_sbatch::<METHODNAME>
 ###############################################################
 import pytest
 from cloudmesh.common.Benchmark import Benchmark
