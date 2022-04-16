@@ -150,8 +150,9 @@ class SBatch:
                 values = ""
                 for attribute, value in permutation.items():
                     values = values + f"{attribute}={value} "
-                    script = f"{self.destination}{values}".replace("=", "_")
+                    script = f"{self.destination} {values}".replace("=", "_")
                 print(f"{values} sbatch {self.destination} {script}")
+                
         elif mode.startswith("f"):
             configuration = {}
             self.script_variables=[]
