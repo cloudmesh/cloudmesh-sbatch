@@ -72,7 +72,6 @@ class SbatchCommand(PluginCommand):
                        "out",
                        "experiment",
                        "mode",
-<<<<<<< HEAD
                        "name")
         arguments["experiments_file"] = arguments["--experiments-file"]
 
@@ -88,12 +87,10 @@ class SbatchCommand(PluginCommand):
         #
         #if arguments.attributes:
         #    arguments.attributes = Parameter.arguments_to_dict(arguments.attributes)
-=======
-                       "name"
-                       )
+        #               "name"
+        #               )
 
         # VERBOSE(arguments)
->>>>>>> 0b15664bed77783d6f67513bc0bf8e9a34fac99f
 
         if verbose:
             banner("experiment batch generator")
