@@ -97,6 +97,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gpu</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configuration_parameters</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="SBatch.info"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">,</span>
@@ -148,9 +149,7 @@
 <div class="viewcode-block" id="SBatch.update_from_cm_variables"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_cm_variables">[docs]</a>    <span class="k">def</span> <span class="nf">update_from_cm_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">load</span><span class="p">:</span>
             <span class="n">variables</span> <span class="o">=</span> <span class="n">Variables</span><span class="p">()</span>
-            <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;KKKKKK&quot;</span><span class="p">,</span> <span class="n">variables</span><span class="o">.</span><span class="n">dict</span><span class="p">())</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">FlatDict</span><span class="p">({</span><span class="s2">&quot;cloudmesh&quot;</span><span class="p">:</span> <span class="n">variables</span><span class="o">.</span><span class="n">dict</span><span class="p">()},</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-            <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;VVVVV&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span></div>
