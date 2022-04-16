@@ -80,10 +80,8 @@
 <span class="kn">from</span> <span class="nn">cloudmesh.shell.command</span> <span class="kn">import</span> <span class="n">PluginCommand</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.shell.command</span> <span class="kn">import</span> <span class="n">command</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.shell.command</span> <span class="kn">import</span> <span class="n">map_parameters</span>
-<span class="kn">from</span> <span class="nn">cloudmesh.common.debug</span> <span class="kn">import</span> <span class="n">VERBOSE</span>
+<span class="c1"># from cloudmesh.common.debug import VERBOSE</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.variables</span> <span class="kn">import</span> <span class="n">Variables</span>
-<span class="kn">from</span> <span class="nn">cloudmesh.common.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
-<span class="kn">from</span> <span class="nn">cloudmesh.common.console</span> <span class="kn">import</span> <span class="n">Console</span>
 
 <div class="viewcode-block" id="SbatchCommand"><a class="viewcode-back" href="../../../../cloudmesh.sbatch.command.html#cloudmesh.sbatch.command.sbatch.SbatchCommand">[docs]</a><span class="k">class</span> <span class="nc">SbatchCommand</span><span class="p">(</span><span class="n">PluginCommand</span><span class="p">):</span>
 
@@ -95,15 +93,12 @@
 
 <span class="sd">          Usage:</span>
 <span class="sd">                sbatch generate submit [--verbose] --name=NAME</span>
-<span class="sd">                sbatch generate  [SOURCE] [--verbose]  [--experiments-file=EXPERIMENTS] [--mode=MODE] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT] --name=NAME</span>
+<span class="sd">                sbatch generate [--verbose] [--mode=MODE] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT] --name=NAME</span>
 <span class="sd">                sbatch slurm start</span>
 <span class="sd">                sbatch slurm stop</span>
 <span class="sd">                sbatch slurm info</span>
 
-<span class="sd">          This command creates a number of batch scripts with parameters</span>
-<span class="sd">          defined by attributs, configuration files, as well ass experiment</span>
-<span class="sd">          parameters. The experiment parameters are permutated over so that</span>
-<span class="sd">          a parameter sweep can be created easily using it.</span>
+<span class="sd">          This command does some useful things.</span>
 
 <span class="sd">          Arguments:</span>
 <span class="sd">              FILENAME       name of a slurm script generated with sbatch</span>
@@ -117,7 +112,6 @@
 <span class="sd">              -h                        help</span>
 <span class="sd">              --dryrun                  flag to skip submission</span>
 <span class="sd">              --config=CONFIG...        TBD</span>
-<span class="sd">              --experiment-file=EXPERIMENTS TBD</span>
 <span class="sd">              --attributes=PARAMS       TBD</span>
 <span class="sd">              --out=DESTINATION         TBD</span>
 <span class="sd">              --gpu=GPU                 TBD</span>
@@ -129,43 +123,10 @@
 
 <span class="sd">          Description:</span>
 
-<span class="sd">               TODO: explain the differences</span>
-
-<span class="sd">               &gt; Examples:</span>
-
-<span class="sd">               &gt; cms sbatch generate slurm.in.sh --verbose</span>
-<span class="sd">               &gt;     --config=a.py,b.json,c.yaml</span>
-<span class="sd">               &gt;     --attributes=a=1,b=4</span>
-<span class="sd">               &gt;     --dryrun</span>
-<span class="sd">               &gt;     --noos</span>
-<span class="sd">               &gt;     --dir=example</span>
-<span class="sd">               &gt;     --experiment=\&quot;epoch=[1-3] x=[1,4] y=[10,11]\&quot;</span>
-<span class="sd">               &gt;     --name=a</span>
-
-<span class="sd">               &gt; cms sbatch generate slurm.in.sh</span>
-<span class="sd">               &gt;     --config=a.py,b.json,c.yaml</span>
-<span class="sd">               &gt;     --attributes=a=1,b=4</span>
-<span class="sd">               &gt;     --noos</span>
-<span class="sd">               &gt;     --dir=example</span>
-<span class="sd">               &gt;     --experiment=\&quot;epoch=[1-3] x=[1,4] y=[10,11]\&quot;</span>
-<span class="sd">               &gt;     --name=a</span>
-
-<span class="sd">               &gt; cms sbatch generate slurm.in.sh</span>
-<span class="sd">               &gt;     --verbose</span>
-<span class="sd">               &gt;     --config=a.py,b.json,c.yaml</span>
-<span class="sd">               &gt;     --attributes=name=gregor,a=1,b=4</span>
-<span class="sd">               &gt;     --dryrun</span>
-<span class="sd">               &gt;     --noos</span>
-<span class="sd">               &gt;     --dir=example</span>
-<span class="sd">               &gt;     --experiment=&quot;epoch=[1-3] x=[1,4] y=[10,11]&quot;</span>
-<span class="sd">               &gt;     --mode=f</span>
-<span class="sd">               &gt;     --name=a</span>
-
-<span class="sd">               &gt; cms sbatch generate slurm.in.sh</span>
-<span class="sd">               &gt;     --config=c.yaml</span>
-<span class="sd">               &gt;     --experiment-file=experiments.yaml</span>
-<span class="sd">               &gt;     --noos</span>
-<span class="sd">               &gt;     --dir=example</span>
+<span class="sd">               &gt; Example:</span>
+<span class="sd">               &gt; cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun --noos --dir=example --experiment=\&quot;epoch=[1-3] x=[1,4] y=[10,11]\&quot; --name=a</span>
+<span class="sd">               &gt; cms sbatch generate slurm.in.sh --config=a.py,b.json,c.yaml --attributes=a=1,b=4  --noos --dir=example --experiment=\&quot;epoch=[1-3] x=[1,4] y=[10,11]\&quot; --name=a</span>
+<span class="sd">               &gt; cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=name=gregor,a=1,b=4 --dryrun --noos --dir=example --experiment=&quot;epoch=[1-3] x=[1,4] y=[10,11]&quot; --mode=f --name=a</span>
 
 <span class="sd">               &gt; cms sbatch generate submit --name=a</span>
 
@@ -182,22 +143,10 @@
                        <span class="s2">&quot;out&quot;</span><span class="p">,</span>
                        <span class="s2">&quot;experiment&quot;</span><span class="p">,</span>
                        <span class="s2">&quot;mode&quot;</span><span class="p">,</span>
-                       <span class="s2">&quot;name&quot;</span><span class="p">)</span>
-        <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;experiments_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;--experiments-file&quot;</span><span class="p">]</span>
+                       <span class="s2">&quot;name&quot;</span>
+                       <span class="p">)</span>
 
-
-        <span class="c1">#</span>
-        <span class="c1"># UNDO GREGORS CHANGES</span>
-        <span class="c1">#</span>
-        <span class="c1">#if arguments.config:</span>
-        <span class="c1">#    try:</span>
-        <span class="c1">#        arguments.config = Parameter.expand(arguments.config[0])</span>
-        <span class="c1">#    except Exception as e:</span>
-        <span class="c1">#        Console.error(&quot;issue with config expansion&quot;)</span>
-        <span class="c1">#        print(e)</span>
-        <span class="c1">#</span>
-        <span class="c1">#if arguments.attributes:</span>
-        <span class="c1">#    arguments.attributes = Parameter.arguments_to_dict(arguments.attributes)</span>
+        <span class="c1"># VERBOSE(arguments)</span>
 
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;experiment batch generator&quot;</span><span class="p">)</span>
@@ -216,8 +165,6 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">arguments</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">):</span>
                 <span class="n">arguments</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span>
 
-        <span class="n">VERBOSE</span><span class="p">(</span><span class="n">arguments</span><span class="p">)</span>
-
 
         <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">generate</span> <span class="ow">and</span> <span class="n">arguments</span><span class="o">.</span><span class="n">submit</span><span class="p">:</span>
 
@@ -233,22 +180,35 @@
         <span class="k">elif</span> <span class="n">arguments</span><span class="o">.</span><span class="n">generate</span><span class="p">:</span>
 
             <span class="n">sbatch</span> <span class="o">=</span> <span class="n">SBatch</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">experiments_file</span><span class="p">:</span>
-                <span class="n">sbatch</span><span class="o">.</span><span class="n">from_yaml</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">experiments_file</span><span class="p">)</span>
 
-            <span class="n">sbatch</span><span class="o">.</span><span class="n">debug_state</span><span class="p">(</span><span class="s2">&quot;run1,,&quot;</span><span class="p">)</span>
+            <span class="n">sbatch</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">SOURCE</span>
 
-            <span class="n">sbatch</span><span class="o">.</span><span class="n">cli_builder</span><span class="p">(</span><span class="n">arguments</span><span class="p">)</span>
-            <span class="n">sbatch</span><span class="o">.</span><span class="n">debug_state</span><span class="p">(</span><span class="s2">&quot;run2,,&quot;</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">sbatch</span><span class="o">.</span><span class="n">register_script</span><span class="p">(</span><span class="n">sbatch</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">script_out</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sbatch</span><span class="o">.</span><span class="n">destination</span> <span class="o">=</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.in.&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.in&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sbatch</span><span class="o">.</span><span class="n">destination</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">out</span>
+            <span class="k">if</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">destination</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">yn_choice</span><span class="p">(</span><span class="s2">&quot;The source and destination filenames are the same. Do you want to continue?&quot;</span><span class="p">):</span>
                     <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 
+            <span class="n">sbatch</span><span class="o">.</span><span class="n">attributes</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">gpu</span>
+            <span class="n">sbatch</span><span class="o">.</span><span class="n">directory</span> <span class="o">=</span> <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;--dir&quot;</span><span class="p">]</span>
+            <span class="n">sbatch</span><span class="o">.</span><span class="n">dryrun</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">dryrun</span>
+            <span class="n">sbatch</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="c1"># not soo good to split. maybe Parameter expand is better</span>
+
+            <span class="n">experiment</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">experiment</span>
+
             <span class="n">experiments</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;--noos&quot;</span><span class="p">]:</span>
+                <span class="n">sbatch</span><span class="o">.</span><span class="n">update_from_os_environ</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sbatch</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sbatch</span><span class="o">.</span><span class="n">directory</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">sbatch</span><span class="o">.</span><span class="n">source</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">sbatch</span><span class="o">.</span><span class="n">destination</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sbatch</span><span class="o">.</span><span class="n">directory</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">sbatch</span><span class="o">.</span><span class="n">destination</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
+                <span class="n">sbatch</span><span class="o">.</span><span class="n">attributes</span> <span class="o">=</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">update_from_attribute_str</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">attributes</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">experiment</span><span class="p">:</span>
                 <span class="n">permutations</span> <span class="o">=</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">generate_experiment_permutations</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">experiment</span><span class="p">)</span>
@@ -258,24 +218,31 @@
                 <span class="n">sbatch</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
                 <span class="nb">print</span><span class="p">()</span>
 
+            <span class="k">for</span> <span class="n">configfile</span> <span class="ow">in</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">config</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">configfile</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sbatch</span><span class="o">.</span><span class="n">directory</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">configfile</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">sbatch</span><span class="o">.</span><span class="n">update_from_file</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span>
+
+            <span class="n">content</span> <span class="o">=</span> <span class="n">readfile</span><span class="p">(</span><span class="n">sbatch</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">dryrun</span> <span class="ow">or</span> <span class="n">verbose</span><span class="p">:</span>
                 <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;Attributes&quot;</span><span class="p">)</span>
                 <span class="n">pprint</span> <span class="p">(</span><span class="n">sbatch</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
                 <span class="n">banner</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original Script </span><span class="si">{</span><span class="n">sbatch</span><span class="o">.</span><span class="n">source</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">sbatch</span><span class="o">.</span><span class="n">template_content</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
                 <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;end script&quot;</span><span class="p">)</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">dryrun</span> <span class="ow">or</span> <span class="n">verbose</span><span class="p">:</span>
                 <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;Script&quot;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                <span class="nb">print</span> <span class="p">(</span><span class="n">result</span><span class="p">)</span>
                 <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;Script End&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">writefile</span><span class="p">(</span><span class="n">sbatch</span><span class="o">.</span><span class="n">script_out</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+                <span class="n">writefile</span><span class="p">(</span><span class="n">sbatch</span><span class="o">.</span><span class="n">destination</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 
-            <span class="n">sbatch</span><span class="o">.</span><span class="n">generate_experiment_slurm_scripts</span><span class="p">()</span>
+            <span class="n">sbatch</span><span class="o">.</span><span class="n">generate_experiment_slurm_scripts</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="n">arguments</span><span class="o">.</span><span class="n">mode</span><span class="p">)</span>
 
-            <span class="n">sbatch</span><span class="o">.</span><span class="n">save_experiment_configuration</span><span class="p">()</span>
+            <span class="n">sbatch</span><span class="o">.</span><span class="n">save_experiment_configuration</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">arguments</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="c1"># print(get_attribute_parameters(arguments.attributes))</span>
 
         <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
