@@ -82,6 +82,7 @@
 <span class="kn">from</span> <span class="nn">cloudmesh.shell.command</span> <span class="kn">import</span> <span class="n">map_parameters</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.debug</span> <span class="kn">import</span> <span class="n">VERBOSE</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.variables</span> <span class="kn">import</span> <span class="n">Variables</span>
+<span class="kn">from</span> <span class="nn">cloudmesh.common.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
 
 <div class="viewcode-block" id="SbatchCommand"><a class="viewcode-back" href="../../../../cloudmesh.sbatch.command.html#cloudmesh.sbatch.command.sbatch.SbatchCommand">[docs]</a><span class="k">class</span> <span class="nc">SbatchCommand</span><span class="p">(</span><span class="n">PluginCommand</span><span class="p">):</span>
 
@@ -158,10 +159,10 @@
         <span class="c1">#        Console.error(&quot;issue with config expansion&quot;)</span>
         <span class="c1">#        print(e)</span>
         <span class="c1">#</span>
-        <span class="c1">#if arguments.attributes:</span>
-        <span class="c1">#    arguments.attributes = Parameter.arguments_to_dict(arguments.attributes)</span>
-        <span class="c1">#               &quot;name&quot;</span>
-        <span class="c1">#               )</span>
+        <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
+            <span class="n">arguments</span><span class="o">.</span><span class="n">attributes</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">arguments_to_dict</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">attributes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">config</span><span class="p">:</span>
+            <span class="n">arguments</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
 
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
@@ -180,6 +181,7 @@
         <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">arguments</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">):</span>
                 <span class="n">arguments</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span>
+
 
         <span class="n">VERBOSE</span><span class="p">(</span><span class="n">arguments</span><span class="p">)</span>
 
@@ -211,7 +213,7 @@
             <span class="n">sbatch</span><span class="o">.</span><span class="n">attributes</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">gpu</span>
             <span class="n">sbatch</span><span class="o">.</span><span class="n">directory</span> <span class="o">=</span> <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;--dir&quot;</span><span class="p">]</span>
             <span class="n">sbatch</span><span class="o">.</span><span class="n">dryrun</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">dryrun</span>
-            <span class="n">sbatch</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="c1"># not soo good to split. maybe Parameter expand is better</span>
+            <span class="n">sbatch</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">config</span>
 
             <span class="n">experiment</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">experiment</span>
 
@@ -229,10 +231,10 @@
                 <span class="n">sbatch</span><span class="o">.</span><span class="n">destination</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sbatch</span><span class="o">.</span><span class="n">directory</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">sbatch</span><span class="o">.</span><span class="n">destination</span><span class="si">}</span><span class="s2">&quot;</span>
 
             <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
-                <span class="n">sbatch</span><span class="o">.</span><span class="n">attributes</span> <span class="o">=</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">update_from_attribute_str</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">attributes</span><span class="p">)</span>
+                <span class="n">sbatch</span><span class="o">.</span><span class="n">attributes</span> <span class="o">=</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">update_from_attributes</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">attributes</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">experiment</span><span class="p">:</span>
-                <span class="n">permutations</span> <span class="o">=</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">generate_experiment_permutations</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">experiment</span><span class="p">)</span>
+                <span class="n">sbatch</span><span class="o">.</span><span class="n">permutations</span> <span class="o">=</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">generate_experiment_permutations</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">experiment</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Experiments:  </span><span class="si">{</span><span class="n">arguments</span><span class="o">.</span><span class="n">experiment</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
