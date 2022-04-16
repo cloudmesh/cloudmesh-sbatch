@@ -80,7 +80,7 @@
 <span class="kn">from</span> <span class="nn">cloudmesh.shell.command</span> <span class="kn">import</span> <span class="n">PluginCommand</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.shell.command</span> <span class="kn">import</span> <span class="n">command</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.shell.command</span> <span class="kn">import</span> <span class="n">map_parameters</span>
-<span class="c1"># from cloudmesh.common.debug import VERBOSE</span>
+<span class="kn">from</span> <span class="nn">cloudmesh.common.debug</span> <span class="kn">import</span> <span class="n">VERBOSE</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.variables</span> <span class="kn">import</span> <span class="n">Variables</span>
 
 <div class="viewcode-block" id="SbatchCommand"><a class="viewcode-back" href="../../../../cloudmesh.sbatch.command.html#cloudmesh.sbatch.command.sbatch.SbatchCommand">[docs]</a><span class="k">class</span> <span class="nc">SbatchCommand</span><span class="p">(</span><span class="n">PluginCommand</span><span class="p">):</span>
@@ -93,7 +93,7 @@
 
 <span class="sd">          Usage:</span>
 <span class="sd">                sbatch generate submit [--verbose] --name=NAME</span>
-<span class="sd">                sbatch generate [--verbose] [--mode=MODE] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--dir=DIR] [--experiment=EXPERIMENT] --name=NAME</span>
+<span class="sd">                sbatch generate [--verbose] [--mode=MODE] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT] --name=NAME</span>
 <span class="sd">                sbatch slurm start</span>
 <span class="sd">                sbatch slurm stop</span>
 <span class="sd">                sbatch slurm info</span>
@@ -116,6 +116,7 @@
 <span class="sd">              --out=DESTINATION         TBD</span>
 <span class="sd">              --gpu=GPU                 TBD</span>
 <span class="sd">              --noos                    TBD</span>
+<span class="sd">              --nocm                    TBD</span>
 <span class="sd">              --experiment=EXPERIMENT   TBD</span>
 <span class="sd">              --account=ACCOUNT         TBD</span>
 <span class="sd">              --mode=MODE               one of &quot;flat&quot;, &quot;debug&quot;, &quot;hierachical&quot; can als just use &quot;f&quot;. &quot;d&quot;, &quot;h&quot; [default: debug]</span>
@@ -162,7 +163,6 @@
         <span class="c1">#               &quot;name&quot;</span>
         <span class="c1">#               )</span>
 
-        <span class="c1"># VERBOSE(arguments)</span>
 
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;experiment batch generator&quot;</span><span class="p">)</span>
@@ -181,6 +181,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">arguments</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">):</span>
                 <span class="n">arguments</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span>
 
+        <span class="n">VERBOSE</span><span class="p">(</span><span class="n">arguments</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">generate</span> <span class="ow">and</span> <span class="n">arguments</span><span class="o">.</span><span class="n">submit</span><span class="p">:</span>
 
@@ -218,6 +219,10 @@
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;--noos&quot;</span><span class="p">]:</span>
                 <span class="n">sbatch</span><span class="o">.</span><span class="n">update_from_os_environ</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;--nocm&quot;</span><span class="p">]:</span>
+                <span class="n">sbatch</span><span class="o">.</span><span class="n">update_from_cm_variables</span><span class="p">()</span>
+
 
             <span class="k">if</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">sbatch</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sbatch</span><span class="o">.</span><span class="n">directory</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">sbatch</span><span class="o">.</span><span class="n">source</span><span class="si">}</span><span class="s2">&quot;</span>
