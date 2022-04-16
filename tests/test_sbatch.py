@@ -11,7 +11,8 @@ from cloudmesh.common.util import HEADING
 import os
 
 def clean():
-    os.system("	rm -rf test_test_example")
+    os.system("cd example; 	rm -rf tests/test_example")
+    os.system("mkdir -p tests/test_example")
 
 def remove_spaces(content):
     result = Shell.oneline(content, seperator=" ")
@@ -26,7 +27,7 @@ class TestConfig:
         Benchmark.Start()
         command = "cms sbatch help"
         print(command)
-        result = Shell.execute(command, shell=True)
+        result = Shell.run(command)
         Benchmark.Stop()
         VERBOSE(result)
         assert "sbatch" in result
@@ -36,13 +37,14 @@ class TestConfig:
         clean()
         Benchmark.Start()
         command = remove_spaces(
+            "cd tests;"
             "cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun "
-            "--noos --dir=test_example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" --name=a")
+            "--noos --dir=test_example --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a")
         print(command)
-        # result = Shell.execute(command, shell=True)
-        result = {"test": "sample"}
+        result = Shell.run(command)
         Benchmark.Stop()
         VERBOSE(result)
+        assert "Error" not in result
 
     def test_hierachy(self):
         HEADING()
@@ -50,7 +52,7 @@ class TestConfig:
         Benchmark.Start()
         command = remove_spaces(
             """
-        	cms sbatch generate slurm.in.sh --verbose 
+            cms sbatch generate slurm.in.sh --verbose 
                    --config=a.py,b.json,c.yaml 
                    --attributes=a=1,b=4 
                    --dryrun 
@@ -60,10 +62,12 @@ class TestConfig:
                    --name=a
             """)
         print(command)
-        # result = Shell.execute(command, shell=True)
-        result = {"test": "sample"}
+        result = Shell.execute(command, shell=True)
         Benchmark.Stop()
         VERBOSE(result)
+
+        assert "Error" not in result
+
 
     def test_flat(self):
         HEADING()
@@ -83,10 +87,11 @@ class TestConfig:
                    --name=a
             """)
         print (command)
-        #result = Shell.execute(command, shell=True)
-        result = {"test": "sample"}
+        result = Shell.execute(command, shell=True)
         Benchmark.Stop()
         VERBOSE(result)
+
+        assert "Error" not in result
 
 
     def test_with_os(self):
@@ -104,11 +109,10 @@ class TestConfig:
             """
         )
         print(command)
-        # result = Shell.execute(command, shell=True)
-        result = {"test": "sample"}
+        result = Shell.execute(command, shell=True)
         Benchmark.Stop()
         VERBOSE(result)
-
+        assert "Error" not in result
 
     def test_experiment_yaml(self):
         HEADING()
@@ -125,10 +129,11 @@ class TestConfig:
         )
         command = remove_spaces(command)
         print(command)
-        # result = Shell.execute(command, shell=True)
-        result = {"test": "sample"}
+        result = Shell.execute(command, shell=True)
         Benchmark.Stop()
         VERBOSE(result)
+
+        assert "Error" not in result
 
 
     def test_benchmark(self):
