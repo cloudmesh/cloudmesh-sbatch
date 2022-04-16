@@ -11,9 +11,8 @@ from cloudmesh.common.util import HEADING
 import os
 
 def clean():
-    pass
-    #os.system("rm -rf test_example")
-    #os.system("mkdir -p test_example")
+    os.system("rm -rf build")
+    os.system("cp -r example.in build")
 
 def remove_spaces(content):
     result = Shell.oneline(content, seperator=" ")
@@ -31,6 +30,7 @@ class TestConfig:
         result = Shell.run(command)
         Benchmark.Stop()
         VERBOSE(result)
+
         assert "sbatch" in result
 
     def test_oneline_noos_command(self):
@@ -39,11 +39,13 @@ class TestConfig:
         Benchmark.Start()
         command = remove_spaces(
             "cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun "
-            "--noos --dir=example --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a")
+            "--noos --dir=build --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a")
         print(command)
         result = Shell.run(command)
         Benchmark.Stop()
         VERBOSE(result)
+        os.system("tree build")
+
         assert "Error" not in result
 
 
@@ -53,11 +55,13 @@ class TestConfig:
         Benchmark.Start()
         command = remove_spaces(
             "cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun "
-            "--dir=example --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a")
+            "--dir=build --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a")
         print(command)
         result = Shell.run(command)
         Benchmark.Stop()
         VERBOSE(result)
+        os.system("tree build")
+
         assert "Error" not in result
         assert 'name=Gregor' in result
         assert 'address=Seasame Str.' in result
@@ -76,7 +80,7 @@ class TestConfig:
                    --config=a.py,b.json,c.yaml 
                    --attributes=a=1,b=4 
                    --dryrun 
-                   --dir=example 
+                   --dir=build 
                    --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
                    --name=a
             """)
@@ -84,6 +88,7 @@ class TestConfig:
         result = Shell.execute(command, shell=True)
         Benchmark.Stop()
         VERBOSE(result)
+        os.system("tree build")
 
         assert "Error" not in result
         assert 'name=Gregor' in result
@@ -104,7 +109,7 @@ class TestConfig:
                    --attributes=name=gregor,a=1,b=4 
                    --dryrun 
                    --noos 
-                   --dir=example 
+                   --dir=build 
                    --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
                    --mode=f 
                    --name=a
@@ -113,6 +118,7 @@ class TestConfig:
         result = Shell.execute(command, shell=True)
         Benchmark.Stop()
         VERBOSE(result)
+        os.system("tree build")
 
         assert "Error" not in result
 
@@ -126,7 +132,7 @@ class TestConfig:
             cms sbatch generate slurm.in.sh 
                        --config=a.py,b.json,c.yaml 
                        --attributes=a=1,b=4 
-                       --dir=example 
+                       --dir=build 
                        --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
                        --name=a
             """
@@ -135,6 +141,8 @@ class TestConfig:
         result = Shell.execute(command, shell=True)
         Benchmark.Stop()
         VERBOSE(result)
+        os.system("tree build")
+
         assert "Error" not in result
 
     # this one does not work as --experiment-file was removed
@@ -149,7 +157,7 @@ class TestConfig:
                        --config=c.yaml 
                        --experiment-file=experiments.yaml 
                        --noos 
-                       --dir=example
+                       --dir=build
             """
         )
         command = remove_spaces(command)

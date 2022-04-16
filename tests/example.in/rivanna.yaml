@@ -1,0 +1,42 @@
+user:
+
+  account: ds6011-sp22-002
+  base: /project/ds6011-sp22-002/runner/mlcommons
+
+queue:
+
+  a100:
+    card_name: a100
+    num_cpus: 6
+    num_gpus: 1
+    time: 05:00:00
+
+  k80:
+    card_name: k80
+    num_cpus: 6
+    num_gpus: 1
+    time: 12:00:00
+
+  p100:
+    card_name: p100
+    num_cpus: 6
+    num_gpus: 1
+    time: 06:00:00
+
+  rtx2080:
+    card_name: rtx2080
+    num_cpus: 6
+    num_gpus: 1
+    time: 06:00:00
+
+  rtx3090:
+    card_name: rtx3090
+    num_cpus: 6
+    num_gpus: 1
+    time: 06:00:00
+
+  v100:
+    card_name: v100
+    num_cpus: 6
+    num_gpus: 1
+    time: 06:00:00
