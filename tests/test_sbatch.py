@@ -13,6 +13,9 @@ import os
 def clean():
     os.system("	rm -rf test_test_example")
 
+def remove_spaces(content):
+    result = Shell.oneline(content, seperator=" ")
+    return " ".join(result.split())
 
 @pytest.mark.incremental
 class TestConfig:
@@ -28,61 +31,57 @@ class TestConfig:
         VERBOSE(result)
         assert "sbatch" in result
 
-    def test_invalid_command(self):
+    def test_oneline_command(self):
         HEADING()
         clean()
         Benchmark.Start()
-        command = "cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun --noos --dir=test_example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" --name=a"
+        command = remove_spaces(
+            "cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun "
+            "--noos --dir=test_example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" --name=a")
         print(command)
         # result = Shell.execute(command, shell=True)
         result = {"test": "sample"}
         Benchmark.Stop()
         VERBOSE(result)
 
-        assert "No help on wrong" in result
-
-    def test_invalid_command(self):
+    def test_hierachy(self):
         HEADING()
         clean()
         Benchmark.Start()
-        command = Shell.oneline(
+        command = remove_spaces(
             """
-        	cms sbatch generate slurm.in.sh --verbose \
-                   --config=a.py,b.json,c.yaml \
-                   --attributes=a=1,b=4 \
-                   --dryrun \
-                   --noos \
-                   --dir=test_example \
-                   --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" \
+        	cms sbatch generate slurm.in.sh --verbose 
+                   --config=a.py,b.json,c.yaml 
+                   --attributes=a=1,b=4 
+                   --dryrun 
+                   --noos 
+                   --dir=test_example 
+                   --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" 
                    --name=a
-            """
-        )
+            """)
         print(command)
         # result = Shell.execute(command, shell=True)
         result = {"test": "sample"}
         Benchmark.Stop()
         VERBOSE(result)
 
-        assert "No help on wrong" in result
-
-    def test_version(self):
+    def test_flat(self):
         HEADING()
         clean()
         Benchmark.Start()
-        command = Shell.oneline(
+        command = remove_spaces(
             """
-            cms sbatch generate slurm.in.sh \
-                   --verbose \
-                   --config=a.py,b.json,c.yaml \
-                   --attributes=name=gregor,a=1,b=4 \
-                   --dryrun \
-                   --noos \
-                   --dir=test_example \
-                   --experiment="epoch=[1-3] x=[1,4] y=[10,11]" \
-                   --mode=f \
+            cms sbatch generate slurm.in.sh 
+                   --verbose 
+                   --config=a.py,b.json,c.yaml 
+                   --attributes=name=gregor,a=1,b=4 
+                   --dryrun 
+                   --noos 
+                   --dir=test_example 
+                   --experiment="epoch=[1-3] x=[1,4] y=[10,11]" 
+                   --mode=f 
                    --name=a
-            """
-            )
+            """)
         print (command)
         #result = Shell.execute(command, shell=True)
         result = {"test": "sample"}
@@ -90,20 +89,18 @@ class TestConfig:
         VERBOSE(result)
 
 
-    def test_version(self):
+    def test_with_os(self):
         HEADING()
         clean()
         Benchmark.Start()
-        command = Shell.oneline(
+        command = remove_spaces(
             """
-    "	cms sbatch generate slurm.in.sh \
-                       --config=a.py,b.json,c.yaml \
-                       --attributes=a=1,b=4 \
-                       --noos \
-                       --dir=test_example \
-                       --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" \
+            cms sbatch generate slurm.in.sh 
+                       --config=a.py,b.json,c.yaml 
+                       --attributes=a=1,b=4 
+                       --dir=test_example 
+                       --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" 
                        --name=a
-    "
             """
         )
         print(command)
@@ -113,11 +110,11 @@ class TestConfig:
         VERBOSE(result)
 
 
-    def test_invalid_command(self):
+    def test_experiment_yaml(self):
         HEADING()
         clean()
         Benchmark.Start()
-        command = Shell.oneline(
+        command = remove_spaces(
             """
             cms sbatch generate slurm.in.sh 
                        --config=c.yaml 
@@ -126,6 +123,7 @@ class TestConfig:
                        --dir=test_example
             """
         )
+        command = remove_spaces(command)
         print(command)
         # result = Shell.execute(command, shell=True)
         result = {"test": "sample"}
