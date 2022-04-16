@@ -11,6 +11,8 @@ from cloudmesh.shell.command import command
 from cloudmesh.shell.command import map_parameters
 from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.variables import Variables
+from cloudmesh.common.parameter import Parameter
+from cloudmesh.common.console import Console
 
 class SbatchCommand(PluginCommand):
 
@@ -112,6 +114,19 @@ class SbatchCommand(PluginCommand):
                        "name")
         arguments["experiments_file"] = arguments["--experiments-file"]
 
+
+        #
+        # UNDO GREGORS CHANGES
+        #
+        #if arguments.config:
+        #    try:
+        #        arguments.config = Parameter.expand(arguments.config[0])
+        #    except Exception as e:
+        #        Console.error("issue with config expansion")
+        #        print(e)
+        #
+        #if arguments.attributes:
+        #    arguments.attributes = Parameter.arguments_to_dict(arguments.attributes)
 
         if verbose:
             banner("experiment batch generator")
