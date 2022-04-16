@@ -49,7 +49,7 @@ class SBatch:
     def update_from_dict(self, d):
         self.data.update(d)
 
-    def update_from_attribute_str(self, attributes):
+    def update_from_attributes(self, attributes):
         """
         attributes are of the form "a=1,b=3"
 
@@ -61,14 +61,8 @@ class SBatch:
         # replace the next lines with
         # entries = Parameter.arguments_to_dict(attributes)
         # start delete
-        attributes = attributes.split(",")
-        entries = {}
-        for attribute in attributes:
-            name, value = attribute.split('=')
-            entries[name] = value
-        # end delete
-        self.data.update(entries)
-        return entries
+        self.data.update(attributes)
+        return attributes
 
     def update_from_os_environ(self, load=True):
         if load:

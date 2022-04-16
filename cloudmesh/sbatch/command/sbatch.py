@@ -11,6 +11,7 @@ from cloudmesh.shell.command import command
 from cloudmesh.shell.command import map_parameters
 from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.variables import Variables
+from cloudmesh.common.parameter import Parameter
 
 class SbatchCommand(PluginCommand):
 
@@ -87,10 +88,10 @@ class SbatchCommand(PluginCommand):
         #        Console.error("issue with config expansion")
         #        print(e)
         #
-        #if arguments.attributes:
-        #    arguments.attributes = Parameter.arguments_to_dict(arguments.attributes)
-        #               "name"
-        #               )
+        if arguments.attributes:
+            arguments.attributes = Parameter.arguments_to_dict(arguments.attributes)
+        if arguments.config:
+            arguments.config = Parameter.expand(arguments.config[0])
 
 
         if verbose:
@@ -109,6 +110,7 @@ class SbatchCommand(PluginCommand):
         if arguments.name is not None:
             if not arguments.name.endswith(".json"):
                 arguments.name = arguments.name + ".json"
+
 
         VERBOSE(arguments)
 
@@ -140,7 +142,7 @@ class SbatchCommand(PluginCommand):
             sbatch.attributes = arguments.gpu
             sbatch.directory = arguments["--dir"]
             sbatch.dryrun = arguments.dryrun
-            sbatch.config = (arguments.config[0]).split(",") # not soo good to split. maybe Parameter expand is better
+            sbatch.config = arguments.config
 
             experiment = arguments.experiment
 
@@ -158,10 +160,10 @@ class SbatchCommand(PluginCommand):
                 sbatch.destination = f"{sbatch.directory}/{sbatch.destination}"
 
             if arguments.attributes:
-                sbatch.attributes = sbatch.update_from_attribute_str(arguments.attributes)
+                sbatch.attributes = sbatch.update_from_attributes(arguments.attributes)
 
             if arguments.experiment:
-                permutations = sbatch.generate_experiment_permutations(arguments.experiment)
+                sbatch.permutations = sbatch.generate_experiment_permutations(arguments.experiment)
 
             if verbose:
                 print(f"Experiments:  {arguments.experiment}")
