@@ -114,7 +114,6 @@ class SbatchCommand(PluginCommand):
                        "name")
         arguments["experiments_file"] = arguments["--experiments-file"]
 
-
         #
         # UNDO GREGORS CHANGES
         #
