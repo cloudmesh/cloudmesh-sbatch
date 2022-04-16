@@ -1,7 +1,7 @@
 ###############################################################
-# pytest -v --capture=no tests/test_sbatch.py
-# pytest -v  tests/test_sbatch.py
-# pytest -v --capture=no  tests/test_sbatch..py::Test_sbatch::<METHODNAME>
+# cd tests; pytest -v --capture=no test_sbatch.py
+# cd tests; pytest -v  test_sbatch.py
+# cd tests; pytest -v --capture=no  test_sbatch..py::Test_sbatch::<METHODNAME>
 ###############################################################
 import pytest
 from cloudmesh.common.Benchmark import Benchmark
@@ -11,8 +11,9 @@ from cloudmesh.common.util import HEADING
 import os
 
 def clean():
-    os.system("cd example; 	rm -rf tests/test_example")
-    os.system("mkdir -p tests/test_example")
+    pass
+    #os.system("rm -rf test_example")
+    #os.system("mkdir -p test_example")
 
 def remove_spaces(content):
     result = Shell.oneline(content, seperator=" ")
@@ -37,9 +38,8 @@ class TestConfig:
         clean()
         Benchmark.Start()
         command = remove_spaces(
-            "cd tests;"
             "cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun "
-            "--noos --dir=test_example --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a")
+            "--noos --dir=example --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a")
         print(command)
         result = Shell.run(command)
         Benchmark.Stop()
@@ -57,7 +57,7 @@ class TestConfig:
                    --attributes=a=1,b=4 
                    --dryrun 
                    --noos 
-                   --dir=test_example 
+                   --dir=example 
                    --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" 
                    --name=a
             """)
@@ -81,7 +81,7 @@ class TestConfig:
                    --attributes=name=gregor,a=1,b=4 
                    --dryrun 
                    --noos 
-                   --dir=test_example 
+                   --dir=example 
                    --experiment="epoch=[1-3] x=[1,4] y=[10,11]" 
                    --mode=f 
                    --name=a
@@ -103,7 +103,7 @@ class TestConfig:
             cms sbatch generate slurm.in.sh 
                        --config=a.py,b.json,c.yaml 
                        --attributes=a=1,b=4 
-                       --dir=test_example 
+                       --dir=example 
                        --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" 
                        --name=a
             """
@@ -114,6 +114,8 @@ class TestConfig:
         VERBOSE(result)
         assert "Error" not in result
 
+    # this one does not work as --experiment-file was removed
+    '''
     def test_experiment_yaml(self):
         HEADING()
         clean()
@@ -124,7 +126,7 @@ class TestConfig:
                        --config=c.yaml 
                        --experiment-file=experiments.yaml 
                        --noos 
-                       --dir=test_example
+                       --dir=example
             """
         )
         command = remove_spaces(command)
@@ -134,7 +136,7 @@ class TestConfig:
         VERBOSE(result)
 
         assert "Error" not in result
-
+    '''
 
     def test_benchmark(self):
         HEADING()
