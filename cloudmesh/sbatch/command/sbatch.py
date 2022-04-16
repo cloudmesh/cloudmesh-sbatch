@@ -11,6 +11,8 @@ from cloudmesh.shell.command import command
 from cloudmesh.shell.command import map_parameters
 from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.variables import Variables
+from cloudmesh.common.parameter import Parameter
+
 
 class SbatchCommand(PluginCommand):
 
@@ -87,10 +89,10 @@ class SbatchCommand(PluginCommand):
         #        Console.error("issue with config expansion")
         #        print(e)
         #
-        #if arguments.attributes:
-        #    arguments.attributes = Parameter.arguments_to_dict(arguments.attributes)
-        #               "name"
-        #               )
+        if arguments.attributes:
+            arguments.attributes = Parameter.arguments_to_dict(arguments.attributes)
+        if arguments.config:
+            arguments.config = Parameter.expand(arguments.config[0])
 
 
         if verbose:
@@ -109,6 +111,7 @@ class SbatchCommand(PluginCommand):
         if arguments.name is not None:
             if not arguments.name.endswith(".json"):
                 arguments.name = arguments.name + ".json"
+
 
         VERBOSE(arguments)
 
@@ -133,6 +136,7 @@ class SbatchCommand(PluginCommand):
                 sbatch.destination = sbatch.source.replace(".in.", ".").replace(".in", "")
             else:
                 sbatch.destination = arguments.out
+
             if sbatch.source == sbatch.destination:
                 if not yn_choice("The source and destination filenames are the same. Do you want to continue?"):
                     return ""
@@ -140,7 +144,8 @@ class SbatchCommand(PluginCommand):
             sbatch.attributes = arguments.gpu
             sbatch.directory = arguments["--dir"]
             sbatch.dryrun = arguments.dryrun
-            sbatch.config = (arguments.config[0]).split(",") # not soo good to split. maybe Parameter expand is better
+            sbatch.config = arguments.config
+            sbatch.source = arguments.SOURCE
 
             experiment = arguments.experiment
 
@@ -158,20 +163,16 @@ class SbatchCommand(PluginCommand):
                 sbatch.destination = f"{sbatch.directory}/{sbatch.destination}"
 
             if arguments.attributes:
-                sbatch.attributes = sbatch.update_from_attribute_str(arguments.attributes)
+                sbatch.attributes = sbatch.update_from_attributes(arguments.attributes)
 
             if arguments.experiment:
-                permutations = sbatch.generate_experiment_permutations(arguments.experiment)
-
-            if verbose:
-                print(f"Experiments:  {arguments.experiment}")
-                sbatch.info()
-                print()
+                sbatch.permutations = sbatch.generate_experiment_permutations(arguments.experiment)
 
             for configfile in sbatch.config:
                 if sbatch.directory is not None:
                     configfile = f"{sbatch.directory}/{configfile}"
                 sbatch.update_from_file(configfile)
+
 
             content = readfile(sbatch.source)
 
@@ -183,6 +184,11 @@ class SbatchCommand(PluginCommand):
                 banner("end script")
             result = sbatch.generate(content)
 
+            if verbose:
+                print(f"Experiments:  {arguments.experiment}")
+                sbatch.info()
+                print()
+
             if sbatch.dryrun or verbose:
                 banner("Script")
                 print (result)
@@ -193,6 +199,5 @@ class SbatchCommand(PluginCommand):
             sbatch.generate_experiment_slurm_scripts(mode=arguments.mode)
 
             sbatch.save_experiment_configuration(name=arguments.name)
-            # print(get_attribute_parameters(arguments.attributes))
 
         return ""
