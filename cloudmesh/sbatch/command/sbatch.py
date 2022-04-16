@@ -13,6 +13,7 @@ from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.variables import Variables
 from cloudmesh.common.parameter import Parameter
 
+
 class SbatchCommand(PluginCommand):
 
     # noinspection PyUnusedLocal
@@ -135,6 +136,7 @@ class SbatchCommand(PluginCommand):
                 sbatch.destination = sbatch.source.replace(".in.", ".").replace(".in", "")
             else:
                 sbatch.destination = arguments.out
+
             if sbatch.source == sbatch.destination:
                 if not yn_choice("The source and destination filenames are the same. Do you want to continue?"):
                     return ""
@@ -143,6 +145,7 @@ class SbatchCommand(PluginCommand):
             sbatch.directory = arguments["--dir"]
             sbatch.dryrun = arguments.dryrun
             sbatch.config = arguments.config
+            sbatch.source = arguments.SOURCE
 
             experiment = arguments.experiment
 
@@ -165,15 +168,11 @@ class SbatchCommand(PluginCommand):
             if arguments.experiment:
                 sbatch.permutations = sbatch.generate_experiment_permutations(arguments.experiment)
 
-            if verbose:
-                print(f"Experiments:  {arguments.experiment}")
-                sbatch.info()
-                print()
-
             for configfile in sbatch.config:
                 if sbatch.directory is not None:
                     configfile = f"{sbatch.directory}/{configfile}"
                 sbatch.update_from_file(configfile)
+
 
             content = readfile(sbatch.source)
 
@@ -185,6 +184,11 @@ class SbatchCommand(PluginCommand):
                 banner("end script")
             result = sbatch.generate(content)
 
+            if verbose:
+                print(f"Experiments:  {arguments.experiment}")
+                sbatch.info()
+                print()
+
             if sbatch.dryrun or verbose:
                 banner("Script")
                 print (result)
@@ -195,6 +199,5 @@ class SbatchCommand(PluginCommand):
             sbatch.generate_experiment_slurm_scripts(mode=arguments.mode)
 
             sbatch.save_experiment_configuration(name=arguments.name)
-            # print(get_attribute_parameters(arguments.attributes))
 
         return ""

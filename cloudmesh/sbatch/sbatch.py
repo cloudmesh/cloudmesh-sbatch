@@ -1,23 +1,22 @@
+import itertools
+import json
 import os
-import sys
+import pathlib
+from collections import OrderedDict
+from pprint import pprint
+
 import yaml
-import textwrap
-import subprocess
+
+from cloudmesh.common.FlatDict import FlatDict
+from cloudmesh.common.Printer import Printer
+from cloudmesh.common.Shell import Shell
+from cloudmesh.common.console import Console
+from cloudmesh.common.parameter import Parameter
+from cloudmesh.common.util import banner
 from cloudmesh.common.util import readfile, writefile, path_expand
 from cloudmesh.common.util import yn_choice
-from cloudmesh.common.Shell import Shell
-from pprint import pprint
-import pathlib
-from cloudmesh.common.console import Console
-from cloudmesh.common.FlatDict import FlatDict
-import json
-from cloudmesh.common.util import banner
-from cloudmesh.common.parameter import Parameter
-from collections import OrderedDict
-import itertools
-import textwrap
-from cloudmesh.common.Printer import Printer
 from cloudmesh.common.variables import Variables
+
 
 class SBatch:
 
@@ -37,10 +36,15 @@ class SBatch:
                     "config",
                     "directory",
                     "experiment",
-                    "permutations"
-                          ]:
-            print(f'{a:<12}: {self.data.get(a)}')
-
+                  ]:
+            try:
+                result = getattr(self,a)
+            except:
+                result = self.data.get(a)
+            print(f'{a:<12}: {result}')
+        print("permutations:")
+        result = getattr(self,"permutations")
+        pprint(result)
         print()
 
     def set_attribute(self, attribute, value):
