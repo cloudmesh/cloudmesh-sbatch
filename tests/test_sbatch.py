@@ -21,6 +21,8 @@ def remove_spaces(content):
 @pytest.mark.incremental
 class TestConfig:
 
+
+
     def test_help(self):
         HEADING()
         clean()
@@ -33,13 +35,14 @@ class TestConfig:
 
         assert "sbatch" in result
 
+
     def test_oneline_noos_command(self):
         HEADING()
         clean()
         Benchmark.Start()
         command = remove_spaces(
             "cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun "
-            "--noos --dir=build --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a")
+            "--noos --dir=build --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a --mode=h")
         print(command)
         result = Shell.run(command)
         Benchmark.Stop()
@@ -55,7 +58,7 @@ class TestConfig:
         Benchmark.Start()
         command = remove_spaces(
             "cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun "
-            "--dir=build --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a")
+            "--dir=build --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a --mode=h")
         print(command)
         result = Shell.run(command)
         Benchmark.Stop()
@@ -83,6 +86,7 @@ class TestConfig:
                    --dir=build 
                    --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
                    --name=a
+                   --mode=h
             """)
         print(command)
         result = Shell.execute(command, shell=True)
@@ -135,6 +139,7 @@ class TestConfig:
                        --dir=build 
                        --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
                        --name=a
+                       --mode=h
             """
         )
         print(command)
@@ -144,6 +149,51 @@ class TestConfig:
         os.system("tree build")
 
         assert "Error" not in result
+
+    def test_experiment_yaml_dict(self):
+        HEADING()
+        clean()
+        Benchmark.Start()
+        command = remove_spaces(
+            """
+            cms sbatch generate slurm.in.sh 
+                       --config=c.yaml,exp_str.yaml 
+                       --noos 
+                       --dir=build
+                       --mode=h
+                       --name=a
+            """
+        )
+        command = remove_spaces(command)
+        print(command)
+        result = Shell.execute(command, shell=True)
+        Benchmark.Stop()
+        print(result)
+
+        assert "Error" not in result
+
+    def test_experiment_yaml_str(self):
+        HEADING()
+        clean()
+        Benchmark.Start()
+        command = remove_spaces(
+            """
+            cms sbatch generate slurm.in.sh 
+                       --config=c.yaml,exp_str.yaml 
+                       --noos 
+                       --dir=build
+                       --mode=h
+                       --name=a
+            """
+        )
+        command = remove_spaces(command)
+        print(command)
+        result = Shell.execute(command, shell=True)
+        Benchmark.Stop()
+        print(result)
+
+        assert "Error" not in result
+
 
     # this one does not work as --experiment-file was removed
     '''
@@ -158,6 +208,7 @@ class TestConfig:
                        --experiment-file=experiments.yaml 
                        --noos 
                        --dir=build
+                       --mode=h
             """
         )
         command = remove_spaces(command)

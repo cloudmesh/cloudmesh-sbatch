@@ -56,9 +56,9 @@ class SbatchCommand(PluginCommand):
           Description:
 
                > Example:
-               > cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" --name=a
-               > cms sbatch generate slurm.in.sh --config=a.py,b.json,c.yaml --attributes=a=1,b=4  --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" --name=a
-               > cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=name=gregor,a=1,b=4 --dryrun --noos --dir=example --experiment="epoch=[1-3] x=[1,4] y=[10,11]" --mode=f --name=a
+               > cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" --name=a --mode=h
+               > cms sbatch generate slurm.in.sh --config=a.py,b.json,c.yaml --attributes=a=1,b=4  --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" --name=a --mode=h
+               > cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=name=gregor,a=1,b=4 --noos --dir=example --experiment="epoch=[1-3] x=[1,4] y=[10,11]" --mode=f --name=a
 
                > cms sbatch generate submit --name=a
 
@@ -93,7 +93,6 @@ class SbatchCommand(PluginCommand):
             arguments.attributes = Parameter.arguments_to_dict(arguments.attributes)
         if arguments.config:
             arguments.config = Parameter.expand(arguments.config[0])
-
 
         if verbose:
             banner("experiment batch generator")
@@ -146,6 +145,7 @@ class SbatchCommand(PluginCommand):
             sbatch.dryrun = arguments.dryrun
             sbatch.config = arguments.config
             sbatch.source = arguments.SOURCE
+            sbatch.mode = arguments.mode
 
             experiment = arguments.experiment
 

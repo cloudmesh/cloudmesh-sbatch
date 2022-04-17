@@ -36,6 +36,7 @@ class SBatch:
                     "config",
                     "directory",
                     "experiment",
+                    "mode"
                   ]:
             try:
                 result = getattr(self,a)
@@ -92,16 +93,44 @@ class SBatch:
         content = readfile(filename)
 
         if suffix.lower() in [".json"]:
-            values = dict(FlatDict(json.loads(content), sep="."))
-            self.data.update(values)
+            regular_dict = json.loads(content)
+            values = dict(FlatDict(regular_dict, sep="."))
         elif suffix.lower() in [".yaml"]:
             content = readfile(filename)
-            values = dict(FlatDict(yaml.safe_load(content), sep="."))
-            self.data.update(values)
+            regular_dict = yaml.safe_load(content)
+            values = dict(FlatDict(regular_dict, sep="."))
         elif suffix.lower() in [".py"]:
+            regular_dict = None
+            values = None
             Console.red("# ERROR: Importing python not yet implemented")
         elif suffix.lower() in [".ipynb"]:
+            regular_dict = None
+            values = None
             Console.red("# ERROR: Importing jupyter notebooks not yet implemented")
+
+        if regular_dict is not None and  'experiment' in regular_dict:
+            exp_values = regular_dict['experiment']
+
+            banner(str(exp_values))
+
+            if type(exp_values) == dict:
+
+                entries = []
+                for key,value in exp_values.items():
+                    entry = f"{key}={value}"
+                    entries.append(entry)
+                exp_values = " ".join(entries)
+
+
+            elif type(exp_values) == str:
+                banner(f"Generate permutations from experiment in {filename}")
+            else:
+                Console.error(f"experiment datatype {type(exp_values)} for {exp_values} not supported")
+            self.generate_experiment_permutations(exp_values)
+
+        if values is not None:
+            self.data.update(values)
+
         return self.data
 
     def generate(self, script, data=None):
@@ -144,8 +173,11 @@ class SBatch:
     #    print(f"{values} sbatch {self.destination} {script}")
 
     def generate_experiment_slurm_scripts(self, mode="flat"):
+
         mode = mode.lower()
-        if mode in ["debug", "d"]:
+        if mode.startswith("d"):
+            Console.warning ("This is just debug mode")
+            print()
             for permutation in self.permutations:
                 values = ""
                 for attribute, value in permutation.items():
@@ -154,6 +186,8 @@ class SBatch:
                 print(f"{values} sbatch {self.destination} {script}")
 
         elif mode.startswith("f"):
+            print("FFFF")
+
             configuration = {}
             self.script_variables=[]
             suffix = self._suffix(self.destination)
@@ -198,7 +232,7 @@ class SBatch:
             #
             self.generate_setup_from_configuration(configuration)
 
-            Console.error("script generation ont yet implemented")
+            Console.error("script generation not yet implemented")
 
             #
             # now generate the scripts
@@ -206,6 +240,7 @@ class SBatch:
             Console.error("script generation ont yet implemented")
 
         elif mode.startswith("h"):
+            print ("HHHH")
             configuration = {}
             self.script_variables = []
             suffix = self._suffix(self.destination)
@@ -235,6 +270,8 @@ class SBatch:
                     "config": config,
                     "variables": variables
                 }
+            else:
+                Console.error("No mode specified.")
 
             banner("Script generation")
 
@@ -268,6 +305,8 @@ class SBatch:
             print (f"{parameters} sbatch -D {directory} {script}")
 
     def generate_setup_from_configuration(self, configuration):
+        print ("IIIIIII")
+        pprint(configuration)
         for identifier in configuration:
             Console.info(f"setup experiment {identifier}")
             experiment = configuration[identifier]
