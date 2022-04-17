@@ -24,7 +24,7 @@ class SbatchCommand(PluginCommand):
 
           Usage:
                 sbatch generate submit [--verbose] --name=NAME
-                sbatch generate [--verbose] [--mode=MODE] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] SOURCE [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT] --name=NAME
+                sbatch generate SOURCE [--verbose] [--mode=MODE] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT] --name=NAME
                 sbatch slurm start
                 sbatch slurm stop
                 sbatch slurm info

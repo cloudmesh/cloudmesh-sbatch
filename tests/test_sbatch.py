@@ -194,32 +194,6 @@ class TestConfig:
 
         assert "Error" not in result
 
-
-    # this one does not work as --experiment-file was removed
-    '''
-    def test_experiment_yaml(self):
-        HEADING()
-        clean()
-        Benchmark.Start()
-        command = remove_spaces(
-            """
-            cms sbatch generate slurm.in.sh 
-                       --config=c.yaml 
-                       --experiment-file=experiments.yaml 
-                       --noos 
-                       --dir=build
-                       --mode=h
-            """
-        )
-        command = remove_spaces(command)
-        print(command)
-        result = Shell.execute(command, shell=True)
-        Benchmark.Stop()
-        VERBOSE(result)
-
-        assert "Error" not in result
-    '''
-
     def test_benchmark(self):
         HEADING()
         Benchmark.print(csv=True, sysinfo=False, tag="cmd5")
