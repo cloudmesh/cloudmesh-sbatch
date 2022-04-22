@@ -10,154 +10,168 @@ from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.util import HEADING
 import os
 
-def clean():
-    os.system("rm -rf build")
-    os.system("cp -r example.in build")
+import textwrap
+
+from cloudmesh.sbatch.command.sbatch import SbatchCommand
+
+from pprint import pprint
+
 
 def remove_spaces(content):
-    result = Shell.oneline(content, seperator=" ")
-    return " ".join(result.split())
+    result = Shell.oneline(content)
+    return " ".join(result.split("&&"))
+    # # print(f"{content = }")
+    # stripped = content.replace(r"\n", " ")
+    # # print(f"{repr(stripped) = }")
+    # return stripped
 
 @pytest.mark.incremental
 class TestConfig:
 
-
-
     def test_help(self):
-        HEADING()
-        clean()
         Benchmark.Start()
         command = "cms sbatch help"
-        print(command)
+        # print(command)
         result = Shell.run(command)
         Benchmark.Stop()
-        VERBOSE(result)
+        # VERBOSE(result)
 
         assert "sbatch" in result
 
-
-    def test_oneline_noos_command(self):
+    def test_oneline_noos_command(self, cfg_dir, testdir, capfd):
         HEADING()
-        clean()
         Benchmark.Start()
-        command = remove_spaces(
-            "cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun "
-            "--noos --dir=build --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a --mode=h")
-        print(command)
+
+        config_files = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
+        slurm_script = f"{testdir}/example.in/slurm.in.sh"
+        attributes = "a=1,b=4"
+        command = (f"cms sbatch generate {slurm_script} --verbose --config={config_files} --attributes={attributes} --dryrun "
+                   f"--noos --dir={cfg_dir} --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a --mode=h")
+
         result = Shell.run(command)
         Benchmark.Stop()
-        VERBOSE(result)
-        os.system("tree build")
 
-        assert "Error" not in result
+        captured = capfd.readouterr()
+        assert "Error" not in captured.err
+        #assert "Error" not in result
 
-
-    def test_oneline_os_command(self):
-        HEADING()
-        clean()
+    def test_oneline_os_command(self, cfg_dir, testdir, capfd):
+        # HEADING()
         Benchmark.Start()
+        config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
         command = remove_spaces(
-            "cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun "
-            "--dir=build --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a --mode=h")
-        print(command)
+            f"cms sbatch generate {testdir}/example.in/slurm.in.sh --verbose --config={config} --attributes=a=1,b=4 --dryrun "
+            f"--dir={cfg_dir} --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a --mode=h")
         result = Shell.run(command)
         Benchmark.Stop()
-        VERBOSE(result)
-        os.system("tree build")
 
-        assert "Error" not in result
-        assert 'name=Gregor' in result
-        assert 'address=Seasame Str.' in result
-        assert 'a=1' in result
-        assert 'debug=True' in result
-        assert os.environ["USER"] in result
+        # os.system(f"tree {cfg_dir}")
 
+        result = capfd.readouterr()
+        pprint(result.out)
+        pprint(result.err)
+        assert "Error" not in result.err
+        assert f'name=Gregor' in result.out
+        assert 'address=Seasame Str.' in result.out
+        assert 'a=1' in result.out
+        assert 'debug=True' in result.out
+        assert os.environ["USERNAME"] in result.out
 
-    def test_hierachy(self):
-        HEADING()
-        clean()
-        Benchmark.Start()
+    def test_hierarchy(self, cfg_dir, testdir, capfd):
+        # HEADING()
+        # Benchmark.Start()
+        config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
         command = remove_spaces(
-            """
-            cms sbatch generate slurm.in.sh --verbose 
-                   --config=a.py,b.json,c.yaml 
+            f"""cms sbatch generate {testdir}/example.in/slurm.in.sh 
+                   --config={config}
                    --attributes=a=1,b=4 
-                   --dryrun 
-                   --dir=build 
+                   --noos
+                   --dir={cfg_dir}/out
                    --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
                    --name=a
                    --mode=h
             """)
         print(command)
         result = Shell.execute(command, shell=True)
-        Benchmark.Stop()
+        # Benchmark.Stop()
         VERBOSE(result)
-        os.system("tree build")
+        # os.system(f"tree {cfg_dir}")
 
-        assert "Error" not in result
-        assert 'name=Gregor' in result
-        assert 'address=Seasame Str.' in result
-        assert 'a=1' in result
-        assert 'debug=True' in result
-        assert os.environ["USER"] in result
+        result = capfd.readouterr()
+        print(result.out)
+        print(result.err)
+        assert "Error" not in result.err
+        # for root, dirs, files in os.walk(cfg_dir):
+        #     for fyle in files:
+        #         print(os.path.join(root, fyle))
+        # os.system(f"dir {cfg_dir}")
+        # with open(f"{cfg_dir}/out/epoch_1_x_1_y_10/slurm.sh") as slrm:
+        #     script_out = slrm.read()
+        #     print(script_out)
+        assert 'name=Gregor' in result.err
+        assert 'address=Seasame Str.' in result.err
+        assert 'a=1' in result.err
+        assert 'debug=True' in result.err
+        assert os.environ["USER"] in result.err
 
-    def test_flat(self):
+    def test_flat(self, cfg_dir, testdir, capfd):
         HEADING()
-        clean()
         Benchmark.Start()
+        config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
         command = remove_spaces(
-            """
-            cms sbatch generate slurm.in.sh 
+            f"""
+            cms sbatch generate {testdir}/example.in/slurm.in.sh 
                    --verbose 
-                   --config=a.py,b.json,c.yaml 
+                   --config={config}
                    --attributes=name=gregor,a=1,b=4 
                    --dryrun 
                    --noos 
-                   --dir=build 
+                   --dir={cfg_dir} 
                    --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
                    --mode=f 
                    --name=a
             """)
-        print (command)
+        print(command)
         result = Shell.execute(command, shell=True)
         Benchmark.Stop()
-        VERBOSE(result)
-        os.system("tree build")
+        # VERBOSE(result)
+        # os.system("tree build")
 
-        assert "Error" not in result
+        result = capfd.readouterr()
+        assert "Error" not in result.err
 
-
-    def test_with_os(self):
+    def test_with_os(self, cfg_dir, testdir, capfd):
         HEADING()
-        clean()
         Benchmark.Start()
+        config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
         command = remove_spaces(
-            """
-            cms sbatch generate slurm.in.sh 
-                       --config=a.py,b.json,c.yaml 
+            f"""
+            cms sbatch generate {testdir}/example.in/slurm.in.sh 
+                       --config={config}
                        --attributes=a=1,b=4 
-                       --dir=build 
+                       --dir={cfg_dir} 
                        --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
                        --name=a
                        --mode=h
             """
         )
-        print(command)
+        # print(command)
         result = Shell.execute(command, shell=True)
         Benchmark.Stop()
-        VERBOSE(result)
-        os.system("tree build")
+        # VERBOSE(result)
+        # os.system("tree build")
 
-        assert "Error" not in result
+        result = capfd.readouterr()
+        assert "Error" not in result.err
 
-    def test_experiment_yaml_dict(self):
+    def test_experiment_yaml_dict(self, cfg_dir, testdir, capfd):
         HEADING()
-        clean()
         Benchmark.Start()
+        config = f"{cfg_dir}/c.yaml,{cfg_dir}/exp_str.yaml"
         command = remove_spaces(
-            """
-            cms sbatch generate slurm.in.sh 
-                       --config=c.yaml,exp_str.yaml 
+            f"""
+            cms sbatch generate {testdir}/example.in/slurm.in.sh 
+                       --config={config}
                        --noos 
                        --dir=build
                        --mode=h
@@ -165,21 +179,22 @@ class TestConfig:
             """
         )
         command = remove_spaces(command)
-        print(command)
+        # print(command)
         result = Shell.execute(command, shell=True)
         Benchmark.Stop()
-        print(result)
+        # print(result)
 
-        assert "Error" not in result
+        result = capfd.readouterr()
+        assert "Error" not in result.err
 
-    def test_experiment_yaml_str(self):
+    def test_experiment_yaml_str(self, cfg_dir, capfd):
         HEADING()
-        clean()
         Benchmark.Start()
+        config = f"{cfg_dir}/c.yaml,{cfg_dir}/exp_str.yaml"
         command = remove_spaces(
-            """
-            cms sbatch generate slurm.in.sh 
-                       --config=c.yaml,exp_str.yaml 
+            f"""
+            cms sbatch generate {cfg_dir}/example.in/slurm.in.sh 
+                       --config={config}
                        --noos 
                        --dir=build
                        --mode=h
@@ -187,12 +202,13 @@ class TestConfig:
             """
         )
         command = remove_spaces(command)
-        print(command)
+        # print(command)
         result = Shell.execute(command, shell=True)
         Benchmark.Stop()
-        print(result)
+        # print(result)
 
-        assert "Error" not in result
+        result = capfd.readouterr()
+        assert "Error" not in result.err
 
     def test_benchmark(self):
         HEADING()

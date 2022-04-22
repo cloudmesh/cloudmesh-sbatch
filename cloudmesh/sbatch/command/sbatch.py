@@ -1,5 +1,8 @@
 from pprint import pprint
 
+import docopt
+import sys
+
 from cloudmesh.common.util import banner
 from cloudmesh.common.util import readfile
 from cloudmesh.common.util import writefile
@@ -24,7 +27,7 @@ class SbatchCommand(PluginCommand):
 
           Usage:
                 sbatch generate submit [--verbose] --name=NAME
-                sbatch generate SOURCE [--verbose] [--mode=MODE] [--config=CONFIG...] [--attributes=PARAMS] [--out=DESTINATION] [--gpu=GPU] [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT] --name=NAME
+                sbatch generate SOURCE [--verbose] [--mode=MODE] [--setup=FILE] [--config=CONFIG] [--attributes=PARAMS] [--out=DESTINATION] [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT] --name=NAME
                 sbatch slurm start
                 sbatch slurm stop
                 sbatch slurm info
@@ -43,9 +46,9 @@ class SbatchCommand(PluginCommand):
               -h                        help
               --dryrun                  flag to skip submission
               --config=CONFIG...        TBD
+              --setup=FILE              TBD
               --attributes=PARAMS       TBD
               --out=DESTINATION         TBD
-              --gpu=GPU                 TBD
               --noos                    TBD
               --nocm                    TBD
               --experiment=EXPERIMENT   TBD
@@ -59,6 +62,7 @@ class SbatchCommand(PluginCommand):
                > cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" --name=a --mode=h
                > cms sbatch generate slurm.in.sh --config=a.py,b.json,c.yaml --attributes=a=1,b=4  --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" --name=a --mode=h
                > cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=name=gregor,a=1,b=4 --noos --dir=example --experiment="epoch=[1-3] x=[1,4] y=[10,11]" --mode=f --name=a
+               > cms sbatch generate slurm.in.sh --experiments-file=experiments.yaml --name=a
 
                > cms sbatch generate submit --name=a
 
@@ -77,6 +81,9 @@ class SbatchCommand(PluginCommand):
                        "mode",
                        "name")
 
+        # pprint(args)
+        # pprint(arguments)
+
         # arguments["experiments_file"] = arguments["--experiments-file"]
 
         #
@@ -89,10 +96,11 @@ class SbatchCommand(PluginCommand):
         #        Console.error("issue with config expansion")
         #        print(e)
         #
-        if arguments.attributes:
-            arguments.attributes = Parameter.arguments_to_dict(arguments.attributes)
-        if arguments.config:
-            arguments.config = Parameter.expand(arguments.config[0])
+        ### Handling in sbatch class now
+        # if arguments.attributes:
+        #     arguments.attributes = Parameter.arguments_to_dict(arguments.attributes)
+        # if arguments.config:
+        #     arguments.config = Parameter.expand(arguments.config[0])
 
         if verbose:
             banner("experiment batch generator")
@@ -111,7 +119,6 @@ class SbatchCommand(PluginCommand):
             if not arguments.name.endswith(".json"):
                 arguments.name = arguments.name + ".json"
 
-
         VERBOSE(arguments)
 
         if arguments.generate and arguments.submit:
@@ -129,60 +136,22 @@ class SbatchCommand(PluginCommand):
 
             sbatch = SBatch()
 
-            sbatch.source = arguments.SOURCE
+            if arguments.get('--setup') is not None:
+                sbatch.config_from_yaml(arguments["--setup"])
 
-            if arguments.out is None:
-                sbatch.destination = sbatch.source.replace(".in.", ".").replace(".in", "")
-            else:
-                sbatch.destination = arguments.out
+            # CLI arguments override the experiments
+            sbatch.config_from_cli(arguments)
 
-            if sbatch.source == sbatch.destination:
-                if not yn_choice("The source and destination filenames are the same. Do you want to continue?"):
-                    return ""
-
-            sbatch.attributes = arguments.gpu
-            sbatch.directory = arguments["--dir"]
-            sbatch.dryrun = arguments.dryrun
-            sbatch.config = arguments.config
-            sbatch.source = arguments.SOURCE
-            sbatch.mode = arguments.mode
-
-            experiment = arguments.experiment
-
-            experiments = None
-
-            if not arguments["--noos"]:
-                sbatch.update_from_os_environ()
-
-            if not arguments["--nocm"]:
-                sbatch.update_from_cm_variables()
-
-
-            if sbatch.directory is not None:
-                sbatch.source = f"{sbatch.directory}/{sbatch.source}"
-                sbatch.destination = f"{sbatch.directory}/{sbatch.destination}"
-
-            if arguments.attributes:
-                sbatch.attributes = sbatch.update_from_attributes(arguments.attributes)
-
-            if arguments.experiment:
-                sbatch.permutations = sbatch.generate_experiment_permutations(arguments.experiment)
-
-            for configfile in sbatch.config:
-                if sbatch.directory is not None:
-                    configfile = f"{sbatch.directory}/{configfile}"
-                sbatch.update_from_file(configfile)
-
-
-            content = readfile(sbatch.source)
+            # sbatch.mode = arguments.mode
+            # content = readfile(sbatch.source)
 
             if sbatch.dryrun or verbose:
                 banner("Attributes")
                 pprint (sbatch.data)
                 banner(f"Original Script {sbatch.source}")
-                print(content)
+                print(sbatch.template_content)
                 banner("end script")
-            result = sbatch.generate(content)
+            result = sbatch.generate(sbatch.template_content)
 
             if verbose:
                 print(f"Experiments:  {arguments.experiment}")
@@ -191,10 +160,10 @@ class SbatchCommand(PluginCommand):
 
             if sbatch.dryrun or verbose:
                 banner("Script")
-                print (result)
+                print(result)
                 banner("Script End")
             else:
-                writefile(sbatch.destination, result)
+                writefile(sbatch.script_out, result)
 
             sbatch.generate_experiment_slurm_scripts(mode=arguments.mode)
 
