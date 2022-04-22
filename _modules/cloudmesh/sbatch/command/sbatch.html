@@ -112,15 +112,15 @@
 
 <span class="sd">          Options:</span>
 <span class="sd">              -h                        help</span>
-<span class="sd">              --dryrun                  flag to skip submission</span>
-<span class="sd">              --config=CONFIG...        TBD</span>
-<span class="sd">              --attributes=PARAMS       TBD</span>
+<span class="sd">              --dryrun                  flag to do a dryrun and not create any files and directories (not tested)</span>
+<span class="sd">              --config=CONFIG...        a list of comma seperated configuration files in yaml or json format. The endings must be .json or .yaml</span>
+<span class="sd">              --attributes=PARAMS       a list of coma separated attribute value pars to set parameters that are used.</span>
 <span class="sd">              --out=DESTINATION         TBD</span>
-<span class="sd">              --gpu=GPU                 TBD</span>
-<span class="sd">              --noos                    TBD</span>
-<span class="sd">              --nocm                    TBD</span>
-<span class="sd">              --experiment=EXPERIMENT   TBD</span>
-<span class="sd">              --account=ACCOUNT         TBD</span>
+<span class="sd">              --gpu=GPU                 The name of the GPU. Tyoically k80, v100, a100, rtx3090, rtx3080</span>
+<span class="sd">              --noos                    ignores environment variable substitution from the shell. This can be helpfull when debugging as the list is quite lareg</span>
+<span class="sd">              --nocm                    cloudmesh ahs a variable dictionary build in. Any vaiable refered to by cloudmes. and its name is replaced from the</span>
+<span class="sd">                                        cloudmesh variables</span>
+<span class="sd">              --experiment=EXPERIMENT   This specifies all parameters that are used to create permutations of them. They are comma separated key value pairs</span>
 <span class="sd">              --mode=MODE               one of &quot;flat&quot;, &quot;debug&quot;, &quot;hierachical&quot; can als just use &quot;f&quot;. &quot;d&quot;, &quot;h&quot; [default: debug]</span>
 <span class="sd">              --name=NAME               name of the experiment configuration file</span>
 
@@ -134,7 +134,7 @@
 <span class="sd">               &gt; cms sbatch generate submit --name=a</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">verbose</span> <span class="o">=</span> <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;--verbose&quot;</span><span class="p">]</span>
+        <span class="n">arguments</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;--verbose&quot;</span><span class="p">]</span>
 
         <span class="n">map_parameters</span><span class="p">(</span><span class="n">arguments</span><span class="p">,</span>
                        <span class="s2">&quot;account&quot;</span><span class="p">,</span>
@@ -165,6 +165,7 @@
         <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">config</span><span class="p">:</span>
             <span class="n">arguments</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
+        <span class="n">verbose</span> <span class="o">=</span> <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;--verbose&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;experiment batch generator&quot;</span><span class="p">)</span>
 
@@ -191,7 +192,6 @@
 
             <span class="n">sbatch</span> <span class="o">=</span> <span class="n">SBatch</span><span class="p">()</span>
             <span class="n">sbatch</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">verbose</span>
-
             <span class="n">sbatch</span><span class="o">.</span><span class="n">generate_submit</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">arguments</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="s2">&quot;&quot;</span>
