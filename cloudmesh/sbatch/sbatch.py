@@ -100,9 +100,19 @@ class SBatch:
             regular_dict = yaml.safe_load(content)
             values = dict(FlatDict(regular_dict, sep="."))
         elif suffix.lower() in [".py"]:
-            regular_dict = None
-            values = None
-            Console.red("# ERROR: Importing python not yet implemented")
+
+            modulename = filename.replace(".py","").replace("/","_").replace("build_", "")
+            from importlib.machinery import SourceFileLoader
+
+            mod = SourceFileLoader(modulename, filename).load_module()
+
+            regular_dict = {}
+            for name, value in vars(mod).items():
+                if not name.startswith("__"):
+                    print (name, value)
+                    regular_dict[name] = value
+            values = dict(FlatDict(regular_dict, sep="."))
+
         elif suffix.lower() in [".ipynb"]:
             regular_dict = None
             values = None
@@ -140,7 +150,7 @@ class SBatch:
         for attribute, value in data.items():
             frame = "{" + attribute + "}"
             if frame in content:
-                content = content.replace(frame, value)
+                content = content.replace(frame, str(value))
         return content
 
 
@@ -234,11 +244,6 @@ class SBatch:
 
             Console.error("script generation not yet implemented")
 
-            #
-            # now generate the scripts
-            #
-            Console.error("script generation ont yet implemented")
-
         elif mode.startswith("h"):
             print ("HHHH")
             configuration = {}
@@ -288,7 +293,7 @@ class SBatch:
             #
             self.generate_setup_from_configuration(configuration)
 
-            Console.error("script generation ont yet implemented")
+            Console.error("script generation not yet implemented")
 
     def generate_submit(self, name=None):
         experiments = self.configuration_parameters = json.loads(readfile(name))

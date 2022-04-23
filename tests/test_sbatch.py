@@ -8,7 +8,9 @@ from cloudmesh.common.Benchmark import Benchmark
 from cloudmesh.common.Shell import Shell
 from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.util import HEADING
+from cloudmesh.common.util import readfile
 import os
+from pprint import pprint
 
 def clean():
     os.system("rm -rf build")
@@ -35,6 +37,30 @@ class TestConfig:
 
         assert "sbatch" in result
 
+    def test_experiment_yaml_python(self):
+        HEADING()
+        clean()
+        Benchmark.Start()
+        command = remove_spaces(
+            """
+            cms sbatch generate slurm.in.sh 
+                       --config=c.yaml,exp_str.yaml,a.py
+                       --noos 
+                       --dir=build
+                       --mode=h
+                       --name=a
+            """
+        )
+        command = remove_spaces(command)
+        print(command)
+        result = Shell.execute(command, shell=True)
+        Benchmark.Stop()
+        pprint(result)
+
+        content = readfile("build/epoch_1_x_1/slurm.sh")
+        assert "p_gregor=GREGOR" in content
+        assert "a=101" in content
+
 
     def test_oneline_noos_command(self):
         HEADING()
@@ -50,7 +76,9 @@ class TestConfig:
         os.system("tree build")
 
         assert "Error" not in result
-
+        content = readfile("build/epoch_1_x_1_y_10/slurm.sh")
+        assert "p_gregor=GREGOR" in content
+        assert "a=101" in content
 
     def test_oneline_os_command(self):
         HEADING()
@@ -71,6 +99,10 @@ class TestConfig:
         assert 'a=1' in result
         assert 'debug=True' in result
         assert os.environ["USER"] in result
+
+        content = readfile("build/epoch_1_x_1_y_10/slurm.sh")
+        assert "p_gregor=GREGOR" in content
+        assert "a=101" in content
 
 
     def test_hierachy(self):
@@ -101,6 +133,10 @@ class TestConfig:
         assert 'debug=True' in result
         assert os.environ["USER"] in result
 
+        content = readfile("build/epoch_1_x_1_y_10/slurm.sh")
+        assert "p_gregor=GREGOR" in content
+        assert "a=101" in content
+
     def test_flat(self):
         HEADING()
         clean()
@@ -125,6 +161,9 @@ class TestConfig:
         os.system("tree build")
 
         assert "Error" not in result
+        content = readfile("build/slurm_epoch_1_x_1_y_10.sh")
+        assert "p_gregor=GREGOR" in content
+        assert "a=101" in content
 
 
     def test_with_os(self):
@@ -149,6 +188,9 @@ class TestConfig:
         os.system("tree build")
 
         assert "Error" not in result
+        content = readfile("build/epoch_1_x_1_y_10/slurm.sh")
+        assert "p_gregor=GREGOR" in content
+        assert "a=101" in content
 
     def test_experiment_yaml_dict(self):
         HEADING()
@@ -157,7 +199,7 @@ class TestConfig:
         command = remove_spaces(
             """
             cms sbatch generate slurm.in.sh 
-                       --config=c.yaml,exp_str.yaml 
+                       --config=c.yaml,exp_str.yaml,a.py 
                        --noos 
                        --dir=build
                        --mode=h
@@ -171,6 +213,9 @@ class TestConfig:
         print(result)
 
         assert "Error" not in result
+        content = readfile("build/epoch_1_x_1/slurm.sh")
+        assert "p_gregor=GREGOR" in content
+        assert "a=101" in content
 
     def test_experiment_yaml_str(self):
         HEADING()
@@ -179,7 +224,7 @@ class TestConfig:
         command = remove_spaces(
             """
             cms sbatch generate slurm.in.sh 
-                       --config=c.yaml,exp_str.yaml 
+                       --config=c.yaml,exp_str.yaml,a.py 
                        --noos 
                        --dir=build
                        --mode=h
@@ -193,6 +238,9 @@ class TestConfig:
         print(result)
 
         assert "Error" not in result
+        content = readfile("build/epoch_1_x_1/slurm.sh")
+        assert "p_gregor=GREGOR" in content
+        assert "a=101" in content
 
     def test_benchmark(self):
         HEADING()
