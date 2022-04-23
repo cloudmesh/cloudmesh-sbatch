@@ -171,9 +171,19 @@
             <span class="n">regular_dict</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
             <span class="n">values</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">(</span><span class="n">regular_dict</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
         <span class="k">elif</span> <span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.py&quot;</span><span class="p">]:</span>
-            <span class="n">regular_dict</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">values</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">Console</span><span class="o">.</span><span class="n">red</span><span class="p">(</span><span class="s2">&quot;# ERROR: Importing python not yet implemented&quot;</span><span class="p">)</span>
+
+            <span class="n">modulename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.py&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span><span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;build_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="kn">from</span> <span class="nn">importlib.machinery</span> <span class="kn">import</span> <span class="n">SourceFileLoader</span>
+
+            <span class="n">mod</span> <span class="o">=</span> <span class="n">SourceFileLoader</span><span class="p">(</span><span class="n">modulename</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">load_module</span><span class="p">()</span>
+
+            <span class="n">regular_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">):</span>
+                    <span class="nb">print</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                    <span class="n">regular_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">(</span><span class="n">regular_dict</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
+
         <span class="k">elif</span> <span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.ipynb&quot;</span><span class="p">]:</span>
             <span class="n">regular_dict</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">values</span> <span class="o">=</span> <span class="kc">None</span>
@@ -211,7 +221,7 @@
         <span class="k">for</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">frame</span> <span class="o">=</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="n">attribute</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
             <span class="k">if</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
-                <span class="n">content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">content</span></div>
 
 
@@ -305,11 +315,6 @@
 
             <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;script generation not yet implemented&quot;</span><span class="p">)</span>
 
-            <span class="c1">#</span>
-            <span class="c1"># now generate the scripts</span>
-            <span class="c1">#</span>
-            <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;script generation ont yet implemented&quot;</span><span class="p">)</span>
-
         <span class="k">elif</span> <span class="n">mode</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;h&quot;</span><span class="p">):</span>
             <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;HHHH&quot;</span><span class="p">)</span>
             <span class="n">configuration</span> <span class="o">=</span> <span class="p">{}</span>
@@ -359,7 +364,7 @@
             <span class="c1">#</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">generate_setup_from_configuration</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span>
 
-            <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;script generation ont yet implemented&quot;</span><span class="p">)</span></div>
+            <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;script generation not yet implemented&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SBatch.generate_submit"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_submit">[docs]</a>    <span class="k">def</span> <span class="nf">generate_submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">experiments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration_parameters</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">readfile</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
