@@ -23,8 +23,6 @@ def remove_spaces(content):
 @pytest.mark.incremental
 class TestConfig:
 
-
-
     def test_help(self):
         HEADING()
         clean()
@@ -61,6 +59,31 @@ class TestConfig:
         assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 
+    def test_experiment_yaml_ipynb(self):
+        HEADING()
+        clean()
+        Benchmark.Start()
+        command = remove_spaces(
+            """
+            cms sbatch generate slurm.in.sh 
+                       --config=c.yaml,exp_str.yaml,a.py,d.ipynb
+                       --noos 
+                       --dir=build
+                       --mode=h
+                       --name=a
+            """
+        )
+        command = remove_spaces(command)
+        print(command)
+        result = Shell.execute(command, shell=True)
+        Benchmark.Stop()
+        pprint(result)
+
+        content = readfile("build/epoch_1_x_1/slurm.sh")
+        assert "p_gregor=GREGOR" in content
+        assert "a=101" in content
+        assert 'd="this is the way"' in content
+
 
     def test_oneline_noos_command(self):
         HEADING()
@@ -95,7 +118,7 @@ class TestConfig:
 
         assert "Error" not in result
         assert 'name=Gregor' in result
-        assert 'address=Seasame Str.' in result
+        assert 'address="Seasame Str."' in result
         assert 'a=1' in result
         assert 'debug=True' in result
         assert os.environ["USER"] in result
@@ -128,7 +151,7 @@ class TestConfig:
 
         assert "Error" not in result
         assert 'name=Gregor' in result
-        assert 'address=Seasame Str.' in result
+        assert 'address="Seasame Str."' in result
         assert 'a=1' in result
         assert 'debug=True' in result
         assert os.environ["USER"] in result

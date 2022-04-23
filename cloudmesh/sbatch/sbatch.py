@@ -116,7 +116,24 @@ class SBatch:
         elif suffix.lower() in [".ipynb"]:
             regular_dict = None
             values = None
-            Console.red("# ERROR: Importing jupyter notebooks not yet implemented")
+
+            py_name = filename.replace(".ipynb", ".py")
+            os.system (f"jupyter nbconvert --to python {filename}")
+
+            filename = py_name
+            modulename = filename.replace(".py","").replace("/","_").replace("build_", "")
+            from importlib.machinery import SourceFileLoader
+
+            mod = SourceFileLoader(modulename, filename).load_module()
+
+            regular_dict = {}
+            for name, value in vars(mod).items():
+                if not name.startswith("__"):
+                    print (name, value)
+                    regular_dict[name] = value
+
+            values = dict(FlatDict(regular_dict, sep="."))
+
 
         if regular_dict is not None and  'experiment' in regular_dict:
             exp_values = regular_dict['experiment']
@@ -245,7 +262,6 @@ class SBatch:
             Console.error("script generation not yet implemented")
 
         elif mode.startswith("h"):
-            print ("HHHH")
             configuration = {}
             self.script_variables = []
             suffix = self._suffix(self.destination)
@@ -310,8 +326,7 @@ class SBatch:
             print (f"{parameters} sbatch -D {directory} {script}")
 
     def generate_setup_from_configuration(self, configuration):
-        print ("IIIIIII")
-        pprint(configuration)
+        # pprint(configuration)
         for identifier in configuration:
             Console.info(f"setup experiment {identifier}")
             experiment = configuration[identifier]
@@ -359,23 +374,3 @@ class SBatch:
         if name is not None:
             content = json.dumps(self.configuration_parameters, indent=2)
             writefile(name, content)
-
-    '''
-    def run(self, filename='submit-job.slurm'):
-        """
-        Execute a custom slurm script to the cluster
-        """
-        cwd = os.getcwd()
-        file_path = os.path.join(cwd, filename)
-        self.configure_sbatch(host='rivanna')
-        if self.params:
-            self.get_parameters()
-        self.data.update(self.env)
-        self.save(file_path)
-        if not self.dryrun:
-            stdout, stderr = subprocess.Popen(['sbatch', file_path], env=self.env, encoding='utf-8',
-                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-            print(stdout)
-            print(f"{stderr = }", file=sys.stderr)
-            Shell.run(f'rm {file_path}')
-    '''
