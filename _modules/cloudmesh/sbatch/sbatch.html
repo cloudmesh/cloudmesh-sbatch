@@ -187,7 +187,24 @@
         <span class="k">elif</span> <span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.ipynb&quot;</span><span class="p">]:</span>
             <span class="n">regular_dict</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">values</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">Console</span><span class="o">.</span><span class="n">red</span><span class="p">(</span><span class="s2">&quot;# ERROR: Importing jupyter notebooks not yet implemented&quot;</span><span class="p">)</span>
+
+            <span class="n">py_name</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.ipynb&quot;</span><span class="p">,</span> <span class="s2">&quot;.py&quot;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;jupyter nbconvert --to python </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">py_name</span>
+            <span class="n">modulename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.py&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span><span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;build_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="kn">from</span> <span class="nn">importlib.machinery</span> <span class="kn">import</span> <span class="n">SourceFileLoader</span>
+
+            <span class="n">mod</span> <span class="o">=</span> <span class="n">SourceFileLoader</span><span class="p">(</span><span class="n">modulename</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">load_module</span><span class="p">()</span>
+
+            <span class="n">regular_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">):</span>
+                    <span class="nb">print</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                    <span class="n">regular_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+            <span class="n">values</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">(</span><span class="n">regular_dict</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
+
 
         <span class="k">if</span> <span class="n">regular_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span>  <span class="s1">&#39;experiment&#39;</span> <span class="ow">in</span> <span class="n">regular_dict</span><span class="p">:</span>
             <span class="n">exp_values</span> <span class="o">=</span> <span class="n">regular_dict</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span>
@@ -316,7 +333,6 @@
             <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;script generation not yet implemented&quot;</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">mode</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;h&quot;</span><span class="p">):</span>
-            <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;HHHH&quot;</span><span class="p">)</span>
             <span class="n">configuration</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">script_variables</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">suffix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="p">)</span>
@@ -381,8 +397,7 @@
             <span class="nb">print</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parameters</span><span class="si">}</span><span class="s2"> sbatch -D </span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">script</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SBatch.generate_setup_from_configuration"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_setup_from_configuration">[docs]</a>    <span class="k">def</span> <span class="nf">generate_setup_from_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configuration</span><span class="p">):</span>
-        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;IIIIIII&quot;</span><span class="p">)</span>
-        <span class="n">pprint</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span>
+        <span class="c1"># pprint(configuration)</span>
         <span class="k">for</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="n">configuration</span><span class="p">:</span>
             <span class="n">Console</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;setup experiment </span><span class="si">{</span><span class="n">identifier</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">experiment</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span>
@@ -429,27 +444,7 @@
 <div class="viewcode-block" id="SBatch.save_experiment_configuration"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.save_experiment_configuration">[docs]</a>    <span class="k">def</span> <span class="nf">save_experiment_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">content</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration_parameters</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-            <span class="n">writefile</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span></div>
-
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    def run(self, filename=&#39;submit-job.slurm&#39;):</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-<span class="sd">        Execute a custom slurm script to the cluster</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-<span class="sd">        cwd = os.getcwd()</span>
-<span class="sd">        file_path = os.path.join(cwd, filename)</span>
-<span class="sd">        self.configure_sbatch(host=&#39;rivanna&#39;)</span>
-<span class="sd">        if self.params:</span>
-<span class="sd">            self.get_parameters()</span>
-<span class="sd">        self.data.update(self.env)</span>
-<span class="sd">        self.save(file_path)</span>
-<span class="sd">        if not self.dryrun:</span>
-<span class="sd">            stdout, stderr = subprocess.Popen([&#39;sbatch&#39;, file_path], env=self.env, encoding=&#39;utf-8&#39;,</span>
-<span class="sd">                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()</span>
-<span class="sd">            print(stdout)</span>
-<span class="sd">            print(f&quot;{stderr = }&quot;, file=sys.stderr)</span>
-<span class="sd">            Shell.run(f&#39;rm {file_path}&#39;)</span>
-<span class="sd">    &#39;&#39;&#39;</span></div>
+            <span class="n">writefile</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
