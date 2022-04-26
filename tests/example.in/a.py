@@ -1,6 +1,6 @@
-from cloudmesh.common.FlatDict import FlatDict
+a = 101
 
-data = {
+p_data = {
     "name": "Gregor",
     "address": {
         "city": "Bloomington",
@@ -9,4 +9,4 @@ data = {
     }
 }
 
-data = FlatDict(data, sep="__")
+p_gregor = "GREGOR"

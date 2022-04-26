@@ -1,8 +1,5 @@
 from pprint import pprint
 
-import docopt
-import sys
-
 from cloudmesh.common.util import banner
 from cloudmesh.common.util import readfile
 from cloudmesh.common.util import writefile
@@ -44,15 +41,20 @@ class SbatchCommand(PluginCommand):
 
           Options:
               -h                        help
-              --dryrun                  flag to skip submission
-              --config=CONFIG...        TBD
+              --dryrun                  flag to do a dryrun and not create any files and directories (not tested)
+              --config=CONFIG...        a list of comma seperated configuration files in yaml or json format. The endings must be .json or .yaml
               --setup=FILE              TBD
-              --attributes=PARAMS       TBD
+              --attributes=PARAMS       a list of coma separated attribute value pars to set parameters that are used.
               --out=DESTINATION         TBD
               --noos                    TBD
               --nocm                    TBD
               --experiment=EXPERIMENT   TBD
               --account=ACCOUNT         TBD
+              --gpu=GPU                 The name of the GPU. Tyoically k80, v100, a100, rtx3090, rtx3080
+              --noos                    ignores environment variable substitution from the shell. This can be helpfull when debugging as the list is quite lareg
+              --nocm                    cloudmesh ahs a variable dictionary build in. Any vaiable refered to by cloudmes. and its name is replaced from the
+                                        cloudmesh variables
+              --experiment=EXPERIMENT   This specifies all parameters that are used to create permutations of them. They are comma separated key value pairs
               --mode=MODE               one of "flat", "debug", "hierachical" can als just use "f". "d", "h" [default: debug]
               --name=NAME               name of the experiment configuration file
 
@@ -67,7 +69,7 @@ class SbatchCommand(PluginCommand):
                > cms sbatch generate submit --name=a
 
         """
-        verbose = arguments["--verbose"]
+        arguments.verbose = arguments["--verbose"]
 
         map_parameters(arguments,
                        "account",
@@ -102,6 +104,7 @@ class SbatchCommand(PluginCommand):
         # if arguments.config:
         #     arguments.config = Parameter.expand(arguments.config[0])
 
+        verbose = arguments["--verbose"]
         if verbose:
             banner("experiment batch generator")
 
@@ -127,7 +130,6 @@ class SbatchCommand(PluginCommand):
 
             sbatch = SBatch()
             sbatch.verbose = arguments.verbose
-
             sbatch.generate_submit(name=arguments.name)
 
             return ""
