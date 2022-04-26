@@ -67,15 +67,14 @@ class TestConfig:
 
         # os.system(f"tree {cfg_dir}")
 
-        result = capfd.readouterr()
-        pprint(result.out)
-        pprint(result.err)
-        assert "Error" not in result.err
-        assert f'name=Gregor' in result.out
-        assert 'address=Seasame Str.' in result.out
-        assert 'a=1' in result.out
-        assert 'debug=True' in result.out
-        assert os.environ["USERNAME"] in result.out
+        # result = capfd.readouterr()
+        pprint(result)
+        assert "Error" not in result
+        assert f'name=Gregor' in result
+        assert 'address=Seasame Str.' in result
+        assert 'a=1' in result
+        assert 'debug=True' in result
+        assert os.environ["USERNAME"] in result
 
     def test_hierarchy(self, cfg_dir, testdir, capfd):
         # HEADING()
@@ -87,32 +86,26 @@ class TestConfig:
                    --attributes=a=1,b=4 
                    --noos
                    --dir={cfg_dir}/out
+                   --out=dummy.out
                    --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
                    --name=a
                    --mode=h
             """)
-        print(command)
         result = Shell.execute(command, shell=True)
         # Benchmark.Stop()
-        VERBOSE(result)
-        # os.system(f"tree {cfg_dir}")
+        pprint(result)
+        #os.system(f"tree {cfg_dir}")
 
-        result = capfd.readouterr()
-        print(result.out)
-        print(result.err)
-        assert "Error" not in result.err
-        # for root, dirs, files in os.walk(cfg_dir):
-        #     for fyle in files:
-        #         print(os.path.join(root, fyle))
-        # os.system(f"dir {cfg_dir}")
-        # with open(f"{cfg_dir}/out/epoch_1_x_1_y_10/slurm.sh") as slrm:
-        #     script_out = slrm.read()
-        #     print(script_out)
-        assert 'name=Gregor' in result.err
-        assert 'address=Seasame Str.' in result.err
-        assert 'a=1' in result.err
-        assert 'debug=True' in result.err
-        assert os.environ["USER"] in result.err
+        for root, dirs, files in os.walk(f"{cfg_dir}/out"):
+            for fyle in files:
+                print(os.path.join(root, fyle))
+
+        assert "Error" not in result
+        assert 'name=Gregor' in result
+        assert 'address=Seasame Str.' in result
+        assert 'a=1' in result
+        assert 'debug=True' in result
+        assert os.environ["USER"] in result
 
     def test_flat(self, cfg_dir, testdir, capfd):
         HEADING()
