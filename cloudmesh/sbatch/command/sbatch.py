@@ -46,13 +46,10 @@ class SbatchCommand(PluginCommand):
               --setup=FILE              TBD
               --attributes=PARAMS       a list of coma separated attribute value pars to set parameters that are used.
               --out=DESTINATION         TBD
-              --noos                    TBD
-              --nocm                    TBD
-              --experiment=EXPERIMENT   TBD
               --account=ACCOUNT         TBD
               --gpu=GPU                 The name of the GPU. Tyoically k80, v100, a100, rtx3090, rtx3080
               --noos                    ignores environment variable substitution from the shell. This can be helpfull when debugging as the list is quite lareg
-              --nocm                    cloudmesh ahs a variable dictionary build in. Any vaiable refered to by cloudmes. and its name is replaced from the
+              --nocm                    cloudmesh as a variable dictionary build in. Any vaiable refered to by cloudmes. and its name is replaced from the
                                         cloudmesh variables
               --experiment=EXPERIMENT   This specifies all parameters that are used to create permutations of them. They are comma separated key value pairs
               --mode=MODE               one of "flat", "debug", "hierachical" can als just use "f". "d", "h" [default: debug]

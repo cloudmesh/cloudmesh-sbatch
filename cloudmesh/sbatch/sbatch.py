@@ -191,7 +191,7 @@ class SBatch:
             print(f'{a:<12}: {result}')
         print("permutations:")
         result = getattr(self, "permutations")
-        pprint(result)
+        # pprint(result)
         print()
 
     def set_attribute(self, attribute, value):
@@ -390,7 +390,7 @@ class SBatch:
         experiments = OrderedDict()
         entries = variable_str.split(' ')
 
-        pprint(entries)
+        # pprint(entries)
         for entry in entries:
             k, v = entry.split("=")
             experiments[k] = Parameter.expand(v)
@@ -476,6 +476,7 @@ class SBatch:
                 "config"    : config,
                 "variables" : variables
             }
+            # pprint(configuration)
         else:
             Console.error("No mode specified.")
         return configuration
@@ -543,13 +544,12 @@ class SBatch:
             print (f"{parameters} sbatch -D {directory} {script}")
 
     def generate_setup_from_configuration(self, configuration):
-        # pprint(configuration)
+        pprint(configuration)
         for identifier in configuration:
             Console.info(f"setup experiment {identifier}")
             experiment = configuration[identifier]
-            # print(f",,,,,,,,,{experiment['directory']}")
             Shell.mkdir(experiment["directory"])
-
+            print(f"Making dir {experiment['directory']}")
             #
             # Generate config.yml
             #
@@ -567,7 +567,7 @@ class SBatch:
             #
             content_script = readfile(self.source)
             content_script = self.generate(content_script, experiment["variables"])
-            writefile(experiment["script"], content_script)
+            writefile(os.path.join(experiment["directory"], experiment["script"]), content_script)
 
     @property
     def now(self):

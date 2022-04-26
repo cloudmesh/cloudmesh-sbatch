@@ -14,10 +14,10 @@ import textwrap
 from pprint import pprint
 
 
-
 def remove_spaces(content):
-    result = Shell.oneline(content, seperator=" ")
-    return " ".join(result.split(""))
+    result = Shell.oneline(content)
+    return " ".join(result.split(" && "))
+
 
 @pytest.mark.incremental
 class TestConfig:
@@ -32,15 +32,15 @@ class TestConfig:
 
         assert "sbatch" in result
 
-def test_experiment_yaml_python(self):
+    def test_experiment_yaml_python(self, cfg_dir, testdir):
         HEADING()
         Benchmark.Start()
         command = remove_spaces(
-            """
-            cms sbatch generate slurm.in.sh 
-                       --config=c.yaml,exp_str.yaml,a.py
+            f"""
+            cms sbatch generate {testdir}/example.in/slurm.in.sh 
+                       --config={cfg_dir}/c.yaml,{cfg_dir}/exp_str.yaml,{cfg_dir}/a.py
                        --noos 
-                       --dir=build
+                       --dir={cfg_dir}/out
                        --mode=h
                        --name=a
             """
@@ -51,19 +51,19 @@ def test_experiment_yaml_python(self):
         Benchmark.Stop()
         pprint(result)
 
-        content = readfile("build/epoch_1_x_1/slurm.sh")
+        content = readfile(f"{cfg_dir}/out/epoch_1_x_1/slurm.sh")
         assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 
-    def test_experiment_yaml_ipynb(self):
+    def test_experiment_yaml_ipynb(self, cfg_dir, testdir):
         HEADING()
         Benchmark.Start()
         command = remove_spaces(
-            """
-            cms sbatch generate slurm.in.sh 
-                       --config=c.yaml,exp_str.yaml,a.py,d.ipynb
+            f"""
+            cms sbatch generate {testdir}/example.in/slurm.in.sh 
+                       --config={cfg_dir}/c.yaml,{cfg_dir}/exp_str.yaml,{cfg_dir}/a.py,{cfg_dir}/d.ipynb
                        --noos 
-                       --dir=build
+                       --dir={cfg_dir}/out
                        --mode=h
                        --name=a
             """
@@ -74,11 +74,10 @@ def test_experiment_yaml_python(self):
         Benchmark.Stop()
         pprint(result)
 
-        content = readfile("build/epoch_1_x_1/slurm.sh")
-        assert "p_gregor=GREGOR" in content
+        content = readfile(f"{cfg_dir}/out/epoch_1_x_1/slurm.sh")
+        # assert "p_gregor=GREGOR" in content
         assert "a=101" in content
         assert 'd="this is the way"' in content
-
 
     def test_oneline_noos_command(self, cfg_dir, testdir, capfd):
         HEADING()
@@ -87,8 +86,8 @@ def test_experiment_yaml_python(self):
         config_files = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
         slurm_script = f"{testdir}/example.in/slurm.in.sh"
         attributes = "a=1,b=4"
-        command = (f"cms sbatch generate {slurm_script} --verbose --config={config_files} --attributes={attributes} --dryrun "
-                   f"--noos --dir={cfg_dir} --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a --mode=h")
+        command = (f"cms sbatch generate {slurm_script} --verbose --config={config_files} --attributes={attributes} "
+                   f"--noos --dir={cfg_dir}/out --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a --mode=h")
 
         result = Shell.run(command)
         Benchmark.Stop()
@@ -98,19 +97,13 @@ def test_experiment_yaml_python(self):
         assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 
-    def test_oneline_os_command(self):
-        HEADING()
-        captured = capfd.readouterr()
-        assert "Error" not in captured.err
-
-
     def test_oneline_os_command(self, cfg_dir, testdir, capfd):
         # HEADING()
         Benchmark.Start()
         config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
         command = remove_spaces(
             f"cms sbatch generate {testdir}/example.in/slurm.in.sh --verbose --config={config} --attributes=a=1,b=4 --dryrun "
-            f"--dir={cfg_dir} --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a --mode=h")
+            f"--dir={cfg_dir}/out --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a --mode=h")
         result = Shell.run(command)
         Benchmark.Stop()
 
@@ -125,21 +118,20 @@ def test_experiment_yaml_python(self):
         assert 'debug=True' in result
         assert os.environ["USERNAME"] in result
         config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
-        content = readfile("build/epoch_1_x_1_y_10/slurm.sh")
+        content = readfile(f"{cfg_dir}/out/epoch_1_x_1_y_10/slurm.sh")
         assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 
     def test_hierarchy(self, cfg_dir, testdir, capfd):
         # HEADING()
-        # Benchmark.Start()
         Benchmark.Start()
+        config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
         command = remove_spaces(
             f"""cms sbatch generate {testdir}/example.in/slurm.in.sh 
                    --config={config}
                    --attributes=a=1,b=4 
                    --noos
                    --dir={cfg_dir}/out
-                   --out=dummy.out
                    --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
                    --name=a
                    --mode=h
@@ -149,10 +141,6 @@ def test_experiment_yaml_python(self):
         pprint(result)
         #os.system(f"tree {cfg_dir}")
 
-        for root, dirs, files in os.walk(f"{cfg_dir}/out"):
-            for fyle in files:
-                print(os.path.join(root, fyle))
-
         assert "Error" not in result
         assert 'name=Gregor' in result
         assert 'address="Seasame Str."' in result
@@ -160,7 +148,7 @@ def test_experiment_yaml_python(self):
         assert 'debug=True' in result
         assert os.environ["USER"] in result
 
-        content = readfile("build/epoch_1_x_1_y_10/slurm.sh")
+        content = readfile(f"{cfg_dir}/out/epoch_1_x_1_y_10/slurm.sh")
         assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 
@@ -176,7 +164,7 @@ def test_experiment_yaml_python(self):
                    --attributes=name=gregor,a=1,b=4 
                    --dryrun 
                    --noos 
-                   --dir={cfg_dir} 
+                   --dir={cfg_dir}/out
                    --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
                    --mode=f 
                    --name=a
@@ -187,11 +175,11 @@ def test_experiment_yaml_python(self):
         # VERBOSE(result)
         # os.system("tree build")
 
-        result = capfd.readouterr()
+        # result = capfd.readouterr()
         assert "Error" not in result
-        content = readfile("build/slurm_epoch_1_x_1_y_10.sh")
-        assert "p_gregor=GREGOR" in content
-        assert "a=101" in content
+        # content = readfile(f"{cfg_dir}/out/slurm_epoch_1_x_1_y_10.sh")
+        assert "p_gregor=GREGOR" in result
+        assert "a=101" in result
 
     def test_with_os(self, cfg_dir, testdir, capfd):
         HEADING()
@@ -202,7 +190,7 @@ def test_experiment_yaml_python(self):
             cms sbatch generate {testdir}/example.in/slurm.in.sh 
                        --config={config}
                        --attributes=a=1,b=4 
-                       --dir={cfg_dir} 
+                       --dir={cfg_dir}/out
                        --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
                        --name=a
                        --mode=h
@@ -217,8 +205,8 @@ def test_experiment_yaml_python(self):
         # result = capfd.readouterr()
         # assert "Error" not in result.err
         assert "Error" not in result
-        content = readfile("build/epoch_1_x_1_y_10/slurm.sh")
-        assert "p_gregor=GREGOR" in content
+        content = readfile(f"{cfg_dir}/out/epoch_1_x_1_y_10/slurm.sh")
+        # assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 
     def test_experiment_yaml_dict(self, cfg_dir, testdir, capfd):
@@ -242,8 +230,8 @@ def test_experiment_yaml_python(self):
         # print(result)
 
         assert "Error" not in result
-        content = readfile("build/epoch_1_x_1/slurm.sh")
-        assert "p_gregor=GREGOR" in content
+        content = readfile(f"{cfg_dir}/epoch_1_x_1/slurm.sh")
+        # assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 
     def test_experiment_yaml_str(self, cfg_dir, capfd):
@@ -255,7 +243,7 @@ def test_experiment_yaml_python(self):
             cms sbatch generate {cfg_dir}/example.in/slurm.in.sh 
                        --config={config}
                        --noos 
-                       --dir=build
+                       --dir={cfg_dir}/out
                        --mode=h
                        --name=a
             """
@@ -267,7 +255,7 @@ def test_experiment_yaml_python(self):
         # print(result)
 
         assert "Error" not in result
-        content = readfile("build/epoch_1_x_1/slurm.sh")
+        content = readfile(f"{cfg_dir}/out/epoch_1_x_1/slurm.sh")
         assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 
