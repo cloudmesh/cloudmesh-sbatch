@@ -500,32 +500,32 @@ class SBatch:
                     values = values + f"{attribute}={value} "
                 script = f"{self.out_directory}/{self.script_out}{values}".replace("=", "_")
                 print(f"{values} sbatch {self.script_out} {script}")
-            configuration = None
-        elif mode.startswith("f"):
-            configuration = self._generate_flat_config()
-
-        elif mode.startswith("h"):
-            configuration = self._generate_hierarchical_config()
-
         else:
-            raise RuntimeError(f"Invalid generator mode {mode}")
+            if mode.startswith("f"):
+                configuration = self._generate_flat_config()
 
-        banner("Script generation")
+            elif mode.startswith("h"):
+                configuration = self._generate_hierarchical_config()
 
-        # pprint(configuration)
+            else:
+                raise RuntimeError(f"Invalid generator mode {mode}")
 
-        print(Printer.write(configuration, order=["id", "experiment", "script", "config", "directory"]))
+            banner("Script generation")
 
-        self.configuration_parameters = configuration
-        # if not yn_choice("The listed scripts will be gnerated, Continue"):
-        #    return
+            # pprint(configuration)
 
-        #
-        # now generate the scripts
-        #
-        self.generate_setup_from_configuration(configuration)
+            print(Printer.write(configuration, order=["id", "experiment", "script", "config", "directory"]))
 
-        Console.error("script generation not yet implemented")
+            self.configuration_parameters = configuration
+            # if not yn_choice("The listed scripts will be gnerated, Continue"):
+            #    return
+
+            #
+            # now generate the scripts
+            #
+            self.generate_setup_from_configuration(configuration)
+
+            Console.error("script generation not yet implemented")
 
     # TODO: Need to make the printout is done the right way
     # Should be able to pipe the output and run as a shell script.
@@ -541,7 +541,7 @@ class SBatch:
             parameters = experiment["experiment"]
             directory = experiment["directory"]
             script = os.path.basename(experiment["script"])
-            print (f"{parameters} sbatch -D {directory} {script}")
+            print(f"{parameters} sbatch -D {directory} {script}")
 
     def generate_setup_from_configuration(self, configuration):
         pprint(configuration)
