@@ -4,6 +4,7 @@ from cloudmesh.common import path_expand
 import pathlib
 import shutil
 import os
+import sys
 import tempfile
 
 
@@ -12,13 +13,16 @@ def testdir():
     yield pathlib.Path(__file__).parent.as_posix()
 
 @pytest.fixture
-def cfg_dir():
+def cfg_dir(testdir):
     with tempfile.TemporaryDirectory() as d:
-        testing_dir = pathlib.Path(__file__).parent
-        source = os.path.join(testing_dir, "example.in")
+        source = os.path.join(testdir, "example.in")
         target = os.path.join(d, 'build')
         shutil.copytree(source, target, dirs_exist_ok=True)
         yield pathlib.Path(target).as_posix()
+        print("Directory out")
+        for base, dirs, files in os.walk(d):
+            for fyle in files:
+                print(os.path.join(base, fyle), file=sys.stdout)
 
 
 @pytest.fixture
