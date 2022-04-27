@@ -127,19 +127,17 @@ class TestConfig:
         Benchmark.Start()
         config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
         command = remove_spaces(
-            f"""cms sbatch generate {testdir}/example.in/slurm.in.sh 
-                   --config={config}
-                   --attributes=a=1,b=4 
-                   --noos
-                   --dir={cfg_dir}/out
-                   --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
-                   --name=a
-                   --mode=h
-            """)
+            f"cms sbatch generate {testdir}/example.in/slurm.in.sh"
+            f" --config={config}"
+            f" --dir={cfg_dir}/out"
+            " --attributes=a=1,b=4"
+            " --noos"
+            " --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\""
+            " --name=a"
+            " --mode=h")
         result = Shell.execute(command, shell=True)
-        # Benchmark.Stop()
+        Benchmark.Stop()
         pprint(result)
-        #os.system(f"tree {cfg_dir}")
 
         assert "Error" not in result
         assert 'name=Gregor' in result
@@ -172,6 +170,8 @@ class TestConfig:
         print(command)
         result = Shell.execute(command, shell=True)
         Benchmark.Stop()
+
+        pprint(result)
         # VERBOSE(result)
         # os.system("tree build")
 
@@ -234,13 +234,13 @@ class TestConfig:
         # assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 
-    def test_experiment_yaml_str(self, cfg_dir, capfd):
+    def test_experiment_yaml_str(self, cfg_dir, testdir, capfd):
         HEADING()
         Benchmark.Start()
         config = f"{cfg_dir}/c.yaml,{cfg_dir}/exp_str.yaml,{cfg_dir}/a.py"
         command = remove_spaces(
             f"""
-            cms sbatch generate {cfg_dir}/example.in/slurm.in.sh 
+            cms sbatch generate {testdir}/example.in/slurm.in.sh 
                        --config={config}
                        --noos 
                        --dir={cfg_dir}/out

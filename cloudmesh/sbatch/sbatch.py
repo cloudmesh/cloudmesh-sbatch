@@ -567,7 +567,7 @@ class SBatch:
             #
             content_script = readfile(self.source)
             content_script = self.generate(content_script, experiment["variables"])
-            writefile(os.path.join(experiment["directory"], experiment["script"]), content_script)
+            writefile(experiment["script"], content_script)
 
     @property
     def now(self):
