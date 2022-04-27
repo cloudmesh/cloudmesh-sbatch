@@ -2,6 +2,7 @@ import itertools
 import json
 import os
 import pathlib
+import tempfile
 import textwrap
 import typing
 import yaml
@@ -9,6 +10,8 @@ import yaml
 from collections import OrderedDict
 from datetime import datetime
 from pprint import pprint
+
+from nbconvert import PythonExporter
 
 from cloudmesh.common.FlatDict import FlatDict
 from cloudmesh.common.Printer import Printer
@@ -288,11 +291,14 @@ class SBatch:
             values = dict(FlatDict(regular_dict, sep="."))
 
         elif suffix.lower() in [".ipynb"]:
-            regular_dict = None
-            values = None
+            # regular_dict = None
+            # values = None
 
             py_name = filename.replace(".ipynb", ".py")
-            os.system (f"jupyter nbconvert --to python {filename}")
+            jupy = PythonExporter()
+            body, _ = jupy.export_from_notebook(filename)
+            writefile(py_name, body)
+            # Shell.run(f"jupyter nbconvert --to python {filename}")
 
             filename = py_name
             modulename = filename.replace(".py","").replace("/","_").replace("build_", "")
