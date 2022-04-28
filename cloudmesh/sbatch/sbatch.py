@@ -226,7 +226,7 @@ class SBatch:
             self.update_from_dict(dict(os.environ))
         return self.data
 
-    def update_from_cm_variables(self, load: bool = True) -> dict[str, typing.Any]:
+    def update_from_cm_variables(self, load: bool = True) -> typing.Dict[str, typing.Any]:
         """Adds Cloudmesh variables to the class's data parameter as a flat dict.
 
         Args:
