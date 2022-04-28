@@ -145,6 +145,8 @@ class TestConfig:
         assert "p_gregor=GREGOR" in content
         assert "a=101" in content
         assert 'address="Seasame Str."' in content
+        # BUG: testing assumes `cms debug on` has been run prior to execution
+        #      need to enable this temporarily.
         assert 'debug=True' in content
         assert f'user={os.environ["USERNAME"]}' in content
         if os.environ["HOME"]:
