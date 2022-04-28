@@ -25,10 +25,8 @@ class TestConfig:
     def test_help(self):
         Benchmark.Start()
         command = "cms sbatch help"
-        # print(command)
         result = Shell.run(command)
         Benchmark.Stop()
-        # VERBOSE(result)
 
         assert "sbatch" in result
 
@@ -46,10 +44,8 @@ class TestConfig:
             """
         )
         command = remove_spaces(command)
-        print(command)
         result = Shell.run(command)
         Benchmark.Stop()
-        pprint(result)
 
         content = readfile(f"{cfg_dir}/out/epoch_1_x_1/slurm.sh")
         assert "p_gregor=GREGOR" in content
@@ -71,7 +67,6 @@ class TestConfig:
         command = remove_spaces(command)
         result = Shell.run(command)
         Benchmark.Stop()
-        pprint(result)
 
         content = readfile(f"{cfg_dir}/out/epoch_1_x_1/slurm.sh")
         # assert "p_gregor=GREGOR" in content
@@ -79,7 +74,6 @@ class TestConfig:
         assert 'd="this is the way"' in content
 
     def test_oneline_noos_command(self, cfg_dir, testdir):
-        HEADING()
         Benchmark.Start()
 
         config_files = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
@@ -97,7 +91,6 @@ class TestConfig:
         assert "a=101" in content
 
     def test_oneline_os_command(self, cfg_dir, testdir):
-        # HEADING()
         Benchmark.Start()
         config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
         command = remove_spaces(
@@ -106,23 +99,22 @@ class TestConfig:
         result = Shell.run(command)
         Benchmark.Stop()
 
-        # os.system(f"tree {cfg_dir}")
-
-        # result = capfd.readouterr()
-        pprint(result)
         assert "Error" not in result
         assert 'name=Gregor' in result
         assert 'address="Seasame Str."' in result
         assert 'a=1' in result
         assert 'debug=True' in result
-        assert os.environ["USERNAME"] in result
-        config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
+        # Github does not have a "USERNAME" that is set.
+        if "GITHUB_ACTIONS" in os.environ:
+            assert 'user={USERNAME}' in result
+        else:
+            assert f'user={os.environ["USERNAME"]}' in result
+
         content = readfile(f"{cfg_dir}/out/epoch_1_x_1_y_10/slurm.sh")
         assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 
     def test_hierarchy(self, cfg_dir, testdir):
-        # HEADING()
         Benchmark.Start()
         config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
         command = remove_spaces(
@@ -136,12 +128,11 @@ class TestConfig:
             " --mode=h")
         result = Shell.run(command)
         Benchmark.Stop()
-        pprint(result)
 
         assert "Error" not in result
 
         content = readfile(f"{cfg_dir}/out/epoch_1_x_1_y_10/slurm.sh")
-        print(content)
+
         assert "p_gregor=GREGOR" in content
         assert "a=101" in content
         assert 'address="Seasame Str."' in content
@@ -149,11 +140,12 @@ class TestConfig:
         #      need to enable this temporarily.
         assert 'debug=True' in content
         # Github does not have a "USERNAME" that is set.
-        if os.environ["GITHUB_ACTIONS"]:
+        if "GITHUB_ACTIONS" in os.environ:
             assert 'user={USERNAME}' in content
         else:
             assert f'user={os.environ["USERNAME"]}' in content
-        if os.environ["HOME"]:
+
+        if "HOME" in os.environ:
             assert f'home={os.environ["HOME"]}' in content
         else:
             assert 'home={HOME}' in content
@@ -174,7 +166,6 @@ class TestConfig:
         assert "epoch_3_x_4_y_11" in experiment_dirs
 
     def test_flat(self, cfg_dir, testdir):
-        HEADING()
         Benchmark.Start()
         config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
         command = remove_spaces(
@@ -189,22 +180,42 @@ class TestConfig:
                    --mode=f 
                    --name=a
             """)
-        print(command)
         result = Shell.run(command)
         Benchmark.Stop()
 
-        pprint(result)
-        # VERBOSE(result)
-        # os.system("tree build")
-
-        # result = capfd.readouterr()
         assert "Error" not in result
-        # content = readfile(f"{cfg_dir}/out/slurm_epoch_1_x_1_y_10.sh")
         assert "p_gregor=GREGOR" in result
         assert "a=101" in result
 
+        experiment_files = next(os.walk(f"{cfg_dir}/out"))[2]
+
+        assert "slurm_epoch_1_x_1_y_10.sh" in experiment_files
+        assert "slurm_epoch_1_x_1_y_11.sh" in experiment_files
+        assert "slurm_epoch_1_x_4_y_10.sh" in experiment_files
+        assert "slurm_epoch_1_x_4_y_11.sh" in experiment_files
+        assert "slurm_epoch_2_x_1_y_10.sh" in experiment_files
+        assert "slurm_epoch_2_x_1_y_11.sh" in experiment_files
+        assert "slurm_epoch_2_x_4_y_10.sh" in experiment_files
+        assert "slurm_epoch_2_x_4_y_11.sh" in experiment_files
+        assert "slurm_epoch_3_x_1_y_10.sh" in experiment_files
+        assert "slurm_epoch_3_x_1_y_11.sh" in experiment_files
+        assert "slurm_epoch_3_x_4_y_10.sh" in experiment_files
+        assert "slurm_epoch_3_x_4_y_11.sh" in experiment_files
+        assert "config_epoch_1_x_1_y_10.yaml" in experiment_files
+        assert "config_epoch_1_x_1_y_11.yaml" in experiment_files
+        assert "config_epoch_1_x_4_y_10.yaml" in experiment_files
+        assert "config_epoch_1_x_4_y_11.yaml" in experiment_files
+        assert "config_epoch_2_x_1_y_10.yaml" in experiment_files
+        assert "config_epoch_2_x_1_y_11.yaml" in experiment_files
+        assert "config_epoch_2_x_4_y_10.yaml" in experiment_files
+        assert "config_epoch_2_x_4_y_11.yaml" in experiment_files
+        assert "config_epoch_3_x_1_y_10.yaml" in experiment_files
+        assert "config_epoch_3_x_1_y_11.yaml" in experiment_files
+        assert "config_epoch_3_x_4_y_10.yaml" in experiment_files
+        assert "config_epoch_3_x_4_y_11.yaml" in experiment_files
+
+
     def test_with_os(self, cfg_dir, testdir):
-        HEADING()
         Benchmark.Start()
         config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
         command = remove_spaces(
@@ -218,21 +229,16 @@ class TestConfig:
                        --mode=h
             """
         )
-        # print(command)
+
         result = Shell.run(command)
         Benchmark.Stop()
-        # VERBOSE(result)
-        # os.system("tree build")
 
-        # result = capfd.readouterr()
-        # assert "Error" not in result.err
         assert "Error" not in result
         content = readfile(f"{cfg_dir}/out/epoch_1_x_1_y_10/slurm.sh")
-        # assert "p_gregor=GREGOR" in content
+
         assert "a=101" in content
 
     def test_experiment_yaml_dict(self, cfg_dir, testdir):
-        HEADING()
         Benchmark.Start()
         config = f"{cfg_dir}/c.yaml,{cfg_dir}/exp_str.yaml,{cfg_dir}/a.py"
         command = remove_spaces(
@@ -246,18 +252,15 @@ class TestConfig:
             """
         )
         command = remove_spaces(command)
-        # print(command)
         result = Shell.run(command)
         Benchmark.Stop()
-        # print(result)
 
         assert "Error" not in result
         content = readfile(f"{cfg_dir}/out/epoch_1_x_1/slurm.sh")
-        # assert "p_gregor=GREGOR" in content
+        assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 
     def test_experiment_yaml_str(self, cfg_dir, testdir):
-        HEADING()
         Benchmark.Start()
         config = f"{cfg_dir}/c.yaml,{cfg_dir}/exp_str.yaml,{cfg_dir}/a.py"
         command = remove_spaces(
@@ -271,10 +274,8 @@ class TestConfig:
             """
         )
         command = remove_spaces(command)
-        # print(command)
         result = Shell.run(command)
         Benchmark.Stop()
-        # print(result)
 
         assert "Error" not in result
         content = readfile(f"{cfg_dir}/out/epoch_1_x_1/slurm.sh")
@@ -282,5 +283,4 @@ class TestConfig:
         assert "a=101" in content
 
     def test_benchmark(self):
-        HEADING()
         Benchmark.print(csv=True, sysinfo=False, tag="cmd5")

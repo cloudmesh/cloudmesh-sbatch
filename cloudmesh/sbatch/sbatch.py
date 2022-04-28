@@ -63,9 +63,9 @@ class SBatch:
             self.execution_mode = arguments['mode']
 
         if self.script_out is None and arguments.out is None:
-            self.script_out = self.source.replace(".in.", ".")  #.replace(".in", "")
+            self.script_out = pathlib.Path(self.source).name.replace(".in.", ".")  #.replace(".in", "")
         else:
-            self.script_out = arguments.get('out', self.script_out)
+            self.script_out = pathlib.Path(arguments.get('out', self.script_out)).name
 
         if self.source == self.script_out:
             if not yn_choice("The source and destination filenames are the same. Do you want to continue?"):
@@ -435,7 +435,7 @@ class SBatch:
         for permutation in self.permutations:
             identifier, assignments, values = self._generate_bootstrapping(permutation)
             print(identifier)
-            script = f"{name}_{identifier}{suffix}"
+            script = f"{directory}/{name}_{identifier}{suffix}"
             config = f"{directory}/config_{identifier}.yaml"
             variables = self.data
             variables.update(permutation.items())
