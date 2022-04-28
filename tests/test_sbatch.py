@@ -69,7 +69,6 @@ class TestConfig:
             """
         )
         command = remove_spaces(command)
-        print(command)
         result = Shell.run(command)
         Benchmark.Stop()
         pprint(result)
@@ -126,15 +125,12 @@ class TestConfig:
         # HEADING()
         Benchmark.Start()
         config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
-        # command = remove_spaces(
-        #     f"cms sbatch generate {testdir}/example.in/slurm.in.sh --verbose --config={config} --attributes=a=1,b=4 --dryrun "
-        #     f"--dir={cfg_dir}/out --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a --mode=h")
         command = remove_spaces(
             f"cms sbatch generate {testdir}/example.in/slurm.in.sh"
             f" --config={config}"
             f" --dir={cfg_dir}/out"
             " --attributes=a=1,b=4"
-            " --noos"
+            # " --noos"
             " --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\""
             " --name=a"
             " --mode=h")
@@ -143,18 +139,33 @@ class TestConfig:
         pprint(result)
 
         assert "Error" not in result
-        assert 'name=Gregor' in result
-        assert 'address="Seasame Str."' in result
-        assert 'a=1' in result
-        assert 'debug=True' in result
-        assert os.environ["USER"] in result
 
         content = readfile(f"{cfg_dir}/out/epoch_1_x_1_y_10/slurm.sh")
+        print(content)
         assert "p_gregor=GREGOR" in content
         assert "a=101" in content
-        assert 'address="Seasame Str."' in result
-        assert 'debug=True' in result
-        assert os.environ["USER"] in result
+        assert 'address="Seasame Str."' in content
+        assert 'debug=True' in content
+        assert f'user={os.environ["USERNAME"]}' in content
+        if os.environ["HOME"]:
+            assert f'home={os.environ["HOME"]}' in content
+        else:
+            assert 'home={HOME}' in content
+
+        experiment_dirs = next(os.walk(f"{cfg_dir}/out"))[1]
+
+        assert "epoch_1_x_1_y_10" in experiment_dirs
+        assert "epoch_1_x_1_y_11" in experiment_dirs
+        assert "epoch_1_x_4_y_10" in experiment_dirs
+        assert "epoch_1_x_4_y_11" in experiment_dirs
+        assert "epoch_2_x_1_y_10" in experiment_dirs
+        assert "epoch_2_x_1_y_11" in experiment_dirs
+        assert "epoch_2_x_4_y_10" in experiment_dirs
+        assert "epoch_2_x_4_y_11" in experiment_dirs
+        assert "epoch_3_x_1_y_10" in experiment_dirs
+        assert "epoch_3_x_1_y_11" in experiment_dirs
+        assert "epoch_3_x_4_y_10" in experiment_dirs
+        assert "epoch_3_x_4_y_11" in experiment_dirs
 
     def test_flat(self, cfg_dir, testdir):
         HEADING()
