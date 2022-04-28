@@ -4,3 +4,4 @@ sphinx_rtd_theme
 pytest
 coverage
 flake8
+wheel
