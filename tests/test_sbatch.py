@@ -148,7 +148,11 @@ class TestConfig:
         # BUG: testing assumes `cms debug on` has been run prior to execution
         #      need to enable this temporarily.
         assert 'debug=True' in content
-        assert f'user={os.environ["USERNAME"]}' in content
+        # Github does not have a "USERNAME" that is set.
+        if os.environ["GITHUB_ACTIONS"]:
+            assert 'user={USERNAME}' in content
+        else:
+            assert f'user={os.environ["USERNAME"]}' in content
         if os.environ["HOME"]:
             assert f'home={os.environ["HOME"]}' in content
         else:
