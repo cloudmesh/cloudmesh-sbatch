@@ -11,7 +11,7 @@ from collections import OrderedDict
 from datetime import datetime
 from pprint import pprint
 
-from nbconvert import PythonExporter
+from nbconvert.exporters import PythonExporter
 
 from cloudmesh.common.FlatDict import FlatDict
 from cloudmesh.common.Printer import Printer
@@ -296,7 +296,7 @@ class SBatch:
 
             py_name = filename.replace(".ipynb", ".py")
             jupy = PythonExporter()
-            body, _ = jupy.export_from_notebook(filename)
+            body, _ = jupy.from_filename(filename)
             writefile(py_name, body)
             # Shell.run(f"jupyter nbconvert --to python {filename}")
 
