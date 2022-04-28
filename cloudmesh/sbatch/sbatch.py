@@ -42,7 +42,7 @@ class SBatch:
         self.template_content = None
         self.out_directory = None
         self.script_out = None
-        self.execution_mode = ""
+        self.execution_mode = None
         self.source = None
         self.dryrun = None
 
@@ -55,12 +55,12 @@ class SBatch:
         Returns:
             Fluent API of the current object.
         """
-        self.source = arguments.get('SOURCE', self.source)
-        if self.source is not None:
+        if arguments.get('SOURCE') is not None:
+            self.source = arguments.get('SOURCE')
             self.register_script(self.source)
         self.dryrun = arguments.get('dryrun', self.dryrun)
-        if self.execution_mode is not None and arguments.execution_mode != 'debug':
-            self.execution_mode = arguments['mode']
+        if self.execution_mode is None:
+            self.execution_mode = arguments.mode
 
         if self.script_out is None and arguments.out is None:
             self.script_out = pathlib.Path(self.source).name.replace(".in.", ".")  #.replace(".in", "")
@@ -88,7 +88,6 @@ class SBatch:
 
         if arguments.config:
             for config_file in Parameter.expand(arguments.config):
-                # print(config_file)
                 self.update_from_file(config_file)
         return self
 
@@ -144,12 +143,17 @@ class SBatch:
         with open(yaml_file, 'rb') as f:
             yaml_data = yaml.safe_load(f)
 
+        if 'script' in yaml_data:
+            self.source = yaml_data['script']
+            self.register_script(yaml_data['script'])
         if 'template' in yaml_data:
             self.register_script(yaml_data['template'])
         if 'config' in yaml_data:
             self.update_from_file(yaml_data['config'])
-        self.name = yaml_data.get('name', self.name)
-        self.execution_mode = yaml_data.get('mode', self.execution_mode)
+        if 'name' in yaml_data:
+            self.name = yaml_data['name']
+        if 'mode' in yaml_data:
+            self.execution_mode = yaml_data['mode']
         if 'dir' in yaml_data:
             self.out_directory = yaml_data['dir']
         if 'experiments' in yaml_data:
@@ -157,7 +161,7 @@ class SBatch:
             perms = self.permutation_generator(experiments)
             self.permutations = self.permutations + perms
         if 'attributes' in yaml_data:
-            self.attributes.update(yaml_data['attributes'])
+            self.update_from_dict(FlatDict(yaml_data['attributes'], sep="."))
 
         return self
 
@@ -487,7 +491,7 @@ class SBatch:
             Console.error("No mode specified.")
         return configuration
 
-    def generate_experiment_slurm_scripts(self, mode="flat"):
+    def generate_experiment_slurm_scripts(self, out_mode=None):
         """Utility method to genrerate either hierarchical or flat outputs; or debug.
 
         Args:
@@ -496,7 +500,7 @@ class SBatch:
         Returns:
 
         """
-        mode = mode.lower()
+        mode = self.execution_mode if out_mode is None else out_mode.lower()
         if mode.startswith("d"):
             Console.warning("This is just debug mode")
             print()
@@ -550,7 +554,7 @@ class SBatch:
             print(f"{parameters} sbatch -D {directory} {script}")
 
     def generate_setup_from_configuration(self, configuration):
-        pprint(configuration)
+        # pprint(configuration)
         for identifier in configuration:
             Console.info(f"setup experiment {identifier}")
             experiment = configuration[identifier]

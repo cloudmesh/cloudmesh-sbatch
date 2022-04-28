@@ -12,11 +12,22 @@ from cloudmesh.common.util import readfile
 import os
 import textwrap
 from pprint import pprint
+from contextlib import contextmanager
 
 
 def remove_spaces(content):
     result = Shell.oneline(content)
     return " ".join(result.split(" && "))
+
+
+@contextmanager
+def ctx_chdir(path):
+    current_dir = os.getcwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(current_dir)
 
 
 @pytest.mark.incremental
@@ -279,6 +290,24 @@ class TestConfig:
 
         assert "Error" not in result
         content = readfile(f"{cfg_dir}/out/epoch_1_x_1/slurm.sh")
+        assert "p_gregor=GREGOR" in content
+        assert "a=101" in content
+
+    def test_yaml_cli(self, cfg_dir, testdir):
+        Benchmark.Start()
+
+        config_files = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
+        slurm_script = f"{testdir}/example.in/slurm.in.sh"
+        attributes = "a=1,b=4"
+        command = f"cms sbatch generate --setup={cfg_dir}/setup.yaml --attributes=a=101 --verbose"
+
+        with ctx_chdir(cfg_dir):
+            result = Shell.run(command)
+        print(result)
+        Benchmark.Stop()
+
+        assert "Error" not in result
+        content = readfile(f"{cfg_dir}/out/epoch_1_x_1_y_10/slurm.sh")
         assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 

@@ -23,8 +23,9 @@ class SbatchCommand(PluginCommand):
         ::
 
           Usage:
-                sbatch generate submit [--verbose] --name=NAME
-                sbatch generate SOURCE [--verbose] [--mode=MODE] [--setup=FILE] [--config=CONFIG] [--attributes=PARAMS] [--out=DESTINATION] [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT] --name=NAME
+                sbatch generate submit --name=NAME [--verbose]
+                sbatch generate SOURCE --name=NAME [--verbose] [--mode=MODE] [--config=CONFIG] [--attributes=PARAMS] [--out=DESTINATION] [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT]
+                sbatch generate --setup=FILE [SOURCE] [--verbose] [--mode=MODE]  [--config=CONFIG] [--attributes=PARAMS] [--out=DESTINATION] [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT] [--name=NAME]
                 sbatch slurm start
                 sbatch slurm stop
                 sbatch slurm info
@@ -52,7 +53,7 @@ class SbatchCommand(PluginCommand):
               --nocm                    cloudmesh as a variable dictionary build in. Any vaiable refered to by cloudmes. and its name is replaced from the
                                         cloudmesh variables
               --experiment=EXPERIMENT   This specifies all parameters that are used to create permutations of them. They are comma separated key value pairs
-              --mode=MODE               one of "flat", "debug", "hierachical" can als just use "f". "d", "h" [default: debug]
+              --mode=MODE               one of "flat", "debug", "hierachical" can also just use "f". "d", "h" [default: debug]
               --name=NAME               name of the experiment configuration file
 
           Description:
@@ -145,26 +146,22 @@ class SbatchCommand(PluginCommand):
             # content = readfile(sbatch.source)
 
             if sbatch.dryrun or verbose:
-                banner("Attributes")
-                pprint (sbatch.data)
+                banner("Configuration")
+                print(sbatch.debug_state(key=".."))
+                print()
                 banner(f"Original Script {sbatch.source}")
                 print(sbatch.template_content)
                 banner("end script")
             result = sbatch.generate(sbatch.template_content)
 
-            if verbose:
-                print(f"Experiments:  {arguments.experiment}")
-                sbatch.info()
-                print()
-
             if sbatch.dryrun or verbose:
-                banner("Script")
+                banner("Expanded Script")
                 print(result)
                 banner("Script End")
             else:
                 writefile(sbatch.script_out, result)
 
-            sbatch.generate_experiment_slurm_scripts(mode=arguments.mode)
+            sbatch.generate_experiment_slurm_scripts()
 
             sbatch.save_experiment_configuration(name=arguments.name)
 

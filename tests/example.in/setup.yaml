@@ -1,0 +1,19 @@
+config: config.yaml
+script: slurm.in.sh
+name: a
+dir: out
+experiments:
+  epoch: "[1-3]"
+  x: "1,4"
+  y: "10,11"
+attributes:
+  a: 1
+  b: 4
+  name: Gregor
+  address:
+    street: Seasame Str.
+    city: Bloomington
+    state: IN
+  p_gregor: GREGOR
+  d: "this is the way"
+mode: h
