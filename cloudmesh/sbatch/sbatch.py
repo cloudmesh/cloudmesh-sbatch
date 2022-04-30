@@ -6,6 +6,7 @@ import tempfile
 import textwrap
 import typing
 import yaml
+import uuid
 
 from collections import OrderedDict
 from datetime import datetime
@@ -89,6 +90,7 @@ class SBatch:
         if arguments.config:
             for config_file in Parameter.expand(arguments.config):
                 self.update_from_file(config_file)
+            self.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
         return self
 
     def config_from_yaml(self, yaml_file: PathLike):
@@ -162,6 +164,7 @@ class SBatch:
             self.permutations = self.permutations + perms
         if 'attributes' in yaml_data:
             self.update_from_dict(FlatDict(yaml_data['attributes'], sep="."))
+            self.update_from_dict({'meta.parent.uuid': str(uuid.uuid4())})
 
         return self
 
@@ -556,6 +559,7 @@ class SBatch:
     def generate_setup_from_configuration(self, configuration):
         # pprint(configuration)
         for identifier in configuration:
+            perm_uuid = str(uuid.uuid4())
             Console.info(f"setup experiment {identifier}")
             experiment = configuration[identifier]
             Shell.mkdir(experiment["directory"])
@@ -565,6 +569,8 @@ class SBatch:
             #
             Console.info(f"* write file {experiment['config']}")
 
+            # Generate UUID for each perm
+            experiment["variables"].update({ 'meta.uuid': perm_uuid })
             writefile(experiment["config"], yaml.dump(experiment["variables"], indent=2))
             content_config = readfile(experiment["config"])
             try:

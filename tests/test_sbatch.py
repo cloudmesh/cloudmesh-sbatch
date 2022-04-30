@@ -308,6 +308,7 @@ class TestConfig:
 
         assert "Error" not in result
         content = readfile(f"{cfg_dir}/out/epoch_1_x_1_y_10/slurm.sh")
+        config = readfile(f"{cfg_dir}/out/epoch_1_x_1_y_10/config.yaml")
         assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 
