@@ -368,8 +368,8 @@ class TestConfig:
         Benchmark.Stop()
 
         assert "Error" not in result
-        content = readfile(f"{build_dir}/out/epoch_1_x_1_y_10/slurm.sh")
-        config = readfile(f"{build_dir}/out/epoch_1_x_1_y_10/config.yaml")
+        content = readfile(f"{build_dir}/epoch_1_x_1_y_10/slurm.sh")
+        config = readfile(f"{build_dir}/epoch_1_x_1_y_10/config.yaml")
         assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 

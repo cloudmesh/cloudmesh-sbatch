@@ -1,7 +1,7 @@
-config: config.yaml
-script: slurm.in.sh
+config: example.in/config.yaml
+script: example.in/slurm.in.sh
 name: a
-dir: ..
+dir: .
 experiments:
   epoch: "[1-3]"
   x: "1,4"
