@@ -7,18 +7,33 @@ import os
 import sys
 import tempfile
 
+BUILD_DIR = "build"
+
+def create_build(name=None):
+    if name is None:
+        os.system(f"mkdir -p build")
+    else:
+        os.system(f"mkdir -p build/{name}")
+
 
 @pytest.fixture
 def testdir():
     yield pathlib.Path(__file__).parent.as_posix()
 
+
 @pytest.fixture
-def cfg_dir(testdir):
-    with tempfile.TemporaryDirectory() as d:
+def builddir():
+    yield pathlib.Path(__file__).parent.as_posix() + "/build"
+
+@pytest.fixture
+def cfg_dir(testdir, builddir):
+    with tempfile.TemporaryDirectory(dir=builddir) as d:
         source = os.path.join(testdir, "example.in")
         target = os.path.join(d, 'build')
         shutil.copytree(source, target, dirs_exist_ok=True)
+
         yield pathlib.Path(target).as_posix()
+
         print("Directory out")
         for base, dirs, files in os.walk(d):
             for fyle in files:

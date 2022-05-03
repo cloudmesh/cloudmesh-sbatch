@@ -30,7 +30,14 @@ class SbatchCommand(PluginCommand):
                 sbatch slurm stop
                 sbatch slurm info
 
-          This command does some useful things.
+          sbatch allows the creation of parameterized batch scripts. The initioal support includes slurm, but we intend also
+          to support LSF. Parameters can be specified on the commandline or in configuration files. Configuration files can
+          be formulated as json,yaml, python, or jupyter notebooks.
+          Parameters defined in this file arethen used in the slur batc script and substituted with their values. A special
+          parameter called experiment defines a number of variables thet are permuted on when used allowing mutliple batch
+          scripts to be defined easily to conduct parameter studies.
+
+          Please note that the setup flag is deprecated and is in future versions fully covered while just using the config file.
 
           Arguments:
               FILENAME       name of a slurm script generated with sbatch
