@@ -344,7 +344,7 @@ class TestConfig:
         assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 
-    def test_yaml_cli(self):
+    def test_setupl_cli(self):
         HEADING()
         name = FUNCTIONNAME()
 
