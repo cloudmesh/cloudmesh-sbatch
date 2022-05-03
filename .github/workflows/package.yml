@@ -26,7 +26,6 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install wheel
         python -m pip install -r requirements-dev.txt
         python -m pip install -r requirements.txt
     - name: Lint with flake8
@@ -37,6 +36,9 @@ jobs:
         flake8 cloudmesh --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
+        # Enable CMS Debug for testing
+        # If you remove, the sbatch test cases for commands without --nocm will fail.
+        cms debug on
         python -m pip install -e .
         coverage run -m pytest
     - name: Create wheel
