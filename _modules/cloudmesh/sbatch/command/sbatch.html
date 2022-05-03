@@ -101,7 +101,14 @@
 <span class="sd">                sbatch slurm stop</span>
 <span class="sd">                sbatch slurm info</span>
 
-<span class="sd">          This command does some useful things.</span>
+<span class="sd">          sbatch allows the creation of parameterized batch scripts. The initioal support includes slurm, but we intend also</span>
+<span class="sd">          to support LSF. Parameters can be specified on the commandline or in configuration files. Configuration files can</span>
+<span class="sd">          be formulated as json,yaml, python, or jupyter notebooks.</span>
+<span class="sd">          Parameters defined in this file arethen used in the slur batc script and substituted with their values. A special</span>
+<span class="sd">          parameter called experiment defines a number of variables thet are permuted on when used allowing mutliple batch</span>
+<span class="sd">          scripts to be defined easily to conduct parameter studies.</span>
+
+<span class="sd">          Please note that the setup flag is deprecated and is in future versions fully covered while just using the config file.</span>
 
 <span class="sd">          Arguments:</span>
 <span class="sd">              FILENAME       name of a slurm script generated with sbatch</span>
