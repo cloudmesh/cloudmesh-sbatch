@@ -431,7 +431,6 @@ class SBatch:
         return identifier, assignments, values
 
     def _generate_flat_config(self):
-        print("FFFF")
 
         configuration = dict()
         # self.script_variables = list()
