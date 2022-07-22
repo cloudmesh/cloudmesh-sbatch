@@ -485,7 +485,7 @@ class SBatch:
             script = f"{directory}/{identifier}/slurm.sh"
             config = f"{directory}/{identifier}/config.yaml"
             variables = dict(self.data)
-            variables.update(permutation)
+            variables.update(FlatDict({'experiments': permutation}, sep="."))
 
             configuration[identifier] = {
                 "id"        : identifier,
@@ -516,7 +516,6 @@ class SBatch:
                 for attribute, value in permutation.items():
                     values = values + f"{attribute}={value} "
                 script = f"{self.out_directory}/{self.script_out}{values}".replace("=", "_")
-                print(f"{values} sbatch {self.script_out} {script}")
         else:
             if mode.startswith("f"):
                 configuration = self._generate_flat_config()
