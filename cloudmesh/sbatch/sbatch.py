@@ -171,7 +171,7 @@ class SBatch:
             perms = self.permutation_generator(experiments)
             self.permutations = self.permutations + perms
         # if 'attributes' in root:
-        #     self.update_from_dict(FlatDict(root['attributes'], sep="."))
+        self.update_from_dict(FlatDict(root, sep="."))
         self.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
 
     def register_script(self, script):
@@ -351,8 +351,8 @@ class SBatch:
             self.permutations = self.permutations + perms
             # self.generate_experiment_permutations(experiments)
 
-        if values is not None:
-            self.update_from_dict(experiments)
+        # if values is not None:
+        #     self.update_from_dict(experiments)
 
         return self.data
 
@@ -452,8 +452,8 @@ class SBatch:
             print(identifier)
             script = f"{directory}/{name}_{identifier}{suffix}"
             config = f"{directory}/config_{identifier}.yaml"
-            variables = self.data
-            variables.update(permutation.items())
+            variables = dict(self.data)
+            variables.update(FlatDict({'experiments': permutation}, sep="."))
 
             configuration[identifier] = {
                 "id"        : identifier,
