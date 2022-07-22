@@ -243,7 +243,7 @@
             <span class="n">perms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutation_generator</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">+</span> <span class="n">perms</span>
         <span class="c1"># if &#39;attributes&#39; in root:</span>
-        <span class="c1">#     self.update_from_dict(FlatDict(root[&#39;attributes&#39;], sep=&quot;.&quot;))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">({</span> <span class="s1">&#39;meta.parent.uuid&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span> <span class="p">})</span></div>
 
 <div class="viewcode-block" id="SBatch.register_script"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.register_script">[docs]</a>    <span class="k">def</span> <span class="nf">register_script</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">script</span><span class="p">):</span>
@@ -418,16 +418,13 @@
                 <span class="n">banner</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generate permutations from experiment in </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;experiment datatype </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exp_values</span><span class="p">)</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">exp_values</span><span class="si">}</span><span class="s2"> not supported&quot;</span><span class="p">)</span>
-            <span class="kn">import</span> <span class="nn">pprint</span>
-            <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">regular_dict</span><span class="p">)</span>
             <span class="n">experiments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_leaf</span><span class="p">(</span><span class="n">regular_dict</span><span class="p">[</span><span class="s1">&#39;experiments&#39;</span><span class="p">],</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">expand</span><span class="p">)</span>
-            <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
             <span class="n">perms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutation_generator</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">+</span> <span class="n">perms</span>
             <span class="c1"># self.generate_experiment_permutations(experiments)</span>
 
-        <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
+        <span class="c1"># if values is not None:</span>
+        <span class="c1">#     self.update_from_dict(experiments)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span></div>
 
@@ -527,8 +524,8 @@
             <span class="nb">print</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
             <span class="n">script</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">identifier</span><span class="si">}{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="n">config</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">/config_</span><span class="si">{</span><span class="n">identifier</span><span class="si">}</span><span class="s2">.yaml&quot;</span>
-            <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-            <span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">permutation</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+            <span class="n">variables</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">({</span><span class="s1">&#39;experiments&#39;</span><span class="p">:</span> <span class="n">permutation</span><span class="p">},</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
 
             <span class="n">configuration</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;id&quot;</span>        <span class="p">:</span> <span class="n">identifier</span><span class="p">,</span>
