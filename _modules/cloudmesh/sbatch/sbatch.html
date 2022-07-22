@@ -225,10 +225,8 @@
         <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="SBatch.read_config_from_dict"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.read_config_from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">read_config_from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
-        <span class="k">if</span> <span class="s1">&#39;script&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">root</span><span class="p">[</span><span class="s1">&#39;script&#39;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">register_script</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="s1">&#39;script&#39;</span><span class="p">])</span>
         <span class="k">if</span> <span class="s1">&#39;template&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">root</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">register_script</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">])</span>
         <span class="k">if</span> <span class="s1">&#39;config&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update_from_file</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">])</span>
