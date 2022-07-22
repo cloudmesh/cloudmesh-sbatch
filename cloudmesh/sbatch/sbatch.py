@@ -346,10 +346,7 @@ class SBatch:
                 banner(f"Generate permutations from experiment in {filename}")
             else:
                 Console.error(f"experiment datatype {type(exp_values)} for {exp_values} not supported")
-            import pprint
-            pprint.pprint(regular_dict)
             experiments = self._apply_leaf(regular_dict['experiments'], Parameter.expand)
-            pprint.pprint(experiments)
             perms = self.permutation_generator(experiments)
             self.permutations = self.permutations + perms
             # self.generate_experiment_permutations(experiments)
