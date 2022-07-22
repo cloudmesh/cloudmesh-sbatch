@@ -153,10 +153,8 @@ class SBatch:
         return self
 
     def read_config_from_dict(self, root):
-        if 'script' in root:
-            self.source = root['script']
-            self.register_script(root['script'])
         if 'template' in root:
+            self.source = root['template']
             self.register_script(root['template'])
         if 'config' in root:
             self.update_from_file(root['config'])
