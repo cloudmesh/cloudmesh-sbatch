@@ -1,14 +1,6 @@
-# copy to build then invoke with
-# cms sbatch generate build/example.in/experiments.yaml \
-#     --config={config} \
-#     --dir={build_dir} \
-#     --attributes=a=1,b=4 \
-#     --noos \
-#     --name=a \
-#     --mode=h
-
-## two hashes will be deleted
-
+##
+## a sample output for experiments.yam and experiment.yaml
+##
 name: earthquake-project
 mode: h
 dir: project
@@ -17,12 +9,11 @@ dir: project
 
 experiment:
   # test comment 2 should be passed
-  ## two hashes will be deleted
-  card_name: "a100,p100,v100,k80,rtx2080"
+  card_name: "a100"
   gpu_count: 1
   cpu_num: 6
   mem: "32GB"
-  TFTTransformerepochs: "2,10,20,30,34,40,50,60,70"
+  TFTTransformerepochs: "2"
 
 benchmark:
   name: Earthquake
@@ -35,7 +26,6 @@ benchmark:
 
 model_parameters:
   # test comment 3 should be passed
-  ## two hashes will be deleted
   DLAnalysisOnly: 'False'
   DLRestorefromcheckpoint: 'False'
   DLinputCheckpointpostfix: '1'

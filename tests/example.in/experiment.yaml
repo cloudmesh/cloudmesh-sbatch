@@ -1,14 +1,26 @@
+# copy to build then invoke with
+# cms sbatch generate build/example.in/experiment.yaml \
+#     --config={config} \
+#     --dir={build_dir} \
+#     --attributes=a=1,b=4 \
+#     --noos \
+#     --name=a \
+#     --mode=h
+
 name: earthquake-project
 mode: h
 dir: project
 
+# test comment 1 should be passed
+## two hashes will be deleted
+
 experiment:
+  # test comment 2 should be passed
+  ## two hashes will be deleted
   card_name: "a100,p100,v100,k80,rtx2080"
   gpu_count: 1
   cpu_num: 6
   mem: "32GB"
-  ## TFTTransformerepochs = num_epochs
-  #
   TFTTransformerepochs: "2,10,20,30,34,40,50,60,70"
 
 benchmark:
@@ -21,6 +33,8 @@ benchmark:
   platform: rivanna
 
 model_parameters:
+  # test comment 3 should be passed
+  ## two hashes will be deleted
   DLAnalysisOnly: 'False'
   DLRestorefromcheckpoint: 'False'
   DLinputCheckpointpostfix: '1'
