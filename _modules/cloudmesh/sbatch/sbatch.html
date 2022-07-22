@@ -165,6 +165,34 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">({</span> <span class="s1">&#39;meta.parent.uuid&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span> <span class="p">})</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_apply_leaf</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">my_dict</span><span class="p">:</span> <span class="n">DictOrList</span><span class="p">,</span> <span class="n">my_lambda</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Walks python dictionary and applies a lambda to all leaf nodes.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            my_dict: The dictionary to process</span>
+<span class="sd">            my_lambda: The lambda function to apply to the leaf nodes.</span>
+<span class="sd">            *args: positional arguments passed directly to my_lambda</span>
+<span class="sd">            **kwargs: keyword arguments passed directoy to my_lambda</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A new dictionary that has applied the my_lambda function on</span>
+<span class="sd">            each leaf node.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">my_dict</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">new_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">new_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_apply_leaf</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">my_lambda</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">inner_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                        <span class="n">inner_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_apply_leaf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">my_lambda</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">inner_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">my_lambda</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+                    <span class="n">new_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">inner_list</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">my_lambda</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_dict</span>
+
 <div class="viewcode-block" id="SBatch.config_from_yaml"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.config_from_yaml">[docs]</a>    <span class="k">def</span> <span class="nf">config_from_yaml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">yaml_file</span><span class="p">:</span> <span class="n">PathLike</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Configures the object from a standard YAML structure.</span>
 
@@ -188,57 +216,35 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Fluent API of the current object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">def</span> <span class="nf">_apply_leaf</span><span class="p">(</span><span class="n">my_dict</span><span class="p">:</span> <span class="n">DictOrList</span><span class="p">,</span> <span class="n">my_lambda</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-            <span class="sd">&quot;&quot;&quot;Walks python dictionary and applies a lambda to all leaf nodes.</span>
-<span class="sd">            Args:</span>
-<span class="sd">                my_dict: The dictionary to process</span>
-<span class="sd">                my_lambda: The lambda function to apply to the leaf nodes.</span>
-<span class="sd">                *args: positional arguments passed directly to my_lambda</span>
-<span class="sd">                **kwargs: keyword arguments passed directoy to my_lambda</span>
-<span class="sd">            Returns:</span>
-<span class="sd">                A new dictionary that has applied the my_lambda function on</span>
-<span class="sd">                each leaf node.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
-            <span class="n">new_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">my_dict</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">new_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                    <span class="n">new_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_apply_leaf</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">my_lambda</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                    <span class="n">inner_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-                    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                            <span class="n">inner_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_apply_leaf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">my_lambda</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">inner_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">my_lambda</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
-                        <span class="n">new_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">inner_list</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">new_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">my_lambda</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">new_dict</span>
+
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">yaml_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">yaml_data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="s1">&#39;script&#39;</span> <span class="ow">in</span> <span class="n">yaml_data</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">yaml_data</span><span class="p">[</span><span class="s1">&#39;script&#39;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">register_script</span><span class="p">(</span><span class="n">yaml_data</span><span class="p">[</span><span class="s1">&#39;script&#39;</span><span class="p">])</span>
-        <span class="k">if</span> <span class="s1">&#39;template&#39;</span> <span class="ow">in</span> <span class="n">yaml_data</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">register_script</span><span class="p">(</span><span class="n">yaml_data</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">])</span>
-        <span class="k">if</span> <span class="s1">&#39;config&#39;</span> <span class="ow">in</span> <span class="n">yaml_data</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">update_from_file</span><span class="p">(</span><span class="n">yaml_data</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">])</span>
-        <span class="k">if</span> <span class="s1">&#39;name&#39;</span> <span class="ow">in</span> <span class="n">yaml_data</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">yaml_data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s1">&#39;mode&#39;</span> <span class="ow">in</span> <span class="n">yaml_data</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">execution_mode</span> <span class="o">=</span> <span class="n">yaml_data</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s1">&#39;dir&#39;</span> <span class="ow">in</span> <span class="n">yaml_data</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">out_directory</span> <span class="o">=</span> <span class="n">yaml_data</span><span class="p">[</span><span class="s1">&#39;dir&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s1">&#39;experiments&#39;</span> <span class="ow">in</span> <span class="n">yaml_data</span><span class="p">:</span>
-            <span class="n">experiments</span> <span class="o">=</span> <span class="n">_apply_leaf</span><span class="p">(</span><span class="n">yaml_data</span><span class="p">[</span><span class="s1">&#39;experiments&#39;</span><span class="p">],</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">expand</span><span class="p">)</span>
-            <span class="n">perms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutation_generator</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">+</span> <span class="n">perms</span>
-        <span class="k">if</span> <span class="s1">&#39;attributes&#39;</span> <span class="ow">in</span> <span class="n">yaml_data</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">(</span><span class="n">yaml_data</span><span class="p">[</span><span class="s1">&#39;attributes&#39;</span><span class="p">],</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">({</span><span class="s1">&#39;meta.parent.uuid&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_config_from_dict</span><span class="p">(</span><span class="n">yaml_data</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="SBatch.read_config_from_dict"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.read_config_from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">read_config_from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;script&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">root</span><span class="p">[</span><span class="s1">&#39;script&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_script</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="s1">&#39;script&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s1">&#39;template&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_script</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s1">&#39;config&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_from_file</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s1">&#39;name&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">root</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;mode&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">execution_mode</span> <span class="o">=</span> <span class="n">root</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;dir&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">out_directory</span> <span class="o">=</span> <span class="n">root</span><span class="p">[</span><span class="s1">&#39;dir&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;experiments&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
+            <span class="n">experiments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_leaf</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="s1">&#39;experiments&#39;</span><span class="p">],</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">expand</span><span class="p">)</span>
+            <span class="n">perms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutation_generator</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">+</span> <span class="n">perms</span>
+        <span class="c1"># if &#39;attributes&#39; in root:</span>
+        <span class="c1">#     self.update_from_dict(FlatDict(root[&#39;attributes&#39;], sep=&quot;.&quot;))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">({</span> <span class="s1">&#39;meta.parent.uuid&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span> <span class="p">})</span></div>
 
 <div class="viewcode-block" id="SBatch.register_script"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.register_script">[docs]</a>    <span class="k">def</span> <span class="nf">register_script</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">script</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Registers and reads the template script in for processing</span>
@@ -388,22 +394,22 @@
             <span class="n">regular_dict</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">):</span>
-                    <span class="nb">print</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
                     <span class="n">regular_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
             <span class="n">values</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">(</span><span class="n">regular_dict</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported config type </span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-
-        <span class="k">if</span> <span class="n">regular_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">&#39;experiment&#39;</span> <span class="ow">in</span> <span class="n">regular_dict</span><span class="p">:</span>
-            <span class="n">exp_values</span> <span class="o">=</span> <span class="n">regular_dict</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_config_from_dict</span><span class="p">(</span><span class="n">regular_dict</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">regular_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">&#39;experiments&#39;</span> <span class="ow">in</span> <span class="n">regular_dict</span><span class="p">:</span>
+            <span class="n">exp_values</span> <span class="o">=</span> <span class="n">regular_dict</span><span class="p">[</span><span class="s1">&#39;experiments&#39;</span><span class="p">]</span>
 
             <span class="n">banner</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exp_values</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp_values</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                 <span class="n">entries</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">exp_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">exp_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="n">entry</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span>
                     <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
                 <span class="n">exp_values</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span>
@@ -412,10 +418,16 @@
                 <span class="n">banner</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generate permutations from experiment in </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;experiment datatype </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exp_values</span><span class="p">)</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">exp_values</span><span class="si">}</span><span class="s2"> not supported&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">generate_experiment_permutations</span><span class="p">(</span><span class="n">exp_values</span><span class="p">)</span>
+            <span class="kn">import</span> <span class="nn">pprint</span>
+            <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">regular_dict</span><span class="p">)</span>
+            <span class="n">experiments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_leaf</span><span class="p">(</span><span class="n">regular_dict</span><span class="p">[</span><span class="s1">&#39;experiments&#39;</span><span class="p">],</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">expand</span><span class="p">)</span>
+            <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
+            <span class="n">perms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutation_generator</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">+</span> <span class="n">perms</span>
+            <span class="c1"># self.generate_experiment_permutations(experiments)</span>
 
         <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span></div>
 
@@ -538,7 +550,7 @@
 <span class="sd">            Writes two files for each established experiment, each in their own directory.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;HHHH&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Outputting Hierarchical Experiments&quot;</span><span class="p">)</span>
         <span class="n">configuration</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">script_variables</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">suffix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script_out</span><span class="p">)</span>
@@ -561,8 +573,6 @@
                 <span class="s2">&quot;variables&quot;</span> <span class="p">:</span> <span class="n">variables</span>
             <span class="p">}</span>
             <span class="c1"># pprint(configuration)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No mode specified.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">configuration</span>
 
 <div class="viewcode-block" id="SBatch.generate_experiment_slurm_scripts"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_experiment_slurm_scripts">[docs]</a>    <span class="k">def</span> <span class="nf">generate_experiment_slurm_scripts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -587,37 +597,29 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">mode</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;f&quot;</span><span class="p">):</span>
                 <span class="n">configuration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_flat_config</span><span class="p">()</span>
-
             <span class="k">elif</span> <span class="n">mode</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;h&quot;</span><span class="p">):</span>
                 <span class="n">configuration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_hierarchical_config</span><span class="p">()</span>
-
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid generator mode </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
             <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;Script generation&quot;</span><span class="p">)</span>
-
-            <span class="c1"># pprint(configuration)</span>
-
             <span class="nb">print</span><span class="p">(</span><span class="n">Printer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">configuration</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;experiment&quot;</span><span class="p">,</span> <span class="s2">&quot;script&quot;</span><span class="p">,</span> <span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="s2">&quot;directory&quot;</span><span class="p">]))</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">configuration_parameters</span> <span class="o">=</span> <span class="n">configuration</span>
-            <span class="c1"># if not yn_choice(&quot;The listed scripts will be gnerated, Continue&quot;):</span>
-            <span class="c1">#    return</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">generate_setup_from_configuration</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span></div>
 
-            <span class="c1">#</span>
-            <span class="c1"># now generate the scripts</span>
-            <span class="c1">#</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">generate_setup_from_configuration</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span>
+<div class="viewcode-block" id="SBatch.generate_submit"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_submit">[docs]</a>    <span class="k">def</span> <span class="nf">generate_submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="s1">&#39;slurm&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">type_</span> <span class="o">==</span> <span class="s1">&#39;slurm&#39;</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="s1">&#39;sbatch&#39;</span>
+        <span class="k">elif</span> <span class="n">type_</span> <span class="o">==</span> <span class="s1">&#39;lsf&#39;</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="s1">&#39;bsub&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported submission type </span><span class="si">{</span><span class="n">type_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-            <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;script generation not yet implemented&quot;</span><span class="p">)</span></div>
-
-    <span class="c1"># TODO: Need to make the printout is done the right way</span>
-    <span class="c1"># Should be able to pipe the output and run as a shell script.</span>
-<div class="viewcode-block" id="SBatch.generate_submit"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_submit">[docs]</a>    <span class="k">def</span> <span class="nf">generate_submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="n">experiments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration_parameters</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">readfile</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+        <span class="n">experiments</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">readfile</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">experiments</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">Console</span><span class="o">.</span><span class="n">error</span> <span class="p">(</span><span class="s2">&quot;please define the experiment parameters&quot;</span><span class="p">)</span>
+            <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;please define the experiment parameters&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 
         <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">experiments</span><span class="p">:</span>
@@ -625,7 +627,7 @@
             <span class="n">parameters</span> <span class="o">=</span> <span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;experiment&quot;</span><span class="p">]</span>
             <span class="n">directory</span> <span class="o">=</span> <span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;directory&quot;</span><span class="p">]</span>
             <span class="n">script</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;script&quot;</span><span class="p">])</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parameters</span><span class="si">}</span><span class="s2"> sbatch -D </span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">script</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;( </span><span class="si">{</span><span class="n">parameters</span><span class="si">}</span><span class="s2"> cd </span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2"> &amp;&amp; </span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">script</span><span class="si">}</span><span class="s2"> )&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SBatch.generate_setup_from_configuration"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_setup_from_configuration">[docs]</a>    <span class="k">def</span> <span class="nf">generate_setup_from_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configuration</span><span class="p">):</span>
         <span class="c1"># pprint(configuration)</span>

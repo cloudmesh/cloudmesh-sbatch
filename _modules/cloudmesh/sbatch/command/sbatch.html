@@ -95,7 +95,7 @@
 <span class="sd">        ::</span>
 
 <span class="sd">          Usage:</span>
-<span class="sd">                sbatch generate submit --name=NAME [--verbose]</span>
+<span class="sd">                sbatch generate submit --name=NAME [--type=JOB_TYPE] [--verbose]</span>
 <span class="sd">                sbatch generate SOURCE --name=NAME [--verbose] [--mode=MODE] [--config=CONFIG] [--attributes=PARAMS] [--out=DESTINATION] [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT]</span>
 <span class="sd">                sbatch generate --setup=FILE [SOURCE] [--verbose] [--mode=MODE]  [--config=CONFIG] [--attributes=PARAMS] [--out=DESTINATION] [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT] [--name=NAME]</span>
 <span class="sd">                sbatch slurm start</span>
@@ -124,6 +124,7 @@
 <span class="sd">              --dryrun                  flag to do a dryrun and not create any files and directories (not tested)</span>
 <span class="sd">              --config=CONFIG...        a list of comma seperated configuration files in yaml or json format. The endings must be .json or .yaml</span>
 <span class="sd">              --setup=FILE              TBD</span>
+<span class="sd">              --type=JOB_TYPE           The method to generate submission scripts.  One of slurm, lsf. [default: slurm]</span>
 <span class="sd">              --attributes=PARAMS       a list of coma separated attribute value pars to set parameters that are used.</span>
 <span class="sd">              --out=DESTINATION         TBD</span>
 <span class="sd">              --account=ACCOUNT         TBD</span>
@@ -207,7 +208,11 @@
 
             <span class="n">sbatch</span> <span class="o">=</span> <span class="n">SBatch</span><span class="p">()</span>
             <span class="n">sbatch</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">verbose</span>
-            <span class="n">sbatch</span><span class="o">.</span><span class="n">generate_submit</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">arguments</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">type_</span> <span class="o">=</span> <span class="s2">&quot;slurm&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">type_</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">type</span>
+            <span class="n">sbatch</span><span class="o">.</span><span class="n">generate_submit</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">arguments</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="n">type_</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 
