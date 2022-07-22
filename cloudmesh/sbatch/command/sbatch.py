@@ -23,7 +23,7 @@ class SbatchCommand(PluginCommand):
         ::
 
           Usage:
-                sbatch generate submit --name=NAME [--verbose]
+                sbatch generate submit --name=NAME [--type=JOB_TYPE] [--verbose]
                 sbatch generate SOURCE --name=NAME [--verbose] [--mode=MODE] [--config=CONFIG] [--attributes=PARAMS] [--out=DESTINATION] [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT]
                 sbatch generate --setup=FILE [SOURCE] [--verbose] [--mode=MODE]  [--config=CONFIG] [--attributes=PARAMS] [--out=DESTINATION] [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT] [--name=NAME]
                 sbatch slurm start
@@ -52,6 +52,7 @@ class SbatchCommand(PluginCommand):
               --dryrun                  flag to do a dryrun and not create any files and directories (not tested)
               --config=CONFIG...        a list of comma seperated configuration files in yaml or json format. The endings must be .json or .yaml
               --setup=FILE              TBD
+              --type=JOB_TYPE           The method to generate submission scripts.  One of slurm, lsf. [default: slurm]
               --attributes=PARAMS       a list of coma separated attribute value pars to set parameters that are used.
               --out=DESTINATION         TBD
               --account=ACCOUNT         TBD
@@ -135,7 +136,11 @@ class SbatchCommand(PluginCommand):
 
             sbatch = SBatch()
             sbatch.verbose = arguments.verbose
-            sbatch.generate_submit(name=arguments.name)
+            if arguments.type is None:
+                type_ = "slurm"
+            else:
+                type_ = arguments.type
+            sbatch.generate_submit(name=arguments.name, type_=type_)
 
             return ""
 

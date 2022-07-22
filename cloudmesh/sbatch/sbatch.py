@@ -93,6 +93,34 @@ class SBatch:
             self.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
         return self
 
+    @classmethod
+    def _apply_leaf(cls, my_dict: DictOrList, my_lambda: typing.Callable, *args, **kwargs) -> dict:
+        """Walks python dictionary and applies a lambda to all leaf nodes.
+        Args:
+            my_dict: The dictionary to process
+            my_lambda: The lambda function to apply to the leaf nodes.
+            *args: positional arguments passed directly to my_lambda
+            **kwargs: keyword arguments passed directoy to my_lambda
+        Returns:
+            A new dictionary that has applied the my_lambda function on
+            each leaf node.
+        """
+        new_dict = dict(my_dict)
+        for key, value in new_dict.items():
+            if isinstance(value, dict):
+                new_dict[key] = cls._apply_leaf(value, my_lambda, *args, **kwargs)
+            elif isinstance(value, list):
+                inner_list = list()
+                for x in value:
+                    if isinstance(x, dict) or isinstance(x, list):
+                        inner_list.append(cls._apply_leaf(x, my_lambda, *args, **kwargs))
+                    else:
+                        inner_list.append(my_lambda(x, **kwargs))
+                    new_dict[key] = inner_list
+            else:
+                new_dict[key] = my_lambda(str(value), *args, **kwargs)
+        return new_dict
+
     def config_from_yaml(self, yaml_file: PathLike):
         """Configures the object from a standard YAML structure.
 
@@ -116,57 +144,35 @@ class SBatch:
         Returns:
             Fluent API of the current object.
         """
-        def _apply_leaf(my_dict: DictOrList, my_lambda: typing.Callable, *args, **kwargs) -> dict:
-            """Walks python dictionary and applies a lambda to all leaf nodes.
-            Args:
-                my_dict: The dictionary to process
-                my_lambda: The lambda function to apply to the leaf nodes.
-                *args: positional arguments passed directly to my_lambda
-                **kwargs: keyword arguments passed directoy to my_lambda
-            Returns:
-                A new dictionary that has applied the my_lambda function on
-                each leaf node.
-            """
-            new_dict = dict(my_dict)
-            for key, value in new_dict.items():
-                if isinstance(value, dict):
-                    new_dict[key] = _apply_leaf(value, my_lambda, *args, **kwargs)
-                elif isinstance(value, list):
-                    inner_list = list()
-                    for x in value:
-                        if isinstance(x, dict) or isinstance(x, list):
-                            inner_list.append(_apply_leaf(x, my_lambda, *args, **kwargs))
-                        else:
-                            inner_list.append(my_lambda(x, **kwargs))
-                        new_dict[key] = inner_list
-                else:
-                    new_dict[key] = my_lambda(str(value), *args, **kwargs)
-            return new_dict
+
         with open(yaml_file, 'rb') as f:
             yaml_data = yaml.safe_load(f)
 
-        if 'script' in yaml_data:
-            self.source = yaml_data['script']
-            self.register_script(yaml_data['script'])
-        if 'template' in yaml_data:
-            self.register_script(yaml_data['template'])
-        if 'config' in yaml_data:
-            self.update_from_file(yaml_data['config'])
-        if 'name' in yaml_data:
-            self.name = yaml_data['name']
-        if 'mode' in yaml_data:
-            self.execution_mode = yaml_data['mode']
-        if 'dir' in yaml_data:
-            self.out_directory = yaml_data['dir']
-        if 'experiments' in yaml_data:
-            experiments = _apply_leaf(yaml_data['experiments'], Parameter.expand)
-            perms = self.permutation_generator(experiments)
-            self.permutations = self.permutations + perms
-        if 'attributes' in yaml_data:
-            self.update_from_dict(FlatDict(yaml_data['attributes'], sep="."))
-            self.update_from_dict({'meta.parent.uuid': str(uuid.uuid4())})
+        self.read_config_from_dict(yaml_data)
 
         return self
+
+    def read_config_from_dict(self, root):
+        if 'script' in root:
+            self.source = root['script']
+            self.register_script(root['script'])
+        if 'template' in root:
+            self.register_script(root['template'])
+        if 'config' in root:
+            self.update_from_file(root['config'])
+        if 'name' in root:
+            self.name = root['name']
+        if 'mode' in root:
+            self.execution_mode = root['mode']
+        if 'dir' in root:
+            self.out_directory = root['dir']
+        if 'experiments' in root:
+            experiments = self._apply_leaf(root['experiments'], Parameter.expand)
+            perms = self.permutation_generator(experiments)
+            self.permutations = self.permutations + perms
+        # if 'attributes' in root:
+        #     self.update_from_dict(FlatDict(root['attributes'], sep="."))
+        self.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
 
     def register_script(self, script):
         """Registers and reads the template script in for processing
@@ -316,22 +322,22 @@ class SBatch:
             regular_dict = {}
             for name, value in vars(mod).items():
                 if not name.startswith("__"):
-                    print (name, value)
+                    print(name, value)
                     regular_dict[name] = value
 
             values = dict(FlatDict(regular_dict, sep="."))
         else:
             raise RuntimeError(f"Unsupported config type {suffix}")
 
-
-        if regular_dict is not None and 'experiment' in regular_dict:
-            exp_values = regular_dict['experiment']
+        self.read_config_from_dict(regular_dict)
+        if regular_dict is not None and 'experiments' in regular_dict:
+            exp_values = regular_dict['experiments']
 
             banner(str(exp_values))
 
             if isinstance(exp_values, dict):
                 entries = []
-                for key,value in exp_values.items():
+                for key, value in exp_values.items():
                     entry = f"{key}={value}"
                     entries.append(entry)
                 exp_values = " ".join(entries)
@@ -340,10 +346,16 @@ class SBatch:
                 banner(f"Generate permutations from experiment in {filename}")
             else:
                 Console.error(f"experiment datatype {type(exp_values)} for {exp_values} not supported")
-            self.generate_experiment_permutations(exp_values)
+            import pprint
+            pprint.pprint(regular_dict)
+            experiments = self._apply_leaf(regular_dict['experiments'], Parameter.expand)
+            pprint.pprint(experiments)
+            perms = self.permutation_generator(experiments)
+            self.permutations = self.permutations + perms
+            # self.generate_experiment_permutations(experiments)
 
         if values is not None:
-            self.update_from_dict(values)
+            self.update_from_dict(experiments)
 
         return self.data
 
@@ -466,7 +478,7 @@ class SBatch:
             Writes two files for each established experiment, each in their own directory.
 
         """
-        print("HHHH")
+        print("Outputting Hierarchical Experiments")
         configuration = dict()
         self.script_variables = []
         suffix = self._suffix(self.script_out)
@@ -489,8 +501,6 @@ class SBatch:
                 "variables" : variables
             }
             # pprint(configuration)
-        else:
-            Console.error("No mode specified.")
         return configuration
 
     def generate_experiment_slurm_scripts(self, out_mode=None):
@@ -515,37 +525,29 @@ class SBatch:
         else:
             if mode.startswith("f"):
                 configuration = self._generate_flat_config()
-
             elif mode.startswith("h"):
                 configuration = self._generate_hierarchical_config()
-
             else:
                 raise RuntimeError(f"Invalid generator mode {mode}")
 
             banner("Script generation")
-
-            # pprint(configuration)
-
             print(Printer.write(configuration, order=["id", "experiment", "script", "config", "directory"]))
 
             self.configuration_parameters = configuration
-            # if not yn_choice("The listed scripts will be gnerated, Continue"):
-            #    return
-
-            #
-            # now generate the scripts
-            #
             self.generate_setup_from_configuration(configuration)
 
-            Console.error("script generation not yet implemented")
+    def generate_submit(self, name=None, type_='slurm'):
+        if type_ == 'slurm':
+            cmd = 'sbatch'
+        elif type_ == 'lsf':
+            cmd = 'bsub'
+        else:
+            raise RuntimeError(f"Unsupported submission type {type_}")
 
-    # TODO: Need to make the printout is done the right way
-    # Should be able to pipe the output and run as a shell script.
-    def generate_submit(self, name=None):
-        experiments = self.configuration_parameters = json.loads(readfile(name))
+        experiments = json.loads(readfile(name))
 
         if experiments is None:
-            Console.error ("please define the experiment parameters")
+            Console.error("please define the experiment parameters")
             return ""
 
         for entry in experiments:
@@ -553,7 +555,7 @@ class SBatch:
             parameters = experiment["experiment"]
             directory = experiment["directory"]
             script = os.path.basename(experiment["script"])
-            print(f"{parameters} sbatch -D {directory} {script}")
+            print(f"( {parameters} cd {directory} && {cmd} {script} )")
 
     def generate_setup_from_configuration(self, configuration):
         # pprint(configuration)
