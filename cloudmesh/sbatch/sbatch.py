@@ -153,10 +153,8 @@ class SBatch:
         return self
 
     def read_config_from_dict(self, root):
-        if 'script' in root:
-            self.source = root['script']
-            self.register_script(root['script'])
         if 'template' in root:
+            self.source = root['template']
             self.register_script(root['template'])
         if 'config' in root:
             self.update_from_file(root['config'])
@@ -487,7 +485,7 @@ class SBatch:
             script = f"{directory}/{identifier}/slurm.sh"
             config = f"{directory}/{identifier}/config.yaml"
             variables = dict(self.data)
-            variables.update(permutation)
+            variables.update(FlatDict({'experiments': permutation}, sep="."))
 
             configuration[identifier] = {
                 "id"        : identifier,
@@ -518,7 +516,6 @@ class SBatch:
                 for attribute, value in permutation.items():
                     values = values + f"{attribute}={value} "
                 script = f"{self.out_directory}/{self.script_out}{values}".replace("=", "_")
-                print(f"{values} sbatch {self.script_out} {script}")
         else:
             if mode.startswith("f"):
                 configuration = self._generate_flat_config()
