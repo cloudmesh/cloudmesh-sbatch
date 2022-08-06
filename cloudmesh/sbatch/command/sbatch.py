@@ -19,8 +19,7 @@ class SbatchCommand(PluginCommand):
     # noinspection PyUnusedLocal
     @command
     def do_sbatch(self, args, arguments):
-        """
-        ::
+        """::
 
           Usage:
                 sbatch generate submit --name=NAME [--type=JOB_TYPE] [--verbose]
@@ -30,14 +29,22 @@ class SbatchCommand(PluginCommand):
                 sbatch slurm stop
                 sbatch slurm info
 
-          sbatch allows the creation of parameterized batch scripts. The initioal support includes slurm, but we intend also
-          to support LSF. Parameters can be specified on the commandline or in configuration files. Configuration files can
-          be formulated as json,yaml, python, or jupyter notebooks.
-          Parameters defined in this file arethen used in the slur batc script and substituted with their values. A special
-          parameter called experiment defines a number of variables thet are permuted on when used allowing mutliple batch
+          sbatch allows the creation of parameterized batch
+          scripts. The initioal support includes slurm, but we intend
+          also to support LSF. Parameters can be specified on the
+          commandline or in configuration files. Configuration files
+          can be formulated as json,yaml, python, or jupyter
+          notebooks.
+
+          Parameters defined in this file arethen used in the slur
+          batc script and substituted with their values. A special
+          parameter called experiment defines a number of variables
+          thet are permuted on when used allowing mutliple batch
           scripts to be defined easily to conduct parameter studies.
 
-          Please note that the setup flag is deprecated and is in future versions fully covered while just using the config file.
+          Please note that the setup flag is deprecated and is in
+          future versions fully covered while just using the config
+          file.
 
           Arguments:
               FILENAME       name of a slurm script generated with sbatch
@@ -49,7 +56,7 @@ class SbatchCommand(PluginCommand):
 
           Options:
               -h                        help
-              --dryrun                  flag to do a dryrun and not create any files and directories (not tested)
+              --dryrun                  flag to do a dryrun and not create files and directories (not tested)
               --config=CONFIG...        a list of comma seperated configuration files in yaml or json format. The endings must be .json or .yaml
               --setup=FILE              TBD
               --type=JOB_TYPE           The method to generate submission scripts.  One of slurm, lsf. [default: slurm]
@@ -66,10 +73,34 @@ class SbatchCommand(PluginCommand):
 
           Description:
 
-               > Example:
-               > cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" --name=a --mode=h
-               > cms sbatch generate slurm.in.sh --config=a.py,b.json,c.yaml --attributes=a=1,b=4  --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" --name=a --mode=h
-               > cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=name=gregor,a=1,b=4 --noos --dir=example --experiment="epoch=[1-3] x=[1,4] y=[10,11]" --mode=f --name=a
+               > Examples:
+               >
+               > cms sbatch generate slurm.in.sh --verbose \
+               >     --config=a.py,b.json,c.yaml \
+               >     --attributes=a=1,b=4 \
+               >     --dryrun --noos --dir=example \
+               >     --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" \
+               >     --name=a --mode=h
+
+               > cms sbatch generate slurm.in.sh \
+               >    --config=a.py,b.json,c.yaml \
+               >    --attributes=a=1,b=4  \
+               >    --noos \
+               >    --dir=example \
+               >    --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" \
+               >    --name=a \
+               >    --mode=h\
+
+               > cms sbatch generate slurm.in.sh \
+               >    --verbose \
+               >    --config=a.py,b.json,c.yaml \
+               >    --attributes=name=gregor,a=1,b=4 \
+               >    --noos \
+               >    --dir=example \
+               >    --experiment="epoch=[1-3] x=[1,4] y=[10,11]" \
+               >    --mode=f \
+               >    --name=a
+
                > cms sbatch generate slurm.in.sh --experiments-file=experiments.yaml --name=a
 
                > cms sbatch generate submit --name=a

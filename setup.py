@@ -32,6 +32,7 @@ cloudmesh-cmd5
 cloudmesh-sys
 cloudmesh-inventory
 cloudmesh-configuration
+cloudmesh-progress
 nbconvert
 """.split("\n")
 
