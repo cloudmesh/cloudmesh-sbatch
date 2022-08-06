@@ -91,8 +91,7 @@
     <span class="c1"># noinspection PyUnusedLocal</span>
     <span class="nd">@command</span>
     <span class="k">def</span> <span class="nf">do_sbatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">arguments</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        ::</span>
+        <span class="sd">&quot;&quot;&quot;::</span>
 
 <span class="sd">          Usage:</span>
 <span class="sd">                sbatch generate submit --name=NAME [--type=JOB_TYPE] [--verbose]</span>
@@ -102,14 +101,22 @@
 <span class="sd">                sbatch slurm stop</span>
 <span class="sd">                sbatch slurm info</span>
 
-<span class="sd">          sbatch allows the creation of parameterized batch scripts. The initioal support includes slurm, but we intend also</span>
-<span class="sd">          to support LSF. Parameters can be specified on the commandline or in configuration files. Configuration files can</span>
-<span class="sd">          be formulated as json,yaml, python, or jupyter notebooks.</span>
-<span class="sd">          Parameters defined in this file arethen used in the slur batc script and substituted with their values. A special</span>
-<span class="sd">          parameter called experiment defines a number of variables thet are permuted on when used allowing mutliple batch</span>
+<span class="sd">          sbatch allows the creation of parameterized batch</span>
+<span class="sd">          scripts. The initioal support includes slurm, but we intend</span>
+<span class="sd">          also to support LSF. Parameters can be specified on the</span>
+<span class="sd">          commandline or in configuration files. Configuration files</span>
+<span class="sd">          can be formulated as json,yaml, python, or jupyter</span>
+<span class="sd">          notebooks.</span>
+
+<span class="sd">          Parameters defined in this file arethen used in the slur</span>
+<span class="sd">          batc script and substituted with their values. A special</span>
+<span class="sd">          parameter called experiment defines a number of variables</span>
+<span class="sd">          thet are permuted on when used allowing mutliple batch</span>
 <span class="sd">          scripts to be defined easily to conduct parameter studies.</span>
 
-<span class="sd">          Please note that the setup flag is deprecated and is in future versions fully covered while just using the config file.</span>
+<span class="sd">          Please note that the setup flag is deprecated and is in</span>
+<span class="sd">          future versions fully covered while just using the config</span>
+<span class="sd">          file.</span>
 
 <span class="sd">          Arguments:</span>
 <span class="sd">              FILENAME       name of a slurm script generated with sbatch</span>
@@ -121,7 +128,7 @@
 
 <span class="sd">          Options:</span>
 <span class="sd">              -h                        help</span>
-<span class="sd">              --dryrun                  flag to do a dryrun and not create any files and directories (not tested)</span>
+<span class="sd">              --dryrun                  flag to do a dryrun and not create files and directories (not tested)</span>
 <span class="sd">              --config=CONFIG...        a list of comma seperated configuration files in yaml or json format. The endings must be .json or .yaml</span>
 <span class="sd">              --setup=FILE              TBD</span>
 <span class="sd">              --type=JOB_TYPE           The method to generate submission scripts.  One of slurm, lsf. [default: slurm]</span>
@@ -138,10 +145,34 @@
 
 <span class="sd">          Description:</span>
 
-<span class="sd">               &gt; Example:</span>
-<span class="sd">               &gt; cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --dryrun --noos --dir=example --experiment=\&quot;epoch=[1-3] x=[1,4] y=[10,11]\&quot; --name=a --mode=h</span>
-<span class="sd">               &gt; cms sbatch generate slurm.in.sh --config=a.py,b.json,c.yaml --attributes=a=1,b=4  --noos --dir=example --experiment=\&quot;epoch=[1-3] x=[1,4] y=[10,11]\&quot; --name=a --mode=h</span>
-<span class="sd">               &gt; cms sbatch generate slurm.in.sh --verbose --config=a.py,b.json,c.yaml --attributes=name=gregor,a=1,b=4 --noos --dir=example --experiment=&quot;epoch=[1-3] x=[1,4] y=[10,11]&quot; --mode=f --name=a</span>
+<span class="sd">               &gt; Examples:</span>
+<span class="sd">               &gt;</span>
+<span class="sd">               &gt; cms sbatch generate slurm.in.sh --verbose \</span>
+<span class="sd">               &gt;     --config=a.py,b.json,c.yaml \</span>
+<span class="sd">               &gt;     --attributes=a=1,b=4 \</span>
+<span class="sd">               &gt;     --dryrun --noos --dir=example \</span>
+<span class="sd">               &gt;     --experiment=\&quot;epoch=[1-3] x=[1,4] y=[10,11]\&quot; \</span>
+<span class="sd">               &gt;     --name=a --mode=h</span>
+
+<span class="sd">               &gt; cms sbatch generate slurm.in.sh \</span>
+<span class="sd">               &gt;    --config=a.py,b.json,c.yaml \</span>
+<span class="sd">               &gt;    --attributes=a=1,b=4  \</span>
+<span class="sd">               &gt;    --noos \</span>
+<span class="sd">               &gt;    --dir=example \</span>
+<span class="sd">               &gt;    --experiment=\&quot;epoch=[1-3] x=[1,4] y=[10,11]\&quot; \</span>
+<span class="sd">               &gt;    --name=a \</span>
+<span class="sd">               &gt;    --mode=h\</span>
+
+<span class="sd">               &gt; cms sbatch generate slurm.in.sh \</span>
+<span class="sd">               &gt;    --verbose \</span>
+<span class="sd">               &gt;    --config=a.py,b.json,c.yaml \</span>
+<span class="sd">               &gt;    --attributes=name=gregor,a=1,b=4 \</span>
+<span class="sd">               &gt;    --noos \</span>
+<span class="sd">               &gt;    --dir=example \</span>
+<span class="sd">               &gt;    --experiment=&quot;epoch=[1-3] x=[1,4] y=[10,11]&quot; \</span>
+<span class="sd">               &gt;    --mode=f \</span>
+<span class="sd">               &gt;    --name=a</span>
+
 <span class="sd">               &gt; cms sbatch generate slurm.in.sh --experiments-file=experiments.yaml --name=a</span>
 
 <span class="sd">               &gt; cms sbatch generate submit --name=a</span>
