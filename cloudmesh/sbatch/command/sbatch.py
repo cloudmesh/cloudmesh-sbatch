@@ -136,10 +136,10 @@ class SbatchCommand(PluginCommand):
 
             sbatch = SBatch()
             sbatch.verbose = arguments.verbose
-            if arguments.type is None:
+            if '--type' not in arguments or arguments['--type'] is None:
                 type_ = "slurm"
             else:
-                type_ = arguments.type
+                type_ = arguments['--type']
             sbatch.generate_submit(name=arguments.name, type_=type_)
 
             return ""
