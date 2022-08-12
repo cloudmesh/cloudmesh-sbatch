@@ -202,9 +202,9 @@ class SbatchCommand(PluginCommand):
                 print(result)
                 banner("Script End")
             else:
-                from cloudmesh.common.Shell import Shell
-                user = Shell.user()
-                result = result.format(user=user)
+                #from cloudmesh.common.Shell import Shell
+                #user = Shell.user()
+                #result = result.format(user=user)
 
                 writefile(sbatch.script_out, result)
 
