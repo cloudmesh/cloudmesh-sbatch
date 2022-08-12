@@ -17,33 +17,16 @@ from pprint import pprint
 from contextlib import contextmanager
 from pathlib import Path
 
-BUILD_DIR = "build"
+BUILD_DIR = "tests/build"
 
 def remove_spaces(content):
     result = Shell.oneline(content)
     return " ".join(result.split(" && "))
 
+Shell.mkdir(BUILD_DIR)
+os.chdir(BUILD_DIR)
 
-@contextmanager
-def create_build(name=""):
-    tests_folder = Path(__file__).parent
-    output_target = tests_folder / f"tmp.{name}"
-    shutil.copytree(tests_folder/"example.in", output_target, dirs_exist_ok=True)
-    try:
-        yield output_target
-    finally:
-        #shutil.rmtree(output_target)
-        pass
-
-@contextmanager
-def ctx_chdir(path):
-    current_dir = os.getcwd()
-    os.chdir(path)
-    try:
-        yield
-    finally:
-        os.chdir(current_dir)
-
+cfg = "../../example/slurm"
 
 @pytest.mark.incremental
 class TestConfigSbatch:
@@ -58,60 +41,59 @@ class TestConfigSbatch:
 
         name = FUNCTIONNAME()
 
-        with create_build(name) as cfg:
-            config = f"{cfg}/a.py,{cfg}/b.json,{cfg}/experiments.yaml"
-            out_dir=cfg/"out"
-            command = remove_spaces(
-                f"cms sbatch generate {cfg}/slurm.in.sh"
-                f" --config={config}"
-                f" --dir={out_dir}"
-                " --attributes=a=1,b=4"
-                # " --noos"
-                # " --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\""
-                " --name=a"
-                " --mode=h")
-            result = Shell.run(command)
-            print(result)
+        config = f"{cfg}/a.py,{cfg}/b.json,{cfg}/experiments.yaml"
+        out_dir= "out"
+        command = remove_spaces(
+            f"cms sbatch generate {cfg}/slurm.in.sh"
+            f" --config={config}"
+            f" --dir={out_dir}"
+            " --attributes=a=1,b=4"
+            # " --noos"
+            # " --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\""
+            " --name=a"
+            " --mode=h")
+        result = Shell.run(command)
+        print(result)
 
-            assert "Error" not in result
+        assert "Error" not in result
 
-            content = readfile(f"{out_dir}/epoch_1_x_1_y_10/slurm.sh")
+        content = readfile(f"{out_dir}/epoch_1_x_1_y_10/slurm.sh")
 
-            assert "p_gregor=GREGOR" in content
-            assert "a=101" in content
-            assert 'address="Seasame Str."' in content
-            # BUG: testing assumes `cms debug on` has been run prior to execution
-            #      need to enable this temporarily.
-            assert 'debug=True' in content
-            # Github does not have a "USERNAME" that is set.
-            if "GITHUB_ACTIONS" in os.environ:
-                assert 'user={USERNAME}' in content
-            else:
-                assert f'user={os.environ["USERNAME"]}' in content
+        assert "p_gregor=GREGOR" in content
+        assert "a=101" in content
+        assert 'address="Seasame Str."' in content
+        # BUG: testing assumes `cms debug on` has been run prior to execution
+        #      need to enable this temporarily.
+        assert 'debug=True' in content
+        # Github does not have a "USERNAME" that is set.
+        if "GITHUB_ACTIONS" in os.environ:
+            assert 'user={USERNAME}' in content
+        else:
+            assert f'user={os.environ["USERNAME"]}' in content
 
-            if "HOME" in os.environ:
-                assert f'home={os.environ["HOME"]}' in content
-            else:
-                assert 'home={HOME}' in content
+        if "HOME" in os.environ:
+            assert f'home={os.environ["HOME"]}' in content
+        else:
+            assert 'home={HOME}' in content
 
-            experiment_dirs = next(os.walk(f"{out_dir}"))[1]
+        experiment_dirs = next(os.walk(f"{out_dir}"))[1]
 
-            assert "epoch_1_x_1_y_10" in experiment_dirs
-            assert "epoch_1_x_1_y_11" in experiment_dirs
-            assert "epoch_1_x_4_y_10" in experiment_dirs
-            assert "epoch_1_x_4_y_11" in experiment_dirs
-            assert "epoch_2_x_1_y_10" in experiment_dirs
-            assert "epoch_2_x_1_y_11" in experiment_dirs
-            assert "epoch_2_x_4_y_10" in experiment_dirs
-            assert "epoch_2_x_4_y_11" in experiment_dirs
-            assert "epoch_3_x_1_y_10" in experiment_dirs
-            assert "epoch_3_x_1_y_11" in experiment_dirs
-            assert "epoch_3_x_4_y_10" in experiment_dirs
-            assert "epoch_3_x_4_y_11" in experiment_dirs
+        assert "epoch_1_x_1_y_10" in experiment_dirs
+        assert "epoch_1_x_1_y_11" in experiment_dirs
+        assert "epoch_1_x_4_y_10" in experiment_dirs
+        assert "epoch_1_x_4_y_11" in experiment_dirs
+        assert "epoch_2_x_1_y_10" in experiment_dirs
+        assert "epoch_2_x_1_y_11" in experiment_dirs
+        assert "epoch_2_x_4_y_10" in experiment_dirs
+        assert "epoch_2_x_4_y_11" in experiment_dirs
+        assert "epoch_3_x_1_y_10" in experiment_dirs
+        assert "epoch_3_x_1_y_11" in experiment_dirs
+        assert "epoch_3_x_4_y_10" in experiment_dirs
+        assert "epoch_3_x_4_y_11" in experiment_dirs
 
 
-    def test_benchmark(self):
-        Benchmark.print(csv=True, sysinfo=False, tag="cmd5")
+    # def test_benchmark(self):
+    #     Benchmark.print(csv=True, sysinfo=False, tag="cmd5")
 
     # def test_clean(self):
     #    os.system{"rm -rf build"}
