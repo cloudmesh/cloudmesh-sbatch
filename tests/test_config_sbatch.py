@@ -27,7 +27,7 @@ Shell.rmdir(BUILD_DIR)
 Shell.mkdir(BUILD_DIR)
 os.chdir(BUILD_DIR)
 
-cfg = "../../example/slurm"
+example = "../../example/slurm"
 
 
 @pytest.mark.incremental
@@ -39,14 +39,10 @@ class TestConfigSbatch:
     def test_config_experiment(self):
         HEADING()
 
-        config_yaml = "experiments.yaml"
-
-        name = FUNCTIONNAME()
-
-        config = f"{cfg}/a.py,{cfg}/b.json,{cfg}/{config_yaml}"
+        config = f"{example}/a.py,{example}/b.json,{example}/experiment.yaml"
         out_dir= "out"
         command = remove_spaces(
-            f"cms sbatch generate {cfg}/slurm.in.sh"
+            f"cms sbatch generate {example}/slurm.in.sh"
             f" --config={config}"
             f" --dir={out_dir}"
             " --attributes=a=1,b=4"

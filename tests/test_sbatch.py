@@ -1,7 +1,7 @@
 ###############################################################
-# cd tests; pytest -v --capture=no test_sbatch.py
-# cd tests; pytest -v  test_sbatch.py
-# cd tests; pytest -v --capture=no  test_sbatch.py::Test_sbatch::<METHODNAME>
+# pytest -v --capture=no tests/test_sbatch.py
+# pytest -v  tests/test_sbatch.py
+# pytest -v --capture=no  tests/test_sbatch.py::Test_sbatch::<METHODNAME>
 ###############################################################
 import pytest
 from cloudmesh.common.Benchmark import Benchmark
@@ -10,37 +10,30 @@ from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.util import HEADING
 from cloudmesh.common.util import FUNCTIONNAME
 from cloudmesh.common.util import readfile
+from cloudmesh.common.util import banner
 import os
+import re
 import textwrap
 from pprint import pprint
 from contextlib import contextmanager
 from pathlib import Path
 
-BUILD_DIR = "build"
+BUILD_DIR = "tests/dest"
+
+Shell.rmdir(BUILD_DIR)
+Shell.mkdir(BUILD_DIR)
+os.chdir(BUILD_DIR)
+
+example = "../example.in"
+tests_dir = ".."
+build_dir = "."
 
 def remove_spaces(content):
     result = Shell.oneline(content)
-    return " ".join(result.split(" && "))
+    result = " ".join(result.split(" && "))
+    result = re.sub("\\s\\s+", " ", result)
 
-def create_build(name=None):
-    target = str(Path(__file__).parent.as_posix())
-    if name is None:
-        os.system(f"mkdir -p {target}")
-        return str(Path(target)), str(Path(target) / "example.in"), str(Path(target))
-    else:
-        os.system(f"mkdir -p {target}/{name}")
-        os.system(f"cp -r example.in {target}/{name}")
-        return str(Path(target) / name), str(Path(target) /  name / "example.in"), target
-
-
-@contextmanager
-def ctx_chdir(path):
-    current_dir = os.getcwd()
-    os.chdir(path)
-    try:
-        yield
-    finally:
-        os.chdir(current_dir)
+    return result
 
 
 @pytest.mark.incremental
@@ -51,18 +44,54 @@ class TestConfig:
         command = "cms sbatch help"
         result = Shell.run(command)
         Benchmark.Stop()
-
+        # print (result)
+        # assert "sbatch allows the creation of parameterized" in result
         assert "sbatch" in result
+
+
+    def test_experiment_yaml_python_a(self):
+        HEADING()
+        banner(os.getcwd())
+        Benchmark.Start()
+        for f in ["c.yaml", "exp_str.yaml", "a.py", "slurm.in.sh"]:
+            Shell.copy_file(f"{example}/{f}", f"{build_dir}/{f}")
+
+        command = remove_spaces(
+            f"""
+            cms sbatch generate 
+                       --source=slurm.in.sh 
+                       --config=c.yaml,exp_str.yaml,a.py
+                       --noos 
+                       --source_dir={example}
+                       --output_dir={build_dir}
+                       --mode=h
+                       --name=a
+            """
+        )
+        command = remove_spaces(command)
+        print(command)
+        print(build_dir)
+        result = Shell.run(command)
+        print (result)
+        Benchmark.Stop()
+
+        content = readfile(f"{build_dir}/slurm.in.sh")
+        # assert "p_gregor=GREGOR" in content
+        # assert "a=101" in content
+
+class ggg:
 
     def test_experiment_yaml_python(self):
         HEADING()
-        name = FUNCTIONNAME()
-        build_dir, cfg_dir, test_dir = create_build(f"./build/{name}")
+        banner(os.getcwd())
         Benchmark.Start()
+        for f in ["c.yaml", "exp_str.yaml", "a.py", "slurm.in.sh"]:
+            Shell.copy_file(f"{example}/{f}", f"{build_dir}/{f}")
+
         command = remove_spaces(
             f"""
-            cms sbatch generate {test_dir}/example.in/slurm.in.sh 
-                       --config={cfg_dir}/c.yaml,{cfg_dir}/exp_str.yaml,{cfg_dir}/a.py
+            cms sbatch generate slurm.in.sh 
+                       --config={example}/c.yaml,{example}/exp_str.yaml,{example}/a.py
                        --noos 
                        --dir={build_dir}
                        --mode=h
@@ -70,22 +99,25 @@ class TestConfig:
             """
         )
         command = remove_spaces(command)
+        print(command)
+        print(build_dir)
         result = Shell.run(command)
+        print (result)
         Benchmark.Stop()
 
-        content = readfile(f"{build_dir}/epoch_1_x_1/slurm.sh")
+        content = readfile(f"{build_dir}/slurm.in.sh")
         assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 
+class res:
     def test_experiment_yaml_ipynb(self):
         HEADING()
-        name = FUNCTIONNAME()
-        build_dir, cfg_dir, test_dir = create_build(f"./build/{name}")
+
         Benchmark.Start()
         command = remove_spaces(
             f"""
-            cms sbatch generate {test_dir}/example.in/slurm.in.sh 
-                       --config={cfg_dir}/c.yaml,{cfg_dir}/exp_str.yaml,{cfg_dir}/a.py,{cfg_dir}/d.ipynb
+            cms sbatch generate {tests_dir}/example.in/slurm.in.sh 
+                       --config={example}/c.yaml,{example}/exp_str.yaml,{example}/a.py,{example}/d.ipynb
                        --noos 
                        --dir={build_dir}
                        --mode=h
@@ -103,13 +135,12 @@ class TestConfig:
 
     def test_oneline_noos_command(self):
         HEADING()
-        name = FUNCTIONNAME()
-        build_dir, cfg_dir, test_dir = create_build(f"./build/{name}")
+
 
         Benchmark.Start()
 
-        config_files = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
-        slurm_script = f"{test_dir}/example.in/slurm.in.sh"
+        config_files = f"{example}/a.py,{example}/b.json,{example}/c.yaml"
+        slurm_script = f"{tests_dir}/example.in/slurm.in.sh"
         attributes = "a=1,b=4"
         command = (f"cms sbatch generate {slurm_script} --verbose --config={config_files} --attributes={attributes} "
                    f"--noos --dir={build_dir} --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a --mode=h")
@@ -124,14 +155,13 @@ class TestConfig:
 
     def test_oneline_os_command(self):
         HEADING()
-        name = FUNCTIONNAME()
 
-        build_dir, cfg_dir, test_dir = create_build(f"./build/{name}")
+
 
         Benchmark.Start()
-        config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
+        config = f"{example}/a.py,{example}/b.json,{example}/c.yaml"
         command = remove_spaces(
-            f"cms sbatch generate {test_dir}/example.in/slurm.in.sh --verbose --config={config} --attributes=a=1,b=4 --dryrun "
+            f"cms sbatch generate {tests_dir}/example.in/slurm.in.sh --verbose --config={config} --attributes=a=1,b=4 --dryrun "
             f"--dir={build_dir} --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a --mode=h")
         result = Shell.run(command)
         Benchmark.Stop()
@@ -153,14 +183,13 @@ class TestConfig:
 
     def test_hierarchy(self):
         HEADING()
-        name = FUNCTIONNAME()
 
-        build_dir, cfg_dir, test_dir = create_build(f"./build/{name}")
+
 
         Benchmark.Start()
-        config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
+        config = f"{example}/a.py,{example}/b.json,{example}/c.yaml"
         command = remove_spaces(
-            f"cms sbatch generate {test_dir}/example.in/slurm.in.sh"
+            f"cms sbatch generate {tests_dir}/example.in/slurm.in.sh"
             f" --config={config}"
             f" --dir={build_dir}"
             " --attributes=a=1,b=4"
@@ -209,15 +238,14 @@ class TestConfig:
 
     def test_flat(self):
         HEADING()
-        name = FUNCTIONNAME()
 
-        build_dir, cfg_dir, test_dir = create_build(f"./build/{name}")
+
 
         Benchmark.Start()
-        config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
+        config = f"{example}/a.py,{example}/b.json,{example}/c.yaml"
         command = remove_spaces(
             f"""
-            cms sbatch generate {test_dir}/example.in/slurm.in.sh 
+            cms sbatch generate {tests_dir}/example.in/slurm.in.sh 
                    --verbose 
                    --config={config}
                    --attributes=name=gregor,a=1,b=4 
@@ -264,15 +292,14 @@ class TestConfig:
 
     def test_with_os(self):
         HEADING()
-        name = FUNCTIONNAME()
 
-        build_dir, cfg_dir, test_dir = create_build(f"./build/{name}")
+
 
         Benchmark.Start()
-        config = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
+        config = f"{example}/a.py,{example}/b.json,{example}/c.yaml"
         command = remove_spaces(
             f"""
-            cms sbatch generate {test_dir}/example.in/slurm.in.sh 
+            cms sbatch generate {tests_dir}/example.in/slurm.in.sh 
                        --config={config}
                        --attributes=a=1,b=4 
                        --dir={build_dir}
@@ -292,15 +319,14 @@ class TestConfig:
 
     def test_experiment_yaml_dict(self):
         HEADING()
-        name = FUNCTIONNAME()
 
-        build_dir, cfg_dir, test_dir = create_build(f"./build/{name}")
+
 
         Benchmark.Start()
-        config = f"{cfg_dir}/c.yaml,{cfg_dir}/exp_str.yaml,{cfg_dir}/a.py"
+        config = f"{example}/c.yaml,{example}/exp_str.yaml,{example}/a.py"
         command = remove_spaces(
             f"""
-            cms sbatch generate {test_dir}/example.in/slurm.in.sh 
+            cms sbatch generate {tests_dir}/example.in/slurm.in.sh 
                        --config={config}
                        --noos 
                        --dir={build_dir}
@@ -319,15 +345,14 @@ class TestConfig:
 
     def test_experiment_yaml_str(self):
         HEADING()
-        name = FUNCTIONNAME()
 
-        build_dir, cfg_dir, test_dir = create_build(f"./build/{name}")
+
 
         Benchmark.Start()
-        config = f"{cfg_dir}/c.yaml,{cfg_dir}/exp_str.yaml,{cfg_dir}/a.py"
+        config = f"{example}/c.yaml,{example}/exp_str.yaml,{example}/a.py"
         command = remove_spaces(
             f"""
-            cms sbatch generate {test_dir}/example.in/slurm.in.sh 
+            cms sbatch generate {tests_dir}/example.in/slurm.in.sh 
                        --config={config}
                        --noos 
                        --dir={build_dir}
@@ -346,21 +371,20 @@ class TestConfig:
 
     def test_setupl_cli(self):
         HEADING()
-        name = FUNCTIONNAME()
 
-        build_dir, cfg_dir, test_dir = create_build(f"./build/{name}")
+
 
         Benchmark.Start()
 
-        config_files = f"{cfg_dir}/a.py,{cfg_dir}/b.json,{cfg_dir}/c.yaml"
-        slurm_script = f"{test_dir}/example.in/slurm.in.sh"
+        config_files = f"{example}/a.py,{example}/b.json,{example}/c.yaml"
+        slurm_script = f"{tests_dir}/example.in/slurm.in.sh"
         attributes = "a=1,b=4"
-        command = f"cms sbatch generate --setup={cfg_dir}/setup.yaml --attributes=a=101 --verbose"
+        command = f"cms sbatch generate --setup={example}/setup.yaml --attributes=a=101 --verbose"
 
         print (command)
         print(build_dir)
-        print(cfg_dir)
-        print(test_dir)
+        print(example)
+        print(tests_dir)
 
         with ctx_chdir(build_dir):
             result = Shell.run(command)

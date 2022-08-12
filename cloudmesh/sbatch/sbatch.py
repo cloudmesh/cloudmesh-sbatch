@@ -14,6 +14,8 @@ from pprint import pprint
 
 from nbconvert.exporters import PythonExporter
 
+from cloudmesh.common.debug import VERBOSE
+
 from cloudmesh.common.FlatDict import FlatDict
 from cloudmesh.common.Printer import Printer
 from cloudmesh.common.Shell import Shell
@@ -29,69 +31,6 @@ OptStr = typing.Optional[str]
 
 
 class SBatch:
-
-    def __init__(self, verbose=False):
-        self.name = None
-        self.data = dict()
-        self.permutations = list()
-        self.template = None
-        self.verbose = verbose
-        # self.gpu = None
-        self.attributes = dict()
-        self.configuration_parameters = None
-        self.template_path = None
-        self.template_content = None
-        self.out_directory = None
-        self.script_out = None
-        self.execution_mode = None
-        self.source = None
-        self.dryrun = None
-
-    def config_from_cli(self, arguments: typing.Any):
-        """Configures the object from command.sbatch CLI arguments
-
-        Args:
-            arguments: The docopts object from the cms sbatch command.
-
-        Returns:
-            Fluent API of the current object.
-        """
-        if arguments.get('SOURCE') is not None:
-            self.source = arguments.get('SOURCE')
-            self.register_script(self.source)
-        self.dryrun = arguments.get('dryrun', self.dryrun)
-        if self.execution_mode is None:
-            self.execution_mode = arguments.mode
-
-        if self.script_out is None and arguments.out is None:
-            self.script_out = pathlib.Path(self.source).name.replace(".in.", ".")  #.replace(".in", "")
-        else:
-            self.script_out = pathlib.Path(arguments.get('out', self.script_out)).name
-
-        if self.source == self.script_out:
-            if not yn_choice("The source and destination filenames are the same. Do you want to continue?"):
-                return ""
-
-        if arguments['--dir']:
-            self.out_directory = arguments['--dir']
-
-        if not arguments["--noos"]:
-            self.update_from_os_environ()
-
-        if not arguments["--nocm"]:
-            self.update_from_cm_variables()
-
-        if arguments.attributes:
-            self.update_from_attributes(arguments.attributes)
-
-        if arguments.experiment:
-            self.permutations = self.generate_experiment_permutations(arguments.experiment)
-
-        if arguments.config:
-            for config_file in Parameter.expand(arguments.config):
-                self.update_from_file(config_file)
-            self.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
-        return self
 
     @classmethod
     def _apply_leaf(cls, my_dict: DictOrList, my_lambda: typing.Callable, *args, **kwargs) -> dict:
@@ -121,7 +60,152 @@ class SBatch:
                 new_dict[key] = my_lambda(str(value), *args, **kwargs)
         return new_dict
 
-    def config_from_yaml(self, yaml_file: PathLike):
+
+    def __init__(self, verbose=False):
+        # self.name = None
+        self.data = dict()
+        self.permutations = list()
+        # self.template = None
+        # self.verbose = verbose
+        # # self.gpu = None
+        # self.attributes = dict()
+        # self.configuration_parameters = None
+        # self.template_path = None
+        # self.template_content = None
+        # self.out_directory = None
+        self.script_out = None
+        # self.execution_mode = None
+        # self.source = None
+        # self.dryrun = None
+        pass
+
+    def info(self):
+        for a in [
+            "dryrun",
+            "verbose",
+            "name",
+            "source",
+            "destination",
+            "attributes",
+            "gpu",
+            "config",
+            "directory",
+            "experiment",
+            "execution_mode",
+            "template",
+            "script_output",
+            "output_dir",
+            "input_dir",
+            "script_out"
+        ]:
+            try:
+                result = getattr(self, a)
+            except:
+                result = self.data.get(a)
+            print(f'{a:<12}: {result}')
+        print("permutations:")
+        result = getattr(self, "permutations")
+        # pprint(result)
+        print()
+
+    @staticmethod
+    def update_with_directory(directory, filename):
+        """
+        prefix with the directory if the filename is not starting with . / ~
+
+        :param directory:
+        :type directory:
+        :param filename:
+        :type filename:
+        :return:
+        :rtype:
+        """
+        if directory is None:
+            return filename
+        elif not filename.startswith("/") and not filename.startswith(".") and not filename.startswith("~"):
+            return f"{directory}/{filename}"
+        else:
+            return filename
+
+    def config_from_cli(self, arguments):
+        """Configures the object from command.sbatch CLI arguments
+
+        Args:
+            arguments: The docopts object from the cms sbatch command.
+
+        Returns:
+            Fluent API of the current object.
+        """
+
+        VERBOSE(arguments)
+
+        # sbatch
+        # generate
+        # SOURCE - -name = NAME[--verbose][--mode = MODE] [--config = CONFIG] [--attributes = PARAMS] [
+        #     --output_dir = DESTINATION] [--dryrun][--noos][--nocm][--input_dir = SOURCE] [--experiment = EXPERIMENT]
+        print(type(arguments))
+
+        # self.source = arguments.source
+        self.dryrun = arguments.dryrun or False
+        self.verbose = arguments.verbose
+        self.execution_mode = arguments.mode
+        self.name = arguments.name
+        self.source = arguments.source
+        self.input_dir = str(Shell.map_filename(arguments["source_dir"]).path)
+        self.output_dir = str(Shell.map_filename(arguments["output_dir"]).path)
+
+
+
+        #
+        # prepare the output script name
+        #
+        if self.script_out is None and arguments.out is None:
+            self.script_out = pathlib.Path(self.source).name.replace(".in.", ".")  # .replace(".in", "")
+        else:
+            self.script_out = pathlib.Path(arguments.get('out', self.script_out)).name
+        self.script_out = SBatch.update_with_directory(self.output_dir, self.script_out)
+
+        if self.source == self.script_out:
+            Console.error("The source and destination filenames are the same.", traceflag=True)
+            return ""
+
+        try:
+            self.attributes = arguments.attributes
+        except:
+            pass
+
+
+        try:
+            self.config = arguments.config.split(",")
+            self.config = [SBatch.update_with_directory(self.input_dir, filename) for filename in self.config]
+        except Exception as e:
+            print (e)
+
+
+        self.info()
+
+        return ""
+        self.load_template(self.source)
+
+        if not arguments["--noos"]:
+            self.update_from_os_environ()
+
+        if not arguments["--nocm"]:
+            self.update_from_cm_variables()
+
+        if arguments.attributes:
+            self.update_from_attributes(arguments.attributes)
+
+        if arguments.experiment:
+            self.permutations = self.generate_experiment_permutations(arguments.experiment)
+
+        if arguments.config:
+            for config_file in Parameter.expand(arguments.config):
+                self.update_from_file(config_file)
+            s  # elf.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
+        return self
+
+    def config_from_yaml(self, yaml_file):
         """Configures the object from a standard YAML structure.
 
         This supports the following YAML structures:
@@ -164,15 +248,15 @@ class SBatch:
             self.execution_mode = root['mode']
         if 'dir' in root:
             self.out_directory = root['dir']
-        if 'experiments' in root:
-            experiments = self._apply_leaf(root['experiments'], Parameter.expand)
-            perms = self.permutation_generator(experiments)
-            self.permutations = self.permutations + perms
+        # if 'experiments' in root:
+        #     experiments = self._apply_leaf(root['experiments'], Parameter.expand)
+        #     perms = self.permutation_generator(experiments)
+        #     self.permutations = self.permutations + perms
         # if 'attributes' in root:
-        self.update_from_dict(FlatDict(root, sep="."))
-        self.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
+        # self.update_from_dict(FlatDict(root, sep="."))
+        # self.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
 
-    def register_script(self, script):
+    def load_template(self, script):
         """Registers and reads the template script in for processing
 
         This method must be run at least once prior to generating the slurm script output.
@@ -186,27 +270,6 @@ class SBatch:
         self.template_path = script
         self.template_content = readfile(script)
         return self.template_content
-
-    def info(self):
-        for a in ["source",
-                    "destination",
-                    "attributes",
-                    "gpu",
-                    "dryrun",
-                    "config",
-                    "directory",
-                    "experiment",
-                    "mode"
-                  ]:
-            try:
-                result = getattr(self,a)
-            except:
-                result = self.data.get(a)
-            print(f'{a:<12}: {result}')
-        print("permutations:")
-        result = getattr(self, "permutations")
-        # pprint(result)
-        print()
 
     def set_attribute(self, attribute, value):
         self.data[attribute] = value
@@ -237,7 +300,7 @@ class SBatch:
             self.update_from_dict(dict(os.environ))
         return self.data
 
-    def update_from_cm_variables(self, load: bool = True) -> typing.Dict[str, typing.Any]:
+    def update_from_cm_variables(self, load=True):
         """Adds Cloudmesh variables to the class's data parameter as a flat dict.
 
         Args:
@@ -254,7 +317,7 @@ class SBatch:
         return self.data
 
     @staticmethod
-    def _suffix(path: str) -> str:
+    def _suffix(path):
         """Returns the file suffix of a path
 
         Args:
@@ -265,7 +328,7 @@ class SBatch:
         """
         return pathlib.Path(path).suffix
 
-    def update_from_file(self, filename: PathLike):
+    def update_from_file(self, filename):
         """Updates the run configuration file with the data within the passed file.
 
         Args:
@@ -289,7 +352,7 @@ class SBatch:
             values = dict(FlatDict(regular_dict, sep="."))
         elif suffix.lower() in [".py"]:
 
-            modulename = filename.replace(".py","").replace("/","_").replace("build_", "")
+            modulename = filename.replace(".py", "").replace("/", "_").replace("build_", "")
             from importlib.machinery import SourceFileLoader
 
             mod = SourceFileLoader(modulename, filename).load_module()
@@ -297,7 +360,7 @@ class SBatch:
             regular_dict = {}
             for name, value in vars(mod).items():
                 if not name.startswith("__"):
-                    print (name, value)
+                    print(name, value)
                     regular_dict[name] = value
             values = dict(FlatDict(regular_dict, sep="."))
 
@@ -312,7 +375,7 @@ class SBatch:
             # Shell.run(f"jupyter nbconvert --to python {filename}")
 
             filename = py_name
-            modulename = filename.replace(".py","").replace("/","_").replace("build_", "")
+            modulename = filename.replace(".py", "").replace("/", "_").replace("build_", "")
             from importlib.machinery import SourceFileLoader
 
             mod = SourceFileLoader(modulename, filename).load_module()
@@ -378,7 +441,7 @@ class SBatch:
         return content
 
     @staticmethod
-    def permutation_generator(exp_dict: dict) -> list:
+    def permutation_generator(exp_dict):
         """Creates a cartisian product of a {key: list, ...} object.
 
         Args:
@@ -417,7 +480,7 @@ class SBatch:
         self.permutations = self.permutation_generator(experiments)
         return self.permutations
 
-    #for permutation in self.permutations:
+    # for permutation in self.permutations:
     #    values = ""
     #    for attribute, value in permutation.items():
     #        values = values + f"{attribute}={value} "
@@ -454,12 +517,12 @@ class SBatch:
             variables.update(FlatDict({'experiments': permutation}, sep="."))
 
             configuration[identifier] = {
-                "id"        : identifier,
-                "directory" : directory,
+                "id": identifier,
+                "directory": directory,
                 "experiment": assignments,
-                "script"    : script,
-                "config"    : config,
-                "variables" : variables
+                "script": script,
+                "config": config,
+                "variables": variables
             }
         return configuration
 
@@ -488,12 +551,12 @@ class SBatch:
             variables.update(FlatDict({'experiments': permutation}, sep="."))
 
             configuration[identifier] = {
-                "id"        : identifier,
-                "directory" : f"{directory}/{identifier}",
+                "id": identifier,
+                "directory": f"{directory}/{identifier}",
                 "experiment": assignments,
-                "script"    : script,
-                "config"    : config,
-                "variables" : variables
+                "script": script,
+                "config": config,
+                "variables": variables
             }
             # pprint(configuration)
         return configuration
@@ -530,15 +593,15 @@ class SBatch:
             self.configuration_parameters = configuration
             self.generate_setup_from_configuration(configuration)
 
-    def generate_submit(self, name=None, type_='slurm'):
-        if type_ == 'slurm':
+    def generate_submit(self, name=None, job_type='slurm'):
+        if job_type == 'slurm':
             cmd = 'sbatch'
-        elif type_ == 'lsf':
+        elif job_type == 'lsf':
             cmd = 'bsub'
         else:
-            cmd = type
+            cmd = job_type
 
-        #else:
+        # else:
         #    raise RuntimeError(f"Unsupported submission type {type_}")
 
         experiments = json.loads(readfile(name))
@@ -568,13 +631,13 @@ class SBatch:
             Console.info(f"* write file {experiment['config']}")
 
             # Generate UUID for each perm
-            experiment["variables"].update({ 'meta.uuid': perm_uuid })
+            experiment["variables"].update({'meta.uuid': perm_uuid})
             writefile(experiment["config"], yaml.dump(experiment["variables"], indent=2))
             content_config = readfile(experiment["config"])
             try:
                 check = yaml.safe_load(content_config)
             except Exception as e:
-                print (e)
+                print(e)
                 Console.error("We had issues with our check for the config.yaml file")
             #
             # Generate slurm.sh
@@ -586,29 +649,6 @@ class SBatch:
     @property
     def now(self):
         return datetime.now().strftime("%Y-m-%d")
-
-    def debug_state(self, key=""):
-        """Outputs the current state of persistent values in class.
-        Args:
-            key: A string to prefix the string with.
-        Returns:
-            A mutliline string with all class variables in a key = value pattern.
-        """
-        return textwrap.dedent(f"""
-        {key}===OBJ===
-        {key}   {self.name = }
-        {key}   {self.data = }
-        {key}   {self.verbose = }
-        {key}   {self.source = }
-        {key}   {self.script_out = }
-        {key}   {self.out_directory = }
-        {key}   {self.attributes = }
-        {key}   {self.dryrun = }
-        {key}   {self.execution_mode = }
-        {key}   {self.permutations = }
-        {key}   {self.configuration_parameters = }
-        {key}   {self.template_path = }
-        {key}===END===""")
 
     # def __str__(self):
     #     return self.content
