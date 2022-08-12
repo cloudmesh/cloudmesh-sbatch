@@ -581,8 +581,6 @@ class SBatch:
             #
             content_script = readfile(self.source)
             content_script = self.generate(content_script, experiment["variables"])
-            user = Shell.user()
-            content_script = content_script.format(user=user)
             writefile(experiment["script"], content_script)
 
     @property
@@ -629,6 +627,4 @@ class SBatch:
     def save_experiment_configuration(self, name=None):
         if name is not None:
             content = json.dumps(self.configuration_parameters, indent=2)
-            user = Shell.user()
-            content_script = content.format(user=user)
             writefile(name, content)
