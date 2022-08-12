@@ -653,8 +653,6 @@
             <span class="c1">#</span>
             <span class="n">content_script</span> <span class="o">=</span> <span class="n">readfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
             <span class="n">content_script</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">content_script</span><span class="p">,</span> <span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">])</span>
-            <span class="n">user</span> <span class="o">=</span> <span class="n">Shell</span><span class="o">.</span><span class="n">user</span><span class="p">()</span>
-            <span class="n">content_script</span> <span class="o">=</span> <span class="n">content_script</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
             <span class="n">writefile</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;script&quot;</span><span class="p">],</span> <span class="n">content_script</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
@@ -701,8 +699,6 @@
 <div class="viewcode-block" id="SBatch.save_experiment_configuration"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.save_experiment_configuration">[docs]</a>    <span class="k">def</span> <span class="nf">save_experiment_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">content</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration_parameters</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-            <span class="n">user</span> <span class="o">=</span> <span class="n">Shell</span><span class="o">.</span><span class="n">user</span><span class="p">()</span>
-            <span class="n">content_script</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
             <span class="n">writefile</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span></div></div>
 </pre></div>
 

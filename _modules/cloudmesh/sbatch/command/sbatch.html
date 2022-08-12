@@ -274,10 +274,6 @@
                 <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
                 <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;Script End&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1">#from cloudmesh.common.Shell import Shell</span>
-                <span class="c1">#user = Shell.user()</span>
-                <span class="c1">#result = result.format(user=user)</span>
-
                 <span class="n">writefile</span><span class="p">(</span><span class="n">sbatch</span><span class="o">.</span><span class="n">script_out</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 
             <span class="n">sbatch</span><span class="o">.</span><span class="n">generate_experiment_slurm_scripts</span><span class="p">()</span>
