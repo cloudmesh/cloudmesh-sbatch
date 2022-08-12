@@ -274,9 +274,9 @@
                 <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
                 <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;Script End&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">cloudmesh.common.Shell</span> <span class="kn">import</span> <span class="n">Shell</span>
-                <span class="n">user</span> <span class="o">=</span> <span class="n">Shell</span><span class="o">.</span><span class="n">user</span><span class="p">()</span>
-                <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
+                <span class="c1">#from cloudmesh.common.Shell import Shell</span>
+                <span class="c1">#user = Shell.user()</span>
+                <span class="c1">#result = result.format(user=user)</span>
 
                 <span class="n">writefile</span><span class="p">(</span><span class="n">sbatch</span><span class="o">.</span><span class="n">script_out</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 
