@@ -17,16 +17,18 @@ from pprint import pprint
 from contextlib import contextmanager
 from pathlib import Path
 
-BUILD_DIR = "tests/build"
+BUILD_DIR = "tests/dest"
 
 def remove_spaces(content):
     result = Shell.oneline(content)
     return " ".join(result.split(" && "))
 
+Shell.rmdir(BUILD_DIR)
 Shell.mkdir(BUILD_DIR)
 os.chdir(BUILD_DIR)
 
 cfg = "../../example/slurm"
+
 
 @pytest.mark.incremental
 class TestConfigSbatch:
@@ -41,7 +43,7 @@ class TestConfigSbatch:
 
         name = FUNCTIONNAME()
 
-        config = f"{cfg}/a.py,{cfg}/b.json,{cfg}/experiments.yaml"
+        config = f"{cfg}/a.py,{cfg}/b.json,{cfg}/{config_yaml}"
         out_dir= "out"
         command = remove_spaces(
             f"cms sbatch generate {cfg}/slurm.in.sh"
@@ -52,8 +54,12 @@ class TestConfigSbatch:
             # " --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\""
             " --name=a"
             " --mode=h")
+        print (command)
         result = Shell.run(command)
         print(result)
+
+"""
+class a:
 
         assert "Error" not in result
 
@@ -97,3 +103,4 @@ class TestConfigSbatch:
 
     # def test_clean(self):
     #    os.system{"rm -rf build"}
+"""
