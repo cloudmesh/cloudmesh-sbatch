@@ -222,8 +222,17 @@ class SBatch:
 
         if self.verbose:
             print ("BEGIN YAML")
-            print (yaml.dump(result, indent=2))
+            spec = yaml.dump(result, indent=2)
+            print(spec)
             print ("END YAML")
+
+        if self.verbose:
+
+
+            print("BEGIN SPEC")
+            spec = self.spec_replace(spec)
+            print (spec)
+            print("END SPEC")
 
         return result
 
@@ -240,6 +249,27 @@ class SBatch:
 
         del result["sep"]
         return result
+
+    def spec_replace(self, spec):
+        import re
+        import munch
+        variables = re.findall(r"\{\w.+\}", spec)
+
+        for i in range(0, len(variables)):
+            data = yaml.load(spec, Loader=yaml.SafeLoader)
+
+            m = munch.DefaultMunch.fromDict(data)
+
+            for variable in variables:
+                text = variable
+                variable = variable[1:-1]
+                try:
+                    value = eval("m.{variable}".format(**locals()))
+                    if "{" not in value:
+                        spec = spec.replace(text, value)
+                except:
+                    value = variable
+        return spec
 
     def update_from_os(self, variables):
         if variables is not None:

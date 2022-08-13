@@ -15,3 +15,5 @@ env:
   name: "{os.USER}"
 other:
   name: "{address.street}"
+fancy:
+  name: "{cm.x}"
