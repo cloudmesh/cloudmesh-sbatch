@@ -60,7 +60,7 @@ class TestConfig:
             f"""
             cms sbatch generate 
                        --source=slurm.in.sh 
-                       --config=c.yaml
+                       --config=c.yaml,a.py
                        --noos 
                        --source_dir={example}
                        --output_dir={build_dir}
