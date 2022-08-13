@@ -49,6 +49,77 @@ class TestConfig:
         assert "sbatch" in result
 
 
+    def test_experiment_yaml_python_dict(self):
+        HEADING()
+        banner(os.getcwd())
+        Benchmark.Start()
+        for f in ["c.yaml", "exp_str.yaml", "a.py", "slurm.in.sh"]:
+            Shell.copy_file(f"{example}/{f}", f"{build_dir}/{f}")
+
+        command = remove_spaces(
+            f"""
+            cms sbatch generate 
+                       --source=slurm.in.sh 
+                       --config=c.yaml
+                       --noos 
+                       --source_dir={example}
+                       --output_dir={build_dir}
+                       --mode=h
+                       --name=a
+                       --os=USER,HOME
+                       --verbose
+            """
+        )
+        command = remove_spaces(command)
+        print(command)
+        print(build_dir)
+        result = Shell.run(command)
+        print (result)
+        Benchmark.Stop()
+
+        content = readfile(f"{build_dir}/slurm.in.sh")
+        # assert "p_gregor=GREGOR" in content
+        # assert "a=101" in content
+
+
+class h:
+
+    def test_experiment_yaml_python_flat(self):
+        HEADING()
+        banner(os.getcwd())
+        Benchmark.Start()
+        for f in ["c.yaml", "exp_str.yaml", "a.py", "slurm.in.sh"]:
+            Shell.copy_file(f"{example}/{f}", f"{build_dir}/{f}")
+
+        command = remove_spaces(
+            f"""
+            cms sbatch generate 
+                       --source=slurm.in.sh
+                       --config=c.yaml,a.py
+                       --noos 
+                       --source_dir={example}
+                       --output_dir={build_dir}
+                       --mode=h
+                       --name=a
+                       --os=USER,HOME
+                       --flat
+                       --verbose
+            """
+        )
+        command = remove_spaces(command)
+        print(command)
+        print(build_dir)
+        result = Shell.run(command)
+        print (result)
+        Benchmark.Stop()
+
+        content = readfile(f"{build_dir}/slurm.in.sh")
+        # assert "p_gregor=GREGOR" in content
+        # assert "a=101" in content
+
+
+class f:
+
     def test_experiment_yaml_python_a(self):
         HEADING()
         banner(os.getcwd())
@@ -96,6 +167,7 @@ class ggg:
                        --dir={build_dir}
                        --mode=h
                        --name=a
+                       --verbose
             """
         )
         command = remove_spaces(command)

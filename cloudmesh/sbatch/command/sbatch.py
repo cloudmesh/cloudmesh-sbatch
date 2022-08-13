@@ -23,7 +23,20 @@ class SbatchCommand(PluginCommand):
 
           Usage:
                 sbatch generate submit --name=NAME [--job_type=JOB_TYPE] [--verbose]
-                sbatch generate --source=SOURCE --name=NAME [--out=OUT] [--verbose] [--mode=MODE] [--config=CONFIG] [--attributes=PARAMS] [--output_dir=OUTPUT_DIR] [--dryrun] [--noos] [--nocm] [--source_dir=SOURCE_DIR] [--experiment=EXPERIMENT]
+                sbatch generate --source=SOURCE --name=NAME
+                                [--out=OUT]
+                                [--verbose]
+                                [--mode=MODE]
+                                [--config=CONFIG]
+                                [--attributes=PARAMS]
+                                [--output_dir=OUTPUT_DIR]
+                                [--dryrun]
+                                [--noos]
+                                [--os=OS]
+                                [--nocm]
+                                [--source_dir=SOURCE_DIR]
+                                [--experiment=EXPERIMENT]
+                                [--flat]
                 sbatch slurm start
                 sbatch slurm stop
                 sbatch slurm info
@@ -59,7 +72,8 @@ class SbatchCommand(PluginCommand):
               --config=CONFIG...        a list of comma seperated configuration files in yaml or json format. The endings must be .json or .yaml
               --type=JOB_TYPE           The method to generate submission scripts.  One of slurm, lsf. [default: slurm]
               --attributes=PARAMS       a list of coma separated attribute value pars to set parameters that are used.
-              --output_dir=DESTINATION         The directory where the result is written to
+              --output_dir=DESTINATION  The directory where the result is written to
+              --input_dir=DIR           location of the input directory
               --account=ACCOUNT         TBD
               --gpu=GPU                 The name of the GPU. Tyoically k80, v100, a100, rtx3090, rtx3080
               --noos                    ignores environment variable substitution from the shell. This can be helpfull when debugging as the list is quite lareg
@@ -68,8 +82,9 @@ class SbatchCommand(PluginCommand):
               --experiment=EXPERIMENT   This specifies all parameters that are used to create permutations of them. They are comma separated key value pairs
               --mode=MODE               one of "flat", "debug", "hierachical" can also just use "f". "d", "h" [default: debug]
               --name=NAME               name of the experiment configuration file
-              --input_dir=DIR                 TBD
               --verbose                 Print more information whne executing [default: False]
+              --os=OS                   Selected OS variables
+              --flat                    produce flatdict
 
           Description:
 
@@ -123,6 +138,8 @@ class SbatchCommand(PluginCommand):
                        "account",
                        "filename",
                        "gpu",
+                       "os",
+                       "flat",
                        "dryrun")
 
         # pprint(args)

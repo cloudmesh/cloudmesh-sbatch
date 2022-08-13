@@ -89,6 +89,7 @@ class SBatch:
             "attributes",
             "gpu",
             "config",
+            "config_files",
             "directory",
             "experiment",
             "execution_mode",
@@ -96,7 +97,8 @@ class SBatch:
             "script_output",
             "output_dir",
             "input_dir",
-            "script_out"
+            "script_out",
+            "os_variables"
         ]:
             try:
                 result = getattr(self, a)
@@ -104,8 +106,11 @@ class SBatch:
                 result = self.data.get(a)
             print(f'{a:<12}: {result}')
         print("permutations:")
+
         result = getattr(self, "permutations")
-        # pprint(result)
+        pprint(result)
+
+        pprint(self.data)
         print()
 
     @staticmethod
@@ -153,7 +158,7 @@ class SBatch:
         self.source = arguments.source
         self.input_dir = str(Shell.map_filename(arguments["source_dir"]).path)
         self.output_dir = str(Shell.map_filename(arguments["output_dir"]).path)
-
+        self.os_variables = (arguments.os).split(",")
 
 
         #
@@ -165,9 +170,7 @@ class SBatch:
             self.script_out = pathlib.Path(arguments.get('out', self.script_out)).name
         self.script_out = SBatch.update_with_directory(self.output_dir, self.script_out)
 
-        if self.source == self.script_out:
-            Console.error("The source and destination filenames are the same.", traceflag=True)
-            return ""
+
 
         try:
             self.attributes = arguments.attributes
@@ -176,16 +179,20 @@ class SBatch:
 
 
         try:
-            self.config = arguments.config.split(",")
-            self.config = [SBatch.update_with_directory(self.input_dir, filename) for filename in self.config]
+            self.config_files = arguments.config.split(",")
+            self.config_files = [SBatch.update_with_directory(self.input_dir, filename) for filename in self.config_files]
         except Exception as e:
             print (e)
 
+        self.source = SBatch.update_with_directory(self.input_dir, self.source)
 
-        self.info()
+        if self.source == self.script_out:
+            Console.error("The source and destination filenames are the same.", traceflag=True)
+            return ""
 
-        return ""
-        self.load_template(self.source)
+
+        self.load_source_template(self.source)
+
 
         if not arguments["--noos"]:
             self.update_from_os_environ()
@@ -196,67 +203,49 @@ class SBatch:
         if arguments.attributes:
             self.update_from_attributes(arguments.attributes)
 
+
+        self.info()
+
+        banner("BEGIN TEMPLATE")
+        print(self.template_content)
+        banner("END TEMPLATE")
+
+
+        if arguments.config:
+            for config_file in self.config_files:
+                self.update_from_file(config_file)
+            # elf.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
+
+
+        self.update_from_os(self.os_variables)
+
+        result = self.data
+
+
+        if not arguments.flat:
+            from cloudmesh.common.FlatDict import FlatDict
+            f = FlatDict(result, sep=".")
+            result = f.unflatten()
+
+        del result["sep"]
+
+        if self.verbose:
+            print ("BEGIN DICT")
+            print (yaml.dump(result, indent=2))
+            print ("END DICT")
+
+        return result
+
         if arguments.experiment:
             self.permutations = self.generate_experiment_permutations(arguments.experiment)
 
-        if arguments.config:
-            for config_file in Parameter.expand(arguments.config):
-                self.update_from_file(config_file)
-            s  # elf.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
-        return self
+    def update_from_os(self, variables):
+        if variables is not None:
+            for key in variables:
+                self.data[f"os.{key}"] = os.environ[key]
 
-    def config_from_yaml(self, yaml_file):
-        """Configures the object from a standard YAML structure.
 
-        This supports the following YAML structures:
-            template: path
-            config: path
-            name: str
-            experiments:
-              card_name: Parameter.expand string
-              gpu_count: Parameter.expand string
-              cpu_num: Parameter.expand string
-              mem: Parameter.expand string
-            attributes:
-              property: substitution
-            mode: str
-            dir: path
-
-        Args:
-            yaml_file: The path to the yaml file to parse
-
-        Returns:
-            Fluent API of the current object.
-        """
-
-        with open(yaml_file, 'rb') as f:
-            yaml_data = yaml.safe_load(f)
-
-        self.read_config_from_dict(yaml_data)
-
-        return self
-
-    def read_config_from_dict(self, root):
-        if 'template' in root:
-            self.source = root['template']
-            self.register_script(root['template'])
-        if 'config' in root:
-            self.update_from_file(root['config'])
-        if 'name' in root:
-            self.name = root['name']
-        if 'mode' in root:
-            self.execution_mode = root['mode']
-        if 'dir' in root:
-            self.out_directory = root['dir']
-        # if 'experiments' in root:
-        #     experiments = self._apply_leaf(root['experiments'], Parameter.expand)
-        #     perms = self.permutation_generator(experiments)
-        #     self.permutations = self.permutations + perms
-        # if 'attributes' in root:
-        # self.update_from_dict(FlatDict(root, sep="."))
-        # self.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
-
-    def load_template(self, script):
+    def load_source_template(self, script):
         """Registers and reads the template script in for processing
 
         This method must be run at least once prior to generating the slurm script output.
@@ -390,7 +379,7 @@ class SBatch:
         else:
             raise RuntimeError(f"Unsupported config type {suffix}")
 
-        self.read_config_from_dict(regular_dict)
+        # self.read_config_from_dict(regular_dict)
         if regular_dict is not None and 'experiments' in regular_dict:
             exp_values = regular_dict['experiments']
 
@@ -412,7 +401,12 @@ class SBatch:
             self.permutations = self.permutations + perms
             # self.generate_experiment_permutations(experiments)
 
-        # if values is not None:
+
+        if values is not None:
+             self.update_from_dict(values)
+
+
+        #if values is not None:
         #     self.update_from_dict(experiments)
 
         return self.data
