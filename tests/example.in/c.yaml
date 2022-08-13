@@ -8,4 +8,10 @@ config:
   DLinputCheckpointpostfix: ""
   TFTTransformerepochs: 66
   TFTTransformerepochs: 10 
-  TFTTransformerepochs: 2 
+  TFTTransformerepochs: 2
+cm:
+  x: "{cloudmesh.debug}"
+env:
+  name: "{os.USER}"
+other:
+  name: "{address.street}"
