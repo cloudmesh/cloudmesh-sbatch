@@ -216,28 +216,30 @@ class SBatch:
                 self.update_from_file(config_file)
             # elf.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
 
-
         self.update_from_os(self.os_variables)
 
-        result = self.data
-
-
-        if not arguments.flat:
-            from cloudmesh.common.FlatDict import FlatDict
-            f = FlatDict(result, sep=".")
-            result = f.unflatten()
-
-        del result["sep"]
+        result = self.get_variable_dict(flat=arguments.flat)
 
         if self.verbose:
-            print ("BEGIN DICT")
+            print ("BEGIN YAML")
             print (yaml.dump(result, indent=2))
-            print ("END DICT")
+            print ("END YAML")
 
         return result
 
         if arguments.experiment:
             self.permutations = self.generate_experiment_permutations(arguments.experiment)
+
+    def get_variable_dict(self, flat=False):
+        result = self.data
+
+        if not flat:
+            from cloudmesh.common.FlatDict import FlatDict
+            f = FlatDict(result, sep=".")
+            result = f.unflatten()
+
+        del result["sep"]
+        return result
 
     def update_from_os(self, variables):
         if variables is not None:
