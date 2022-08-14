@@ -148,6 +148,10 @@ class SBatch:
         pprint (self.data)
         print("END DATA")
 
+        banner("BEGIN TEMPLATE")
+        print(self.template_content)
+        banner("END TEMPLATE")
+
     @staticmethod
     def update_with_directory(directory, filename):
         """
@@ -200,28 +204,29 @@ class SBatch:
         #
         # prepare the output script name
         #
+        # ok
         if self.script_out is None and arguments.out is None:
             self.script_out = pathlib.Path(self.source).name.replace(".in.", ".")  # .replace(".in", "")
         else:
             self.script_out = pathlib.Path(arguments.get('out', self.script_out)).name
         self.script_out = SBatch.update_with_directory(self.output_dir, self.script_out)
 
-
-
-
+        # ok create list of config files
         try:
             self.config_files = arguments.config.split(",")
             self.config_files = [SBatch.update_with_directory(self.input_dir, filename) for filename in self.config_files]
         except Exception as e:
             print (e)
 
+        # ok
         self.source = SBatch.update_with_directory(self.input_dir, self.source)
 
+        # ok
         if self.source == self.script_out:
             Console.error("The source and destination filenames are the same.", traceflag=True)
             return ""
 
-
+        # ok
         self.load_source_template(self.source)
 
         # ok
@@ -245,18 +250,20 @@ class SBatch:
 
         self.info()
 
-        banner("BEGIN TEMPLATE")
-        print(self.template_content)
-        banner("END TEMPLATE")
+        # order of replace is defined by
+        # config
+        # os
+        # cm
+        # attributes
 
 
+        # ok
         if arguments.config:
             for config_file in self.config_files:
                 self.update_from_file(config_file)
             # elf.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
 
         self.update_from_os(self.os_variables)
-
         d = self.get_variable_dict(flat=False)
 
         if arguments.experiment:

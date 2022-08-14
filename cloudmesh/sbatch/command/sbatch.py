@@ -238,6 +238,7 @@ class SbatchCommand(PluginCommand):
 
             sbatch.name = arguments.name
             sbatch.source = arguments.source
+            sbatch.source = SBatch.update_with_directory(sbatch.input_dir, sbatch.source)
 
             #
             # set output_script
@@ -257,11 +258,14 @@ class SbatchCommand(PluginCommand):
                 Console.error("The source and destination filenames are the same.", traceflag=True)
                 return ""
 
-            if not arguments["--noos"]:
-                sbatch.update_from_os_environ()
+            # ok create list of config files
+            try:
+                sbatch.config_files = arguments.config.split(",")
+                sbatch.config_files = [SBatch.update_with_directory(sbatch.input_dir, filename) for filename in
+                                     sbatch.config_files]
+            except Exception as e:
+                print(e)
 
-            if not arguments["--nocm"]:
-                sbatch.update_from_cm_variables()
 
 
             #
@@ -272,7 +276,53 @@ class SbatchCommand(PluginCommand):
                 sbatch.attributes = arguments.attributes
                 sbatch.update_from_attributes(arguments.attributes)
 
+            #
+            # LOAD TEMPLATE
+            #
+            sbatch.load_source_template(sbatch.source)
+
             sbatch.info()
+
+
+            #
+            # GENERATE THE REPLACEMENTS
+            #
+
+            # order of replace is defined by
+            # config
+            # os
+            # cm
+            # attributes
+
+            #
+            # REPLACE fariables from config files
+            #
+            if arguments.config:
+                for config_file in sbatch.config_files:
+                    sbatch.update_from_file(config_file)
+                # elf.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
+
+            sbatch.update_from_os(sbatch.os_variables)
+            sbatch.data = sbatch.get_variable_dict(flat=False)
+
+            # replace variables from cloudmesh
+
+            # replace variables from --os
+
+            sbatch.update_from_os(sbatch.os_variables)
+            if not arguments["--noos"]:
+                sbatch.update_from_os_environ()
+
+            # replace variables from cm
+            if not arguments["--nocm"]:
+                sbatch.update_from_cm_variables()
+
+
+
+            # d = sbatch.get_variable_dict(flat=False)
+
+            sbatch.info()
+
 
 
             # sbatch.config_from_cli(arguments)

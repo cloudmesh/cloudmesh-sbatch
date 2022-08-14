@@ -73,6 +73,7 @@ class TestConfig:
             Shell.copy_file(f"{example}/{f}", f"{build_dir}/{f}")
 
         attributes = "a=1,b=4,g.a=4"
+        attributes = "a=1,b=4"
 
         command = format_command(
             f"""
@@ -80,8 +81,8 @@ class TestConfig:
                        --source=slurm.in.sh 
                        --config=c.yaml,a.py,exp_dict.yaml
                        --attributes={attributes}
-                       --noos 
-                       --nocm 
+            #           --noos 
+            #           --nocm 
             #           --os=HOME,USER
                        --source_dir={example}
                        --output_dir={build_dir}
