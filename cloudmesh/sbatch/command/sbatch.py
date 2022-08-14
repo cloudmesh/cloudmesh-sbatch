@@ -68,10 +68,9 @@ class SbatchCommand(PluginCommand):
 
           Options:
               -h                        help
-              --dryrun                  flag to do a dryrun and not create files and directories (not tested)
               --config=CONFIG...        a list of comma seperated configuration files in yaml or json format. The endings must be .json or .yaml
               --type=JOB_TYPE           The method to generate submission scripts.  One of slurm, lsf. [default: slurm]
-              --attributes=PARAMS       a list of coma separated attribute value pars to set parameters that are used.
+              --attributes=PARAMS       a list of coma separated attribute value pars to set parameters that are used. [default: None]
               --output_dir=DESTINATION  The directory where the result is written to
               --input_dir=DIR           location of the input directory
               --account=ACCOUNT         TBD
@@ -82,9 +81,10 @@ class SbatchCommand(PluginCommand):
               --experiment=EXPERIMENT   This specifies all parameters that are used to create permutations of them. They are comma separated key value pairs
               --mode=MODE               one of "flat", "debug", "hierachical" can also just use "f". "d", "h" [default: debug]
               --name=NAME               name of the experiment configuration file
-              --verbose                 Print more information whne executing [default: False]
               --os=OS                   Selected OS variables
               --flat                    produce flatdict
+              --dryrun                  flag to do a dryrun and not create files and directories [defualt: False]
+              --verbose                 Print more information whne executing [default: False]
 
           Description:
 
@@ -198,8 +198,84 @@ class SbatchCommand(PluginCommand):
 
             sbatch = SBatch()
 
+
+            """
+            sbatch generate --source=SOURCE --name=NAME
+                                [--out=OUT]
+                                [--verbose]
+                                [--mode=MODE]
+                                [--config=CONFIG]
+                                [--attributes=PARAMS]
+                                [--output_dir=OUTPUT_DIR]
+                                [--dryrun]
+                                [--noos]
+                                [--os=OS]
+                                [--nocm]
+                                [--source_dir=SOURCE_DIR]
+                                [--experiment=EXPERIMENT]
+                                [--flat]
+            """
+
+
+
+            from cloudmesh.common.Shell import Shell
             # CLI arguments override the experiments
-            sbatch.config_from_cli(arguments)
+
+            sbatch.dryrun = arguments.dryrun or False
+            sbatch.verbose = arguments.verbose or False
+            sbatch.execution_mode = arguments.mode or "h"
+            sbatch.name = arguments.name
+            sbatch.source = arguments.source
+            sbatch.input_dir = str(Shell.map_filename(arguments["source_dir"]).path)
+            sbatch.output_dir = str(Shell.map_filename(arguments["output_dir"]).path)
+            sbatch.script_in = f"{sbatch.input_dir}/{sbatch.source}"
+            sbatch.os_variables = (arguments.os).split(",")
+
+
+            #
+            # set source and name
+            #
+
+            sbatch.name = arguments.name
+            sbatch.source = arguments.source
+
+            #
+            # set output_script
+            #
+            import pathlib
+            from cloudmesh.common.console import Console
+            if arguments.out is None:
+                sbatch.script_out = pathlib.Path(sbatch.source).name.replace(".in.", ".")  # .replace(".in", "")
+            else:
+                sbatch.script_out = pathlib.Path(arguments.get('out', sbatch.script_out)).name
+            sbatch.script_out = SBatch.update_with_directory(sbatch.output_dir, sbatch.script_out)
+
+            #
+            # make sure output script is not input script
+            #
+            if sbatch.source == sbatch.script_out:
+                Console.error("The source and destination filenames are the same.", traceflag=True)
+                return ""
+
+            if not arguments["--noos"]:
+                sbatch.update_from_os_environ()
+
+            if not arguments["--nocm"]:
+                sbatch.update_from_cm_variables()
+
+
+            #
+            # ADD ADDITIONAL ATTRIBUTES
+            #
+            # move to last
+            if arguments.attributes:
+                sbatch.attributes = arguments.attributes
+                sbatch.update_from_attributes(arguments.attributes)
+
+            sbatch.info()
+
+
+            # sbatch.config_from_cli(arguments)
 
             # sbatch.mode = arguments.mode
             # content = readfile(sbatch.source)

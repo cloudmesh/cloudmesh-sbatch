@@ -1,4 +1,7 @@
 name: "Gregor"
+sbatch:
+  mode: h
+  dir: project
 address:
   street: "Seasame Str."
 config:

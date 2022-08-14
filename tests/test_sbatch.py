@@ -28,12 +28,29 @@ example = "../example.in"
 tests_dir = ".."
 build_dir = "."
 
+
 def remove_spaces(content):
+
     result = Shell.oneline(content)
     result = " ".join(result.split(" && "))
     result = re.sub("\\s\\s+", " ", result)
 
     return result
+
+def remove_comments(content):
+    content = textwrap.dedent(content)
+    lines = content.split("\n")
+    lines = [line for line in lines if not line.startswith("#")]
+    lines = "\n".join(lines)
+
+    return lines
+
+def format_command(content):
+
+    result = remove_comments(content)
+    print ("#", result)
+
+    return remove_spaces(result)
 
 
 @pytest.mark.incremental
@@ -48,36 +65,41 @@ class TestConfig:
         # assert "sbatch allows the creation of parameterized" in result
         assert "sbatch" in result
 
-
     def test_experiment_yaml_python_dict(self):
         HEADING()
         banner(os.getcwd())
         Benchmark.Start()
-        for f in ["c.yaml", "exp_str.yaml", "a.py", "slurm.in.sh"]:
+        for f in ["c.yaml", "exp_str.yaml", "exp_dict.yaml", "a.py", "slurm.in.sh"]:
             Shell.copy_file(f"{example}/{f}", f"{build_dir}/{f}")
 
-        command = remove_spaces(
+        attributes = "a=1,b=4,g.a=4"
+
+        command = format_command(
             f"""
             cms sbatch generate 
                        --source=slurm.in.sh 
-                       --config=c.yaml,a.py
+                       --config=c.yaml,a.py,exp_dict.yaml
+                       --attributes={attributes}
                        --noos 
+                       --nocm 
+            #           --os=HOME,USER
                        --source_dir={example}
                        --output_dir={build_dir}
                        --mode=h
                        --name=a
                        --os=USER,HOME
                        --verbose
+            #           --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\"
             """
         )
-        command = remove_spaces(command)
         print(command)
+
         print(build_dir)
         result = Shell.run(command)
-        print (result)
+        print(result)
         Benchmark.Stop()
 
-        content = readfile(f"{build_dir}/slurm.in.sh")
+        # content = readfile(f"{build_dir}/slurm.sh")
         # assert "p_gregor=GREGOR" in content
         # assert "a=101" in content
 
@@ -91,7 +113,7 @@ class h:
         for f in ["c.yaml", "exp_str.yaml", "a.py", "slurm.in.sh"]:
             Shell.copy_file(f"{example}/{f}", f"{build_dir}/{f}")
 
-        command = remove_spaces(
+        command = format_command(
             f"""
             cms sbatch generate 
                        --source=slurm.in.sh
@@ -102,15 +124,15 @@ class h:
                        --mode=h
                        --name=a
                        --os=USER,HOME
-                       --flat
+            #           --flat
                        --verbose
             """
         )
-        command = remove_spaces(command)
+
         print(command)
         print(build_dir)
         result = Shell.run(command)
-        print (result)
+        print(result)
         Benchmark.Stop()
 
         content = readfile(f"{build_dir}/slurm.in.sh")
@@ -127,7 +149,7 @@ class f:
         for f in ["c.yaml", "exp_str.yaml", "a.py", "slurm.in.sh"]:
             Shell.copy_file(f"{example}/{f}", f"{build_dir}/{f}")
 
-        command = remove_spaces(
+        command = format_command(
             f"""
             cms sbatch generate 
                        --source=slurm.in.sh 
@@ -139,16 +161,17 @@ class f:
                        --name=a
             """
         )
-        command = remove_spaces(command)
+
         print(command)
         print(build_dir)
         result = Shell.run(command)
-        print (result)
+        print(result)
         Benchmark.Stop()
 
         content = readfile(f"{build_dir}/slurm.in.sh")
         # assert "p_gregor=GREGOR" in content
         # assert "a=101" in content
+
 
 class ggg:
 
@@ -159,7 +182,7 @@ class ggg:
         for f in ["c.yaml", "exp_str.yaml", "a.py", "slurm.in.sh"]:
             Shell.copy_file(f"{example}/{f}", f"{build_dir}/{f}")
 
-        command = remove_spaces(
+        command = format_command(
             f"""
             cms sbatch generate slurm.in.sh 
                        --config={example}/c.yaml,{example}/exp_str.yaml,{example}/a.py
@@ -170,23 +193,24 @@ class ggg:
                        --verbose
             """
         )
-        command = remove_spaces(command)
+
         print(command)
         print(build_dir)
         result = Shell.run(command)
-        print (result)
+        print(result)
         Benchmark.Stop()
 
         content = readfile(f"{build_dir}/slurm.in.sh")
         assert "p_gregor=GREGOR" in content
         assert "a=101" in content
 
+
 class res:
     def test_experiment_yaml_ipynb(self):
         HEADING()
 
         Benchmark.Start()
-        command = remove_spaces(
+        command = format_command(
             f"""
             cms sbatch generate {tests_dir}/example.in/slurm.in.sh 
                        --config={example}/c.yaml,{example}/exp_str.yaml,{example}/a.py,{example}/d.ipynb
@@ -196,7 +220,7 @@ class res:
                        --name=a
             """
         )
-        command = remove_spaces(command)
+
         result = Shell.run(command)
         Benchmark.Stop()
 
@@ -207,7 +231,6 @@ class res:
 
     def test_oneline_noos_command(self):
         HEADING()
-
 
         Benchmark.Start()
 
@@ -228,11 +251,9 @@ class res:
     def test_oneline_os_command(self):
         HEADING()
 
-
-
         Benchmark.Start()
         config = f"{example}/a.py,{example}/b.json,{example}/c.yaml"
-        command = remove_spaces(
+        command = format_command(
             f"cms sbatch generate {tests_dir}/example.in/slurm.in.sh --verbose --config={config} --attributes=a=1,b=4 --dryrun "
             f"--dir={build_dir} --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" --name=a --mode=h")
         result = Shell.run(command)
@@ -256,11 +277,9 @@ class res:
     def test_hierarchy(self):
         HEADING()
 
-
-
         Benchmark.Start()
         config = f"{example}/a.py,{example}/b.json,{example}/c.yaml"
-        command = remove_spaces(
+        command = format_command(
             f"cms sbatch generate {tests_dir}/example.in/slurm.in.sh"
             f" --config={config}"
             f" --dir={build_dir}"
@@ -311,17 +330,16 @@ class res:
     def test_flat(self):
         HEADING()
 
-
-
         Benchmark.Start()
         config = f"{example}/a.py,{example}/b.json,{example}/c.yaml"
-        command = remove_spaces(
+        command = format_command(
             f"""
             cms sbatch generate {tests_dir}/example.in/slurm.in.sh 
                    --verbose 
                    --config={config}
                    --attributes=name=gregor,a=1,b=4 
-                   --noos 
+                   --noos
+                   --nocm 
                    --dir={build_dir}
                    --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\" 
                    --mode=f 
@@ -361,15 +379,12 @@ class res:
         assert "config_epoch_3_x_4_y_10.yaml" in experiment_files
         assert "config_epoch_3_x_4_y_11.yaml" in experiment_files
 
-
     def test_with_os(self):
         HEADING()
 
-
-
         Benchmark.Start()
         config = f"{example}/a.py,{example}/b.json,{example}/c.yaml"
-        command = remove_spaces(
+        command = format_command(
             f"""
             cms sbatch generate {tests_dir}/example.in/slurm.in.sh 
                        --config={config}
@@ -392,11 +407,9 @@ class res:
     def test_experiment_yaml_dict(self):
         HEADING()
 
-
-
         Benchmark.Start()
         config = f"{example}/c.yaml,{example}/exp_str.yaml,{example}/a.py"
-        command = remove_spaces(
+        command = format_command(
             f"""
             cms sbatch generate {tests_dir}/example.in/slurm.in.sh 
                        --config={config}
@@ -406,7 +419,7 @@ class res:
                        --name=a
             """
         )
-        command = remove_spaces(command)
+
         result = Shell.run(command)
         Benchmark.Stop()
 
@@ -418,11 +431,9 @@ class res:
     def test_experiment_yaml_str(self):
         HEADING()
 
-
-
         Benchmark.Start()
         config = f"{example}/c.yaml,{example}/exp_str.yaml,{example}/a.py"
-        command = remove_spaces(
+        command = format_command(
             f"""
             cms sbatch generate {tests_dir}/example.in/slurm.in.sh 
                        --config={config}
@@ -432,7 +443,7 @@ class res:
                        --name=a
             """
         )
-        command = remove_spaces(command)
+
         result = Shell.run(command)
         Benchmark.Stop()
 
@@ -444,8 +455,6 @@ class res:
     def test_setupl_cli(self):
         HEADING()
 
-
-
         Benchmark.Start()
 
         config_files = f"{example}/a.py,{example}/b.json,{example}/c.yaml"
@@ -453,7 +462,7 @@ class res:
         attributes = "a=1,b=4"
         command = f"cms sbatch generate --setup={example}/setup.yaml --attributes=a=101 --verbose"
 
-        print (command)
+        print(command)
         print(build_dir)
         print(example)
         print(tests_dir)

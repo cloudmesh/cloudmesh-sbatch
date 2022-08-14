@@ -65,6 +65,15 @@ class SBatch:
         # self.name = None
         self.data = dict()
         self.permutations = list()
+        self.experiments = None
+        self.dryrun = False
+        self.verbose = False
+        self.execution_mode = "h"
+        self.input_dir = str(Shell.map_filename(".").path)
+        self.output_dir = str(Shell.map_filename(".").path)
+        self.os_variables = None
+
+
         # self.template = None
         # self.verbose = verbose
         # # self.gpu = None
@@ -97,8 +106,10 @@ class SBatch:
             "script_output",
             "output_dir",
             "input_dir",
+            "script_in",
             "script_out",
-            "os_variables"
+            "os_variables",
+            "experiments"
         ]:
             try:
                 result = getattr(self, a)
@@ -110,8 +121,32 @@ class SBatch:
         result = getattr(self, "permutations")
         pprint(result)
 
+        print ("BEGIN DATA")
         pprint(self.data)
+        print("END DATA")
         print()
+
+        print ("BEGIN YAML")
+        spec = yaml.dump(self.data, indent=2)
+        print(spec)
+        print ("END YAML")
+
+        print("BEGIN SPEC")
+        spec = self.spec_replace(spec)
+        print (spec)
+        print("END SPEC")
+        print("BEGIN PERMUTATION")
+        p = self.permutations
+        pprint (p)
+        print("END PERMUTATION")
+
+        # self.info()
+        #
+        # self.data = result
+        #
+        print("BEGIN DATA")
+        pprint (self.data)
+        print("END DATA")
 
     @staticmethod
     def update_with_directory(directory, filename):
@@ -158,6 +193,7 @@ class SBatch:
         self.source = arguments.source
         self.input_dir = str(Shell.map_filename(arguments["source_dir"]).path)
         self.output_dir = str(Shell.map_filename(arguments["output_dir"]).path)
+        self.script_in = f"{self.input_dir}/{self.source}"
         self.os_variables = (arguments.os).split(",")
 
 
@@ -171,11 +207,6 @@ class SBatch:
         self.script_out = SBatch.update_with_directory(self.output_dir, self.script_out)
 
 
-
-        try:
-            self.attributes = arguments.attributes
-        except:
-            pass
 
 
         try:
@@ -193,13 +224,21 @@ class SBatch:
 
         self.load_source_template(self.source)
 
-
+        # ok
         if not arguments["--noos"]:
             self.update_from_os_environ()
 
+        # ok
         if not arguments["--nocm"]:
             self.update_from_cm_variables()
 
+        # ok
+        try:
+            self.attributes = arguments.attributes
+        except:
+            pass
+
+        # ok
         if arguments.attributes:
             self.update_from_attributes(arguments.attributes)
 
@@ -218,26 +257,31 @@ class SBatch:
 
         self.update_from_os(self.os_variables)
 
+        d = self.get_variable_dict(flat=False)
+
+        if arguments.experiment:
+            self.experiments = arguments.experiment
+            self.experiment = self.generate_experiment_permutations(self.experiments)
+        else:
+            self.experiments = d.get("experiment", None)
+
+        # input("KKKKKK")
+
+
         result = self.get_variable_dict(flat=arguments.flat)
 
-        if self.verbose:
-            print ("BEGIN YAML")
-            spec = yaml.dump(result, indent=2)
-            print(spec)
-            print ("END YAML")
+        experiments = result["experiment"]
+        for e in experiments:
+            experiments[e] = Parameter.expand(experiments[e])
 
-        if self.verbose:
+        self.permutations = self.permutation_generator(experiments)
 
-
-            print("BEGIN SPEC")
-            spec = self.spec_replace(spec)
-            print (spec)
-            print("END SPEC")
 
         return result
 
-        if arguments.experiment:
-            self.permutations = self.generate_experiment_permutations(arguments.experiment)
+    def yaml(self):
+        spec = yaml.dump(result, indent=2)
+
 
     def get_variable_dict(self, flat=False):
         result = self.data
@@ -306,9 +350,14 @@ class SBatch:
         Returns:
             dict[str,str]: The expanded dictionary
         """
-        entries = Parameter.arguments_to_dict(attributes)
-        self.update_from_dict(entries)
-        return entries
+        flatdict = Parameter.arguments_to_dict(attributes)
+
+        d = FlatDict(flatdict, sep=".")
+        d = d.unflatten()
+        del d["sep"]
+
+        self.update_from_dict(d)
+        return d
 
     def update_from_os_environ(self, load=True):
         """Updates the config file output to include OS environment variables
@@ -428,10 +477,13 @@ class SBatch:
                 banner(f"Generate permutations from experiment in {filename}")
             else:
                 Console.error(f"experiment datatype {type(exp_values)} for {exp_values} not supported")
+
+            print ("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
+            input("KKKKK")
             experiments = self._apply_leaf(regular_dict['experiments'], Parameter.expand)
             perms = self.permutation_generator(experiments)
             self.permutations = self.permutations + perms
-            # self.generate_experiment_permutations(experiments)
+            self.generate_experiment_permutations(experiments)
 
 
         if values is not None:
