@@ -31,7 +31,6 @@ OptStr = typing.Optional[str]
 
 
 class SBatch:
-class SBatch:
 
 
     def __init__(self, verbose=False):
