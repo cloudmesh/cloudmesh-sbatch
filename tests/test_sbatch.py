@@ -80,15 +80,15 @@ class TestConfig:
             cms sbatch generate 
                        --source=slurm.in.sh 
                        --config=c.yaml,a.py,exp_dict.yaml
+            #            --config=c.yaml
                        --attributes={attributes}
-            #           --noos 
-            #           --nocm 
-            #           --os=HOME,USER
+                       --noos 
+                       --nocm 
+                       --os=HOME,USER
                        --source_dir={example}
                        --output_dir={build_dir}
                        --mode=h
                        --name=a
-                       --os=USER,HOME
                        --verbose
             #           --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\"
             """

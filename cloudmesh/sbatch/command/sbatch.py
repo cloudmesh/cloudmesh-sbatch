@@ -12,6 +12,9 @@ from cloudmesh.shell.command import map_parameters
 from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.variables import Variables
 from cloudmesh.common.parameter import Parameter
+import pathlib
+from cloudmesh.common.console import Console
+from cloudmesh.common.Shell import Shell
 
 
 class SbatchCommand(PluginCommand):
@@ -218,7 +221,7 @@ class SbatchCommand(PluginCommand):
 
 
 
-            from cloudmesh.common.Shell import Shell
+
             # CLI arguments override the experiments
 
             sbatch.dryrun = arguments.dryrun or False
@@ -229,7 +232,6 @@ class SbatchCommand(PluginCommand):
             sbatch.input_dir = str(Shell.map_filename(arguments["source_dir"]).path)
             sbatch.output_dir = str(Shell.map_filename(arguments["output_dir"]).path)
             sbatch.script_in = f"{sbatch.input_dir}/{sbatch.source}"
-            sbatch.os_variables = (arguments.os).split(",")
 
 
             #
@@ -240,11 +242,10 @@ class SbatchCommand(PluginCommand):
             sbatch.source = arguments.source
             sbatch.source = SBatch.update_with_directory(sbatch.input_dir, sbatch.source)
 
+
             #
             # set output_script
             #
-            import pathlib
-            from cloudmesh.common.console import Console
             if arguments.out is None:
                 sbatch.script_out = pathlib.Path(sbatch.source).name.replace(".in.", ".")  # .replace(".in", "")
             else:
@@ -258,35 +259,10 @@ class SbatchCommand(PluginCommand):
                 Console.error("The source and destination filenames are the same.", traceflag=True)
                 return ""
 
-            # ok create list of config files
-            try:
-                sbatch.config_files = arguments.config.split(",")
-                sbatch.config_files = [SBatch.update_with_directory(sbatch.input_dir, filename) for filename in
-                                     sbatch.config_files]
-            except Exception as e:
-                print(e)
-
-
-
-            #
-            # ADD ADDITIONAL ATTRIBUTES
-            #
-            # move to last
-            if arguments.attributes:
-                sbatch.attributes = arguments.attributes
-                sbatch.update_from_attributes(arguments.attributes)
-
             #
             # LOAD TEMPLATE
             #
             sbatch.load_source_template(sbatch.source)
-
-            sbatch.info()
-
-
-            #
-            # GENERATE THE REPLACEMENTS
-            #
 
             # order of replace is defined by
             # config
@@ -294,22 +270,28 @@ class SbatchCommand(PluginCommand):
             # cm
             # attributes
 
-            #
-            # REPLACE fariables from config files
-            #
             if arguments.config:
+
+                # ok create list of config files
+                try:
+                    sbatch.config_files = arguments.config.split(",")
+                    sbatch.config_files = [SBatch.update_with_directory(sbatch.input_dir, filename) for filename in
+                                         sbatch.config_files]
+                except Exception as e:
+                    print(e)
+
+                #
+                # GENERATE THE REPLACEMENTS
+                #
+
                 for config_file in sbatch.config_files:
+                    print ("IIIII", config_file)
                     sbatch.update_from_file(config_file)
-                # elf.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
 
-            sbatch.update_from_os(sbatch.os_variables)
-            sbatch.data = sbatch.get_variable_dict(flat=False)
+            if arguments.os:
+                sbatch.os_variables = (arguments.os).split(",")
+                sbatch.update_from_os(sbatch.os_variables)
 
-            # replace variables from cloudmesh
-
-            # replace variables from --os
-
-            sbatch.update_from_os(sbatch.os_variables)
             if not arguments["--noos"]:
                 sbatch.update_from_os_environ()
 
@@ -317,12 +299,45 @@ class SbatchCommand(PluginCommand):
             if not arguments["--nocm"]:
                 sbatch.update_from_cm_variables()
 
+            # expriments from commandline overwrites experiments in configs
+
+            # if "experiment" in sbatch.data:
+            #     try:
+            #         d = sbatch.data["experiment"]
+            #         print ("EEEEE", d, sbatch.permutation_generator(d))
+            #         sbatch.experiment = sbatch.permutation_generator(d)
+            #     except:
+            #         pass
 
 
-            # d = sbatch.get_variable_dict(flat=False)
+            if arguments.experiment:
+                sbatch.experiments = arguments.experiment
+                sbatch.experiment = sbatch.generate_experiment_permutations(sbatch.experiments)
+
+            #
+            #
+            # result = sbatch.get_data(flat=arguments.flat)
+            #
+            # experiments = result["experiment"]
+            # for e in experiments:
+            #     experiments[e] = Parameter.expand(experiments[e])
+            #
+            # sbatch.permutations = sbatch.permutation_generator(experiments)
+
+
+            # MOVE TO END
+            #
+            # ADD ADDITIONAL ATTRIBUTES
+            #
+            # move to last
+            #if arguments.attributes:
+            #    sbatch.attributes = arguments.attributes
+            #    sbatch.update_from_attributes(arguments.attributes)
 
             sbatch.info()
 
+
+            return ""
 
 
             # sbatch.config_from_cli(arguments)
