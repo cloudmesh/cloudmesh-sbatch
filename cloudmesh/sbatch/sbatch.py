@@ -31,34 +31,7 @@ OptStr = typing.Optional[str]
 
 
 class SBatch:
-
-    @classmethod
-    def _apply_leaf(cls, my_dict: DictOrList, my_lambda: typing.Callable, *args, **kwargs) -> dict:
-        """Walks python dictionary and applies a lambda to all leaf nodes.
-        Args:
-            my_dict: The dictionary to process
-            my_lambda: The lambda function to apply to the leaf nodes.
-            *args: positional arguments passed directly to my_lambda
-            **kwargs: keyword arguments passed directoy to my_lambda
-        Returns:
-            A new dictionary that has applied the my_lambda function on
-            each leaf node.
-        """
-        new_dict = dict(my_dict)
-        for key, value in new_dict.items():
-            if isinstance(value, dict):
-                new_dict[key] = cls._apply_leaf(value, my_lambda, *args, **kwargs)
-            elif isinstance(value, list):
-                inner_list = list()
-                for x in value:
-                    if isinstance(x, dict) or isinstance(x, list):
-                        inner_list.append(cls._apply_leaf(x, my_lambda, *args, **kwargs))
-                    else:
-                        inner_list.append(my_lambda(x, **kwargs))
-                    new_dict[key] = inner_list
-            else:
-                new_dict[key] = my_lambda(str(value), *args, **kwargs)
-        return new_dict
+class SBatch:
 
 
     def __init__(self, verbose=False):
