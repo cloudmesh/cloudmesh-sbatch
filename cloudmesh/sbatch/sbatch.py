@@ -61,7 +61,12 @@ class SBatch:
         # self.dryrun = None
         pass
 
-    def info(self):
+    def info(self, verbose=None):
+        verbose = verbose or self.verbose
+
+        if not verbose:
+            return
+
         for a in [
             "dryrun",
             "verbose",
@@ -127,11 +132,6 @@ class SBatch:
         print("END DATA")
 
         banner("BEGIN TEMPLATE")
-        print(self.template_content)
-        banner("END TEMPLATE")
-
-    def template_replace(self):
-        banner("BEGIN REPLACE")
         print(self.template_content)
         banner("END TEMPLATE")
 
@@ -301,7 +301,6 @@ class SBatch:
             values = {}
             for name, value in vars(mod).items():
                 if not name.startswith("__"):
-                    print(name, value)
                     values[name] = value
 
         elif suffix in [".ipynb"]:
@@ -321,7 +320,6 @@ class SBatch:
             values = {}
             for name, value in vars(mod).items():
                 if not name.startswith("__"):
-                    print(name, value)
                     values[name] = value
 
         else:
@@ -402,19 +400,11 @@ class SBatch:
         experiments = OrderedDict()
         entries = variable_str.split(' ')
 
-        # pprint(entries)
         for entry in entries:
             k, v = entry.split("=")
             experiments[k] = Parameter.expand(v)
         self.permutations = self.permutation_generator(experiments)
         return self.permutations
-
-    # for permutation in self.permutations:
-    #    values = ""
-    #    for attribute, value in permutation.items():
-    #        values = values + f"{attribute}={value} "
-    #        script = f"{self.destination}{values}".replace("=", "_")
-    #    print(f"{values} sbatch {self.destination} {script}")
 
     @staticmethod
     def _generate_bootstrapping(permutation):
@@ -476,7 +466,8 @@ class SBatch:
             Writes two files for each established experiment, each in their own directory.
 
         """
-        print("Outputting Hierarchical Experiments")
+        if self.verbose:
+            print("Outputting Hierarchical Experiments")
         configuration = dict()
         self.script_variables = []
         suffix = self._suffix(self.script_out)
@@ -510,7 +501,6 @@ class SBatch:
                 "config": config,
                 "variables": variables
             }
-            # pprint(configuration)
         return configuration
 
     def generate_experiment_slurm_scripts(self, out_mode=None):
@@ -538,8 +528,9 @@ class SBatch:
                 configuration = self._generate_hierarchical_config()
             else:
                 raise RuntimeError(f"Invalid generator mode {mode}")
+            if self.verbose:
+                banner("Script generation")
 
-            banner("Script generation")
             print(Printer.write(configuration, order=["id", "experiment", "script", "config", "directory"]))
 
             self.configuration_parameters = configuration
@@ -568,25 +559,22 @@ class SBatch:
             parameters = experiment["experiment"]
             directory = experiment["directory"]
             script = os.path.basename(experiment["script"])
-            print(f"( {parameters} cd {directory} && {cmd} {script} )")
+            if self.verbose:
+               print(f"( {parameters} cd {directory} && {cmd} {script} )")
 
     def generate_setup_from_configuration(self, configuration):
-        # pprint(configuration)
         for identifier in configuration:
+            experiment = configuration[identifier]
+            Shell.mkdir(experiment["directory"])
             if self.verbose:
                 print()
                 Console.info(f"Setup experiment {identifier}")
-            experiment = configuration[identifier]
-            Shell.mkdir(experiment["directory"])
-            print(f"- Making dir {experiment['directory']}")
-            #
-            # Generate config.yml
-            #
-            if self.verbose:
-               print(f"- write file {experiment['config']}")
+                print(f"- Making dir {experiment['directory']}")
+                print(f"- write file {experiment['config']}")
 
             # Generate UUID for each perm
             experiment["variables"]['sbatch']['uuid'] = str(uuid.uuid4())
+
             writefile(experiment["config"], yaml.dump(experiment["variables"], indent=2))
             content_config = readfile(experiment["config"])
             try:
@@ -594,11 +582,6 @@ class SBatch:
             except Exception as e:
                 print(e)
                 Console.error("We had issues with our check for the config.yaml file")
-            #
-            # Generate slurm.sh
-            #
-            # content_script = readfile(self.source)
-            # content_script = self.spec_replace(content_script)
 
             content_script = self.generate(self.template_content)
 
@@ -607,20 +590,6 @@ class SBatch:
     @property
     def now(self):
         return datetime.now().strftime("%Y-m-%d")
-
-    # def __str__(self):
-    #     return self.content
-    #
-    # def save_slurm_script(self, filename):
-    #     """
-    #     Writes the custom slurm script to a file for submission
-    #     If the file already exists, the user will be prompted to override
-    #     """
-    #     if os.path.exists(path_expand(filename)):
-    #         if yn_choice(f"{filename} exists, would you like to overwrite?"):
-    #             writefile(filename, self.content)
-    #     else:
-    #         writefile(filename, self.content)
 
     def save_experiment_configuration(self, name=None):
         if name is not None:

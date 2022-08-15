@@ -184,7 +184,8 @@ class SbatchCommand(PluginCommand):
             if not arguments.name.endswith(".json"):
                 arguments.name = arguments.name + ".json"
 
-        VERBOSE(arguments)
+        if verbose:
+            VERBOSE(arguments)
 
         if arguments.generate and arguments.submit:
 
