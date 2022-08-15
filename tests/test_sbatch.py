@@ -79,7 +79,7 @@ class TestConfig:
             f"""
             cms sbatch generate 
                        --source=slurm.in.sh 
-                       --config=c.yaml,a.py,exp_dict.yaml
+                       --config=c.yaml,a.py,exp_dict.yaml,d.ipynb
             #            --config=c.yaml
                        --attributes={attributes}
             #           --noos 
@@ -89,7 +89,7 @@ class TestConfig:
                        --output_dir={build_dir}
                        --mode=h
                        --name=a
-                       --verbose
+            #           --verbose
             #           --experiment=\\\"epoch=[1-3] x=[1,4] y=[10,11]\\\"
             """
         )

@@ -285,7 +285,6 @@ class SbatchCommand(PluginCommand):
                 #
 
                 for config_file in sbatch.config_files:
-                    print ("IIIII", config_file)
                     sbatch.update_from_file(config_file)
 
             if arguments.os:

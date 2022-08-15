@@ -130,6 +130,11 @@ class SBatch:
         print(self.template_content)
         banner("END TEMPLATE")
 
+    def template_replace(self):
+        banner("BEGIN REPLACE")
+        print(self.template_content)
+        banner("END TEMPLATE")
+
     @staticmethod
     def update_with_directory(directory, filename):
         """
@@ -336,7 +341,7 @@ class SBatch:
 
         return self.data
 
-    def generate(self, script, data=None, fences=("{", "}")):
+    def generate(self, script=None, variables=None, fences=("{", "}")):
         """Expands the script template given the passed configuration.
 
         Args:
@@ -347,15 +352,20 @@ class SBatch:
         Returns:
             The script that has expanded its values based on `data`.
         """
-        if data is None:
-            data = self.data
-        content = self.template_content
-        for attribute, value in data.items():
+
+        if variables is None:
+            variables = self.data
+        if script is None:
+            scipt = self.template_content
+        content = str(script)
+
+        flat = FlatDict(variables, sep=".")
+        for attribute in flat:
+            value = flat[attribute]
             frame = fences[0] + attribute + fences[1]
-            # print(content)
             if frame in content:
                 if self.verbose:
-                    print(f"Expanding {frame} with {value}")
+                    print(f"- Expanding {frame} with {value}")
                 content = content.replace(frame, str(value))
         return content
 
@@ -426,17 +436,25 @@ class SBatch:
         suffix = self._suffix(self.script_out)
         name = self.script_out.replace(suffix, "")
         # directory = os.path.dirname(name)
+        spec = yaml.dump(self.data, indent=2)
+        spec = self.spec_replace(spec)
+
         directory = self.output_dir
         for permutation in self.permutations:
+
             identifier, assignments, values = self._generate_bootstrapping(permutation)
-            print(identifier)
+
+            spec = yaml.dump(self.data, indent=2)
+            spec = self.spec_replace(spec)
+
+            variables = yaml.safe_load(spec)
+
+            name = os.path.basename(self.script_out)
             script = f"{directory}/{name}_{identifier}{suffix}"
             config = f"{directory}/config_{identifier}.yaml"
-            variables = dict(self.data)
-            experiment = self.permutations[permutation]
-            print ("BBB", experiment)
-            #variables.update(FlatDict({'experiment': permutation}, sep="."))
-            variables.update(experiment)
+
+            variables.update({'experiment' : permutation})
+            variables["sbatch"]["identfier"] = identifier
 
             configuration[identifier] = {
                 "id": identifier,
@@ -465,17 +483,24 @@ class SBatch:
         # name = self.script_out.replace(suffix, "")
         directory = self.output_dir  # .path.dirname(name)
         for permutation in self.permutations:
+
+
             identifier, assignments, values = self._generate_bootstrapping(permutation)
-            print(identifier)
+
+            if self.verbose:
+                print(identifier, assignments, values)
+
+            spec = yaml.dump(self.data, indent=2)
+            spec = self.spec_replace(spec)
+
+            variables = yaml.safe_load(spec)
+
             name = os.path.basename(self.script_out)
             script = f"{directory}/{identifier}/{name}"
             config = f"{directory}/{identifier}/config.yaml"
-            variables = dict(self.data)
 
-            #print ("AAA", experiment)
             variables.update({'experiment' : permutation})
             variables["sbatch"]["identfier"] = identifier
-            #variables.update(FlatDict({'experiment': permutation}, sep="."))
 
             configuration[identifier] = {
                 "id": identifier,
@@ -518,6 +543,7 @@ class SBatch:
             print(Printer.write(configuration, order=["id", "experiment", "script", "config", "directory"]))
 
             self.configuration_parameters = configuration
+
             self.generate_setup_from_configuration(configuration)
 
     def generate_submit(self, name=None, job_type='slurm'):
@@ -547,18 +573,20 @@ class SBatch:
     def generate_setup_from_configuration(self, configuration):
         # pprint(configuration)
         for identifier in configuration:
-            perm_uuid = str(uuid.uuid4())
-            Console.info(f"setup experiment {identifier}")
+            if self.verbose:
+                print()
+                Console.info(f"Setup experiment {identifier}")
             experiment = configuration[identifier]
             Shell.mkdir(experiment["directory"])
-            print(f"Making dir {experiment['directory']}")
+            print(f"- Making dir {experiment['directory']}")
             #
             # Generate config.yml
             #
-            Console.info(f"* write file {experiment['config']}")
+            if self.verbose:
+               print(f"- write file {experiment['config']}")
 
             # Generate UUID for each perm
-            experiment["variables"]['sbatch']['uuid'] = perm_uuid
+            experiment["variables"]['sbatch']['uuid'] = str(uuid.uuid4())
             writefile(experiment["config"], yaml.dump(experiment["variables"], indent=2))
             content_config = readfile(experiment["config"])
             try:
@@ -569,8 +597,11 @@ class SBatch:
             #
             # Generate slurm.sh
             #
-            content_script = readfile(self.source)
-            content_script = self.generate(content_script, experiment["variables"])
+            # content_script = readfile(self.source)
+            # content_script = self.spec_replace(content_script)
+
+            content_script = self.generate(self.template_content)
+
             writefile(experiment["script"], content_script)
 
     @property
