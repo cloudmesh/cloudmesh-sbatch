@@ -82,8 +82,8 @@ class TestConfig:
                        --config=c.yaml,a.py,exp_dict.yaml
             #            --config=c.yaml
                        --attributes={attributes}
-                       --noos 
-                       --nocm 
+            #           --noos 
+            #           --nocm 
                        --os=HOME,USER
                        --source_dir={example}
                        --output_dir={build_dir}

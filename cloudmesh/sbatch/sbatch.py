@@ -281,12 +281,10 @@ class SBatch:
 
         if suffix in [".json"]:
             values = json.loads(content)
-            # values = dict(FlatDict(regular_dict, sep="."))
 
         elif suffix in [".yml", ".yaml"]:
             content = readfile(filename)
             values = yaml.safe_load(content)
-            # values = dict(FlatDict(regular_dict, sep="."))
 
         elif suffix in [".py"]:
 
@@ -300,11 +298,8 @@ class SBatch:
                 if not name.startswith("__"):
                     print(name, value)
                     values[name] = value
-            # values = dict(FlatDict(regular_dict, sep="."))
 
         elif suffix in [".ipynb"]:
-            # regular_dict = None
-            # values = None
 
             py_name = filename.replace(".ipynb", ".py")
             jupy = PythonExporter()
@@ -324,8 +319,6 @@ class SBatch:
                     print(name, value)
                     values[name] = value
 
-
-            # values = dict(FlatDict(regular_dict, sep="."))
         else:
             raise RuntimeError(f"Unsupported config type {suffix}")
 
@@ -359,10 +352,10 @@ class SBatch:
         content = self.template_content
         for attribute, value in data.items():
             frame = fences[0] + attribute + fences[1]
-            if self.verbose:
-                print(f"Expanding {frame} with {value}")
             # print(content)
             if frame in content:
+                if self.verbose:
+                    print(f"Expanding {frame} with {value}")
                 content = content.replace(frame, str(value))
         return content
 
@@ -433,14 +426,17 @@ class SBatch:
         suffix = self._suffix(self.script_out)
         name = self.script_out.replace(suffix, "")
         # directory = os.path.dirname(name)
-        directory = self.out_directory
+        directory = self.output_dir
         for permutation in self.permutations:
             identifier, assignments, values = self._generate_bootstrapping(permutation)
             print(identifier)
             script = f"{directory}/{name}_{identifier}{suffix}"
             config = f"{directory}/config_{identifier}.yaml"
             variables = dict(self.data)
-            variables.update(FlatDict({'experiments': permutation}, sep="."))
+            experiment = self.permutations[permutation]
+            print ("BBB", experiment)
+            #variables.update(FlatDict({'experiment': permutation}, sep="."))
+            variables.update(experiment)
 
             configuration[identifier] = {
                 "id": identifier,
@@ -467,14 +463,19 @@ class SBatch:
         self.script_variables = []
         suffix = self._suffix(self.script_out)
         # name = self.script_out.replace(suffix, "")
-        directory = self.out_directory  # .path.dirname(name)
+        directory = self.output_dir  # .path.dirname(name)
         for permutation in self.permutations:
             identifier, assignments, values = self._generate_bootstrapping(permutation)
             print(identifier)
-            script = f"{directory}/{identifier}/slurm.sh"
+            name = os.path.basename(self.script_out)
+            script = f"{directory}/{identifier}/{name}"
             config = f"{directory}/{identifier}/config.yaml"
             variables = dict(self.data)
-            variables.update(FlatDict({'experiments': permutation}, sep="."))
+
+            #print ("AAA", experiment)
+            variables.update({'experiment' : permutation})
+            variables["sbatch"]["identfier"] = identifier
+            #variables.update(FlatDict({'experiment': permutation}, sep="."))
 
             configuration[identifier] = {
                 "id": identifier,
@@ -504,7 +505,7 @@ class SBatch:
                 values = ""
                 for attribute, value in permutation.items():
                     values = values + f"{attribute}={value} "
-                script = f"{self.out_directory}/{self.script_out}{values}".replace("=", "_")
+                script = f"{self.output_dir}/{self.script_out}{values}".replace("=", "_")
         else:
             if mode.startswith("f"):
                 configuration = self._generate_flat_config()
@@ -557,7 +558,7 @@ class SBatch:
             Console.info(f"* write file {experiment['config']}")
 
             # Generate UUID for each perm
-            experiment["variables"].update({'meta.uuid': perm_uuid})
+            experiment["variables"]['sbatch']['uuid'] = perm_uuid
             writefile(experiment["config"], yaml.dump(experiment["variables"], indent=2))
             content_config = readfile(experiment["config"])
             try:

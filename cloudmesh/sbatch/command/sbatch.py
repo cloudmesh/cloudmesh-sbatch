@@ -336,6 +336,9 @@ class SbatchCommand(PluginCommand):
 
             sbatch.info()
 
+            sbatch.generate_experiment_slurm_scripts()
+
+            sbatch.save_experiment_configuration(name=arguments.name)
 
             return ""
 
