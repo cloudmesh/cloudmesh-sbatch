@@ -170,10 +170,10 @@ class SBatch:
         import munch
         variables = re.findall(r"\{\w.+\}", spec)
 
-        for i in range(0, len(variables)):
-            data = yaml.load(spec, Loader=yaml.SafeLoader)
+        data = yaml.load(spec, Loader=yaml.SafeLoader)
+        m = munch.DefaultMunch.fromDict(data)
 
-            m = munch.DefaultMunch.fromDict(data)
+        for i in range(0, len(variables)):
 
             for variable in variables:
                 text = variable
@@ -351,21 +351,24 @@ class SBatch:
             The script that has expanded its values based on `data`.
         """
 
+        replaced = {}
+
         if variables is None:
             variables = self.data
         if script is None:
             scipt = self.template_content
         content = str(script)
-
         flat = FlatDict(variables, sep=".")
+
         for attribute in flat:
             value = flat[attribute]
             frame = fences[0] + attribute + fences[1]
             if frame in content:
                 if self.verbose:
                     print(f"- Expanding {frame} with {value}")
+                replaced[attribute] = value
                 content = content.replace(frame, str(value))
-        return content
+        return content, replaced
 
     @staticmethod
     def permutation_generator(exp_dict):
@@ -444,7 +447,7 @@ class SBatch:
             config = f"{directory}/config_{identifier}.yaml"
 
             variables.update({'experiment' : permutation})
-            variables["sbatch"]["identfier"] = identifier
+            variables["sbatch"]["idenitfier"] = identifier
 
             configuration[identifier] = {
                 "id": identifier,
@@ -491,7 +494,7 @@ class SBatch:
             config = f"{directory}/{identifier}/config.yaml"
 
             variables.update({'experiment' : permutation})
-            variables["sbatch"]["identfier"] = identifier
+            variables["sbatch"]["identifier"] = identifier
 
             configuration[identifier] = {
                 "id": identifier,
@@ -583,7 +586,11 @@ class SBatch:
                 print(e)
                 Console.error("We had issues with our check for the config.yaml file")
 
-            content_script = self.generate(self.template_content)
+            content_script, replaced = self.generate(self.template_content, variables=experiment["variables"])
+
+            #if self.verbose:
+            #    for attribute, value in replaced.items():
+            #        print (f"- replaced {attribute}={value}")
 
             writefile(experiment["script"], content_script)
 
