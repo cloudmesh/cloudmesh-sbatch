@@ -217,7 +217,7 @@ class SBatch:
         """
         Registers and reads the template script in for processing
 
-        This method must be run at least once prior to generating the slurm script output.
+        This method must be run at least once prior to generating the batch script output.
 
         :param script: A string that is the path to the template script.
         :type script: str
@@ -552,7 +552,7 @@ class SBatch:
             }
         return configuration
 
-    def generate_experiment_slurm_scripts(self, out_mode=None):
+    def generate_experiment_batch_scripts(self, out_mode=None):
         """
         Utility method to genrerate either hierarchical or flat outputs; or debug.
 

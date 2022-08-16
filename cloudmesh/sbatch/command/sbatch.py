@@ -288,7 +288,7 @@ class SbatchCommand(PluginCommand):
 
             sbatch.info()
 
-            sbatch.generate_experiment_slurm_scripts()
+            sbatch.generate_experiment_batch_scripts()
 
             sbatch.save_experiment_configuration(name=arguments.name)
 
@@ -315,7 +315,7 @@ class SbatchCommand(PluginCommand):
             # else:
             #     writefile(sbatch.script_out, result)
             #
-            # sbatch.generate_experiment_slurm_scripts()
+            # sbatch.generate_experiment_batch_scripts()
             #
             # sbatch.save_experiment_configuration(name=arguments.name)
 
