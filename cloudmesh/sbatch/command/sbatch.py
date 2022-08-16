@@ -1,20 +1,14 @@
-from pprint import pprint
+import pathlib
 
+from cloudmesh.common.Shell import Shell
+from cloudmesh.common.console import Console
+from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.util import banner
-from cloudmesh.common.util import readfile
-from cloudmesh.common.util import writefile
-from cloudmesh.common.util import yn_choice
 from cloudmesh.sbatch.sbatch import SBatch
 from cloudmesh.sbatch.slurm import Slurm
 from cloudmesh.shell.command import PluginCommand
 from cloudmesh.shell.command import command
 from cloudmesh.shell.command import map_parameters
-from cloudmesh.common.debug import VERBOSE
-from cloudmesh.common.variables import Variables
-from cloudmesh.common.parameter import Parameter
-import pathlib
-from cloudmesh.common.console import Console
-from cloudmesh.common.Shell import Shell
 
 
 class SbatchCommand(PluginCommand):
@@ -71,18 +65,24 @@ class SbatchCommand(PluginCommand):
 
           Options:
               -h                        help
-              --config=CONFIG...        a list of comma seperated configuration files in yaml or json format. The endings must be .json or .yaml
+              --config=CONFIG...        a list of comma seperated configuration files in yaml or json format.
+                                        The endings must be .json or .yaml
               --type=JOB_TYPE           The method to generate submission scripts.  One of slurm, lsf. [default: slurm]
-              --attributes=PARAMS       a list of coma separated attribute value pars to set parameters that are used. [default: None]
+              --attributes=PARAMS       a list of coma separated attribute value pairs
+                                        to set parameters that are used. [default: None]
               --output_dir=DESTINATION  The directory where the result is written to
               --input_dir=DIR           location of the input directory
               --account=ACCOUNT         TBD
               --gpu=GPU                 The name of the GPU. Tyoically k80, v100, a100, rtx3090, rtx3080
-              --noos                    ignores environment variable substitution from the shell. This can be helpfull when debugging as the list is quite lareg
-              --nocm                    cloudmesh as a variable dictionary build in. Any vaiable refered to by cloudmes. and its name is replaced from the
+              --noos                    ignores environment variable substitution from the shell. This
+                                        can be helpfull when debugging as the list is quite lareg
+              --nocm                    cloudmesh as a variable dictionary build in. Any vaiable refered to
+                                        by cloudmes. and its name is replaced from the
                                         cloudmesh variables
-              --experiment=EXPERIMENT   This specifies all parameters that are used to create permutations of them. They are comma separated key value pairs
-              --mode=MODE               one of "flat", "debug", "hierachical" can also just use "f". "d", "h" [default: debug]
+              --experiment=EXPERIMENT   This specifies all parameters that are used to create permutations of them.
+                                        They are comma separated key value pairs
+              --mode=MODE               one of "flat", "debug", "hierachical" can also just
+                                        use "f". "d", "h" [default: debug]
               --name=NAME               name of the experiment configuration file
               --os=OS                   Selected OS variables
               --flat                    produce flatdict
@@ -125,8 +125,6 @@ class SbatchCommand(PluginCommand):
 
         """
 
-        # sbatch generate --source=SOURCE --name=NAME [--out=OUT] [--verbose] [--mode=MODE] [--config=CONFIG] [--attributes=PARAMS] [--output_dir=OUTPUT_DIR] [--dryrun] [--noos] [--nocm] [--source_dir=SOURCE_DIR] [--experiment=EXPERIMENT]
-
         map_parameters(arguments,
                        "verbose",
                        "source",
@@ -144,27 +142,6 @@ class SbatchCommand(PluginCommand):
                        "os",
                        "flat",
                        "dryrun")
-
-        # pprint(args)
-        # pprint(arguments)
-
-        # arguments["experiments_file"] = arguments["--experiments-file"]
-
-        #
-        # UNDO GREGORS CHANGES
-        #
-        # if arguments.config:
-        #    try:
-        #        arguments.config = Parameter.expand(arguments.config[0])
-        #    except Exception as e:
-        #        Console.error("issue with config expansion")
-        #        print(e)
-        #
-        ### Handling in sbatch class now
-        # if arguments.attributes:
-        #     arguments.attributes = Parameter.arguments_to_dict(arguments.attributes)
-        # if arguments.config:
-        #     arguments.config = Parameter.expand(arguments.config[0])
 
         verbose = arguments["--verbose"]
         if verbose:
@@ -202,27 +179,6 @@ class SbatchCommand(PluginCommand):
 
             sbatch = SBatch()
 
-
-            """
-            sbatch generate --source=SOURCE --name=NAME
-                                [--out=OUT]
-                                [--verbose]
-                                [--mode=MODE]
-                                [--config=CONFIG]
-                                [--attributes=PARAMS]
-                                [--output_dir=OUTPUT_DIR]
-                                [--dryrun]
-                                [--noos]
-                                [--os=OS]
-                                [--nocm]
-                                [--source_dir=SOURCE_DIR]
-                                [--experiment=EXPERIMENT]
-                                [--flat]
-            """
-
-
-
-
             # CLI arguments override the experiments
 
             sbatch.dryrun = arguments.dryrun or False
@@ -234,7 +190,6 @@ class SbatchCommand(PluginCommand):
             sbatch.output_dir = str(Shell.map_filename(arguments["output_dir"]).path)
             sbatch.script_in = f"{sbatch.input_dir}/{sbatch.source}"
 
-
             #
             # set source and name
             #
@@ -242,7 +197,6 @@ class SbatchCommand(PluginCommand):
             sbatch.name = arguments.name
             sbatch.source = arguments.source
             sbatch.source = SBatch.update_with_directory(sbatch.input_dir, sbatch.source)
-
 
             #
             # set output_script
@@ -277,7 +231,7 @@ class SbatchCommand(PluginCommand):
                 try:
                     sbatch.config_files = arguments.config.split(",")
                     sbatch.config_files = [SBatch.update_with_directory(sbatch.input_dir, filename) for filename in
-                                         sbatch.config_files]
+                                           sbatch.config_files]
                 except Exception as e:
                     print(e)
 
@@ -309,7 +263,6 @@ class SbatchCommand(PluginCommand):
             #     except:
             #         pass
 
-
             if arguments.experiment:
                 sbatch.experiments = arguments.experiment
                 sbatch.experiment = sbatch.generate_experiment_permutations(sbatch.experiments)
@@ -324,13 +277,12 @@ class SbatchCommand(PluginCommand):
             #
             # sbatch.permutations = sbatch.permutation_generator(experiments)
 
-
             # MOVE TO END
             #
             # ADD ADDITIONAL ATTRIBUTES
             #
             # move to last
-            #if arguments.attributes:
+            # if arguments.attributes:
             #    sbatch.attributes = arguments.attributes
             #    sbatch.update_from_attributes(arguments.attributes)
 
@@ -341,7 +293,6 @@ class SbatchCommand(PluginCommand):
             sbatch.save_experiment_configuration(name=arguments.name)
 
             return ""
-
 
             # sbatch.config_from_cli(arguments)
 

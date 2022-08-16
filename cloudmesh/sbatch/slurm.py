@@ -33,7 +33,9 @@ The API reflects what we do on the commandline and we have the methods::
     Slurm.status()
 """
 import os
+
 from cloudmesh.common.util import banner
+
 
 class Slurm:
 
