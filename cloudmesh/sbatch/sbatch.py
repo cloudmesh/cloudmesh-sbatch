@@ -459,47 +459,47 @@ class SBatch:
         identifier = "_".join(values)
         return identifier, assignments, values
 
-    def _generate_flat_config(self):
-        """
-        deprectaed.
-
-        Creates a flat configuration file.
-
-        :return: dict with information where the variables are a flatdict
-        :rtype: dict
-        """
-
-        configuration = dict()
-        # self.script_variables = list()
-        suffix = self._suffix(self.script_out)
-        spec = yaml.dump(self.data, indent=2)
-        spec = self.spec_replace(spec)
-
-        directory = self.output_dir
-        for permutation in self.permutations:
-            identifier, assignments, values = self._generate_bootstrapping(permutation)
-
-            spec = yaml.dump(self.data, indent=2)
-            spec = self.spec_replace(spec)
-
-            variables = yaml.safe_load(spec)
-
-            name = os.path.basename(self.script_out)
-            script = f"{directory}/{name}_{identifier}{suffix}"
-            config = f"{directory}/config_{identifier}.yaml"
-
-            variables.update({'experiment': permutation})
-            variables["sbatch"]["idenitfier"] = identifier
-
-            configuration[identifier] = {
-                "id": identifier,
-                "directory": directory,
-                "experiment": assignments,
-                "script": script,
-                "config": config,
-                "variables": variables
-            }
-        return configuration
+    # def _generate_flat_config(self):
+    #     """
+    #     deprecated. IT is no longer supported
+    #
+    #     Creates a flat configuration file.
+    #
+    #     :return: dict with information where the variables are a flatdict
+    #     :rtype: dict
+    #     """
+    #
+    #     configuration = dict()
+    #     # self.script_variables = list()
+    #     suffix = self._suffix(self.script_out)
+    #     spec = yaml.dump(self.data, indent=2)
+    #     spec = self.spec_replace(spec)
+    #
+    #     directory = self.output_dir
+    #     for permutation in self.permutations:
+    #         identifier, assignments, values = self._generate_bootstrapping(permutation)
+    #
+    #         spec = yaml.dump(self.data, indent=2)
+    #         spec = self.spec_replace(spec)
+    #
+    #         variables = yaml.safe_load(spec)
+    #
+    #         name = os.path.basename(self.script_out)
+    #         script = f"{directory}/{name}_{identifier}{suffix}"
+    #         config = f"{directory}/config_{identifier}.yaml"
+    #
+    #         variables.update({'experiment': permutation})
+    #         variables["sbatch"]["idenitfier"] = identifier
+    #
+    #         configuration[identifier] = {
+    #             "id": identifier,
+    #             "directory": directory,
+    #             "experiment": assignments,
+    #             "script": script,
+    #             "config": config,
+    #             "variables": variables
+    #         }
+    #     return configuration
 
     def _generate_hierarchical_config(self):
         """
@@ -556,6 +556,8 @@ class SBatch:
         """
         Utility method to genrerate either hierarchical or flat outputs; or debug.
 
+        NOte the falt mode is no longer supported
+
         :param out_mode: The mode of operation.  One of: "debug", "flat", "hierarchical"
         :type out_mode: string
         :return: generates the batch scripts
@@ -572,7 +574,8 @@ class SBatch:
                 script = f"{self.output_dir}/{self.script_out}{values}".replace("=", "_")
         else:
             if mode.startswith("f"):
-                configuration = self._generate_flat_config()
+                Console.error("Flat mode is no longer supported", traceflag=True)
+                # configuration = self._generate_flat_config()
             elif mode.startswith("h"):
                 configuration = self._generate_hierarchical_config()
             else:
