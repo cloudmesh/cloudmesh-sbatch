@@ -70,8 +70,8 @@ class SbatchCommand(PluginCommand):
               --type=JOB_TYPE           The method to generate submission scripts.  One of slurm, lsf. [default: slurm]
               --attributes=PARAMS       a list of coma separated attribute value pairs
                                         to set parameters that are used. [default: None]
-              --output_dir=DESTINATION  The directory where the result is written to
-              --input_dir=DIR           location of the input directory
+              --output_dir=OUTPUT_DIR   The directory where the result is written to
+              --source_dir=SOURCE_DIR   location of the input directory [default: .]
               --account=ACCOUNT         TBD
               --gpu=GPU                 The name of the GPU. Tyoically k80, v100, a100, rtx3090, rtx3080
               --noos                    ignores environment variable substitution from the shell. This
@@ -82,7 +82,7 @@ class SbatchCommand(PluginCommand):
               --experiment=EXPERIMENT   This specifies all parameters that are used to create permutations of them.
                                         They are comma separated key value pairs
               --mode=MODE               one of "flat", "debug", "hierachical" can also just
-                                        use "f". "d", "h" [default: debug]
+                                        use "f". "d", "h" [default: h]
               --name=NAME               name of the experiment configuration file
               --os=OS                   Selected OS variables
               --flat                    produce flatdict
@@ -166,7 +166,7 @@ class SbatchCommand(PluginCommand):
 
         if arguments.generate and arguments.submit:
 
-            # sbatch generate submit [--verbose] [--mode=MODE] [--experiment=EXPERIMENT] [--input_dir=DIR]
+            #  sbatch generate submit --name=NAME [--job_type=JOB_TYPE] [--verbose]
 
             sbatch = SBatch()
             sbatch.verbose = arguments.verbose

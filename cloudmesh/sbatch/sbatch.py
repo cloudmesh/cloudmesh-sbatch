@@ -359,7 +359,11 @@ class SBatch:
             experiments = values['experiment']
 
             for key, value in experiments.items():
-                experiments[key] = Parameter.expand(value)
+                print (key, value)
+                try:
+                    experiments[key] = Parameter.expand(value)
+                except:
+                    experiments[key] = [value]
 
             self.permutations = self.permutation_generator(experiments)
 
@@ -589,7 +593,7 @@ class SBatch:
 
             self.generate_setup_from_configuration(configuration)
 
-    def generate_submit(self, name=None, job_type='slurm', verbose=None):
+    def generate_submit(self, name=None, job_type='slurm'):
         """
         Generates a list of commands based on the permutations for submission
 
@@ -603,6 +607,10 @@ class SBatch:
         :return: prepars the internal data for the experiments, if set to verbose, prints them
         :rtype: None
         """
+
+        if ".json" not in name:
+            name = f"{name}.json"
+
         if job_type == 'slurm':
             cmd = 'sbatch'
         elif job_type == 'lsf':
@@ -615,17 +623,20 @@ class SBatch:
 
         experiments = json.loads(readfile(name))
 
+       #  print (experiments)
+
         if experiments is None:
             Console.error("please define the experiment parameters")
             return ""
 
         for entry in experiments:
+            if self.verbose:
+                print(f"# Generate {entry}")
             experiment = experiments[entry]
             parameters = experiment["experiment"]
             directory = experiment["directory"]
             script = os.path.basename(experiment["script"])
-            if self.verbose:
-                print(f"( {parameters} cd {directory} && {cmd} {script} )")
+            print(f"{parameters} cd {directory} && {cmd} {script}")
 
     def generate_setup_from_configuration(self, configuration):
         for identifier in configuration:
