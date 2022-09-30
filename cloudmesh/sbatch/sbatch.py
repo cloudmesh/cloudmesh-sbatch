@@ -2,16 +2,13 @@ import itertools
 import json
 import os
 import pathlib
-import tempfile
-import textwrap
 import typing
-import yaml
 import uuid
-
 from collections import OrderedDict
 from datetime import datetime
 from pprint import pprint
 
+import yaml
 from nbconvert.exporters import PythonExporter
 
 from cloudmesh.common.FlatDict import FlatDict
@@ -19,7 +16,7 @@ from cloudmesh.common.Printer import Printer
 from cloudmesh.common.Shell import Shell
 from cloudmesh.common.console import Console
 from cloudmesh.common.parameter import Parameter
-from cloudmesh.common.util import banner, readfile, writefile, yn_choice
+from cloudmesh.common.util import banner, readfile, writefile
 from cloudmesh.common.variables import Variables
 
 PathLike = typing.Union[str, pathlib.Path]
@@ -31,279 +28,309 @@ OptStr = typing.Optional[str]
 class SBatch:
 
     def __init__(self, verbose=False):
-        self.name = None
+        """
+        Initialize the SBatch Object
+
+        :param verbose: If true prints additional infromation when SBatch methods are called
+        :type verbose: bool
+        """
+        self.flat = FlatDict({}, sep=".")
         self.data = dict()
         self.permutations = list()
-        self.template = None
+        self.experiments = None
+        self.dryrun = False
+        self.verbose = False
+        self.execution_mode = "h"
+        self.input_dir = str(Shell.map_filename(".").path)
+        self.output_dir = str(Shell.map_filename(".").path)
+        self.os_variables = None
         self.verbose = verbose
-        # self.gpu = None
-        self.attributes = dict()
-        self.configuration_parameters = None
         self.template_path = None
         self.template_content = None
-        self.out_directory = None
+        self.configuration_parameters = None
         self.script_out = None
-        self.execution_mode = None
-        self.source = None
-        self.dryrun = None
+        # self.gpu = None
 
-    def config_from_cli(self, arguments: typing.Any):
-        """Configures the object from command.sbatch CLI arguments
-
-        Args:
-            arguments: The docopts object from the cms sbatch command.
-
-        Returns:
-            Fluent API of the current object.
+    def info(self, verbose=None):
         """
-        if arguments.get('SOURCE') is not None:
-            self.source = arguments.get('SOURCE')
-            self.register_script(self.source)
-        self.dryrun = arguments.get('dryrun', self.dryrun)
-        if self.execution_mode is None:
-            self.execution_mode = arguments.mode
+        Prints information about the SBatch object for debugging purposes
 
-        if self.script_out is None and arguments.out is None:
-            self.script_out = pathlib.Path(self.source).name.replace(".in.", ".")  #.replace(".in", "")
+        :param verbose:  if True prints even more information
+        :type verbose: bool
+        :return: None
+        :rtype: None
+        """
+        verbose = verbose or self.verbose
+
+        if not verbose:
+            return
+
+        for a in [
+            "dryrun",
+            "verbose",
+            "name",
+            "source",
+            "destination",
+            "attributes",
+            "gpu",
+            "config",
+            "config_files",
+            "directory",
+            "experiment",
+            "execution_mode",
+            "template",
+            "script_output",
+            "output_dir",
+            "input_dir",
+            "script_in",
+            "script_out",
+            "os_variables",
+            "experiments"
+        ]:
+            try:
+                result = getattr(self, a)
+            except:  # noqa: E722
+                result = self.data.get(a)
+            print(f'{a:<12}: {result}')
+        print("permutations:")
+
+        result = getattr(self, "permutations")
+        pprint(result)
+
+        print("BEGIN FLAT")
+        pprint(self.flat)
+        print("END FLAT")
+        print()
+
+        print("BEGIN DATA")
+        pprint(self.data)
+        print("END DATA")
+        print()
+
+        print("BEGIN YAML")
+        spec = yaml.dump(self.data, indent=2)
+        print(spec)
+        print("END YAML")
+
+        print("BEGIN SPEC")
+        spec = self.spec_replace(spec)
+        print(spec)
+        print("END SPEC")
+        print("BEGIN PERMUTATION")
+        p = self.permutations
+        pprint(p)
+        print("END PERMUTATION")
+
+        # self.info()
+        #
+        # self.data = result
+        #
+        print("BEGIN DATA")
+        pprint(self.data)
+        print("END DATA")
+
+        banner("BEGIN TEMPLATE")
+        print(self.template_content)
+        banner("END TEMPLATE")
+
+    @staticmethod
+    def update_with_directory(directory, filename):
+        """
+        prefix with the directory if the filename is not starting with . / ~
+
+        :param directory: the string value of the directory
+        :type directory: str
+        :param filename: the filename
+        :type filename: str
+        :return: directory/filename
+        :rtype: str
+        """
+        if directory is None:
+            return filename
+        elif not filename.startswith("/") and not filename.startswith(".") and not filename.startswith("~"):
+            return f"{directory}/{filename}"
         else:
-            self.script_out = pathlib.Path(arguments.get('out', self.script_out)).name
+            return filename
 
-        if self.source == self.script_out:
-            if not yn_choice("The source and destination filenames are the same. Do you want to continue?"):
-                return ""
+    def get_data(self, flat=False):
+        result = self.data
 
-        if arguments['--dir']:
-            self.out_directory = arguments['--dir']
+        if flat:
+            from cloudmesh.common.FlatDict import FlatDict
+            result = FlatDict(self.data, sep=".")
+            del result["sep"]
 
-        if not arguments["--noos"]:
-            self.update_from_os_environ()
+        return result
 
-        if not arguments["--nocm"]:
-            self.update_from_cm_variables()
-
-        if arguments.attributes:
-            self.update_from_attributes(arguments.attributes)
-
-        if arguments.experiment:
-            self.permutations = self.generate_experiment_permutations(arguments.experiment)
-
-        if arguments.config:
-            for config_file in Parameter.expand(arguments.config):
-                self.update_from_file(config_file)
-            self.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
-        return self
-
-    @classmethod
-    def _apply_leaf(cls, my_dict: DictOrList, my_lambda: typing.Callable, *args, **kwargs) -> dict:
-        """Walks python dictionary and applies a lambda to all leaf nodes.
-        Args:
-            my_dict: The dictionary to process
-            my_lambda: The lambda function to apply to the leaf nodes.
-            *args: positional arguments passed directly to my_lambda
-            **kwargs: keyword arguments passed directoy to my_lambda
-        Returns:
-            A new dictionary that has applied the my_lambda function on
-            each leaf node.
+    def spec_replace(self, spec):
         """
-        new_dict = dict(my_dict)
-        for key, value in new_dict.items():
-            if isinstance(value, dict):
-                new_dict[key] = cls._apply_leaf(value, my_lambda, *args, **kwargs)
-            elif isinstance(value, list):
-                inner_list = list()
-                for x in value:
-                    if isinstance(x, dict) or isinstance(x, list):
-                        inner_list.append(cls._apply_leaf(x, my_lambda, *args, **kwargs))
-                    else:
-                        inner_list.append(my_lambda(x, **kwargs))
-                    new_dict[key] = inner_list
-            else:
-                new_dict[key] = my_lambda(str(value), *args, **kwargs)
-        return new_dict
+        given a spec in yaml format, replaces all values in the yaml file taht are of the form "{a.b}"
+        with the value of
 
-    def config_from_yaml(self, yaml_file: PathLike):
-        """Configures the object from a standard YAML structure.
+        a:
+           b: value
 
-        This supports the following YAML structures:
-            template: path
-            config: path
-            name: str
-            experiments:
-              card_name: Parameter.expand string
-              gpu_count: Parameter.expand string
-              cpu_num: Parameter.expand string
-              mem: Parameter.expand string
-            attributes:
-              property: substitution
-            mode: str
-            dir: path
+        if it is defined in the yaml file
 
-        Args:
-            yaml_file: The path to the yaml file to parse
-
-        Returns:
-            Fluent API of the current object.
+        :param spec: yaml string
+        :type spec: str
+        :return: replaced yaml file
+        :rtype: str
         """
+        import re
+        import munch
+        variables = re.findall(r"\{\w.+\}", spec)
 
-        with open(yaml_file, 'rb') as f:
-            yaml_data = yaml.safe_load(f)
+        data = yaml.load(spec, Loader=yaml.SafeLoader)
+        m = munch.DefaultMunch.fromDict(data)
 
-        self.read_config_from_dict(yaml_data)
+        for i in range(0, len(variables)):
 
-        return self
+            for variable in variables:
+                text = variable
+                variable = variable[1:-1]
+                try:
+                    value = eval("m.{variable}".format(**locals()))
+                    if "{" not in value:
+                        spec = spec.replace(text, value)
+                except:  # noqa: E722
+                    value = variable
+        return spec
 
-    def read_config_from_dict(self, root):
-        if 'template' in root:
-            self.source = root['template']
-            self.register_script(root['template'])
-        if 'config' in root:
-            self.update_from_file(root['config'])
-        if 'name' in root:
-            self.name = root['name']
-        if 'mode' in root:
-            self.execution_mode = root['mode']
-        if 'dir' in root:
-            self.out_directory = root['dir']
-        if 'experiments' in root:
-            experiments = self._apply_leaf(root['experiments'], Parameter.expand)
-            perms = self.permutation_generator(experiments)
-            self.permutations = self.permutations + perms
-        # if 'attributes' in root:
-        self.update_from_dict(FlatDict(root, sep="."))
-        self.update_from_dict({ 'meta.parent.uuid': str(uuid.uuid4()) })
+    def update_from_os(self, variables):
+        """
+        LOads all variables from os.environ into self.data with os.name
 
-    def register_script(self, script):
-        """Registers and reads the template script in for processing
+        :param variables: tha name of the variables such as "HOME"
+        :type variables:  [str]
+        :return: self.data with all variaples added with os.name: value
+        :rtype: dict
+        """
+        if variables is not None:
+            if os not in self.data:
+                self.data["os"] = {}
+            for key in variables:
+                self.data["os"][key] = os.environ[key]
+        return self.data
 
-        This method must be run at least once prior to generating the slurm script output.
+    def load_source_template(self, script):
+        """
+        Registers and reads the template script in for processing
 
-        Args:
-            script: A string that is the path to the template script.
+        This method must be run at least once prior to generating the batch script output.
 
-        Returns:
-            The text of the template file unaltered.
+        :param script: A string that is the path to the template script.
+        :type script: str
+        :return: The text of the template file unaltered.
+        :rtype: str
         """
         self.template_path = script
         self.template_content = readfile(script)
         return self.template_content
 
-    def info(self):
-        for a in ["source",
-                    "destination",
-                    "attributes",
-                    "gpu",
-                    "dryrun",
-                    "config",
-                    "directory",
-                    "experiment",
-                    "mode"
-                  ]:
-            try:
-                result = getattr(self,a)
-            except:
-                result = self.data.get(a)
-            print(f'{a:<12}: {result}')
-        print("permutations:")
-        result = getattr(self, "permutations")
-        # pprint(result)
-        print()
-
-    def set_attribute(self, attribute, value):
-        self.data[attribute] = value
-
     def update_from_dict(self, d):
+        """
+        Add a dict to self. data
+
+        :param d: dictionary
+        :type d: dict
+        :return: self.data with updated dict
+        :rtype: dict
+        """
         self.data.update(d)
-
-    def update_from_attributes(self, attributes: str):
-        """attributes are of the form "a=1,b=3"
-
-        Args:
-            attributes: A string to expand into key-value pairs
-        Returns:
-            dict[str,str]: The expanded dictionary
-        """
-        entries = Parameter.arguments_to_dict(attributes)
-        self.update_from_dict(entries)
-        return entries
-
-    def update_from_os_environ(self, load=True):
-        """Updates the config file output to include OS environment variables
-        Args:
-            load: When true, loads the environment variables into the config.
-        Returns:
-            The current value of the data configuration variable
-        """
-        if load:
-            self.update_from_dict(dict(os.environ))
         return self.data
 
-    def update_from_cm_variables(self, load: bool = True) -> typing.Dict[str, typing.Any]:
-        """Adds Cloudmesh variables to the class's data parameter as a flat dict.
+    def update_from_attributes(self, attributes: str):
+        """
+        attributes are of the form "a=1,b=3"
 
-        Args:
-            load: Toggles execution; if false, method does nothing.
+        :param attributes: A string to expand into key-value pairs
+        :type attributes:
+        :return: self.data with updated dict
+        :rtype: dict
+        """
+        flatdict = Parameter.arguments_to_dict(attributes)
 
-        Returns:
-            The updated data parameter with the cloudmesh variables set.
+        d = FlatDict(flatdict, sep=".")
+        d = d.unflatten()
+        del d["sep"]
+
+        self.update_from_dict(d)
+        return self.data
+
+    def update_from_os_environ(self):
+        """
+        Updates the config file output to include OS environment variables
+
+        :return: The current value of the data configuration variable
+        :rtype: dict
+        """
+        self.update_from_dict(dict(os.environ))
+        return self.data
+
+    def update_from_cm_variables(self, load=True):
+        """
+        Adds Cloudmesh variables to the class's data parameter as a flat dict.
+
+        :param load: Toggles execution; if false, method does nothing.
+        :type load: bool
+        :return: self.data with updated cloudmesh variables
+        :rtype: dict
         """
         if load:
             variables = Variables()
             v = FlatDict({"cloudmesh": variables.dict()}, sep=".")
-
-            self.update_from_dict(dict(v))
+            d = v.unflatten()
+            del d["sep"]
+            self.update_from_dict(d)
         return self.data
 
     @staticmethod
-    def _suffix(path: str) -> str:
-        """Returns the file suffix of a path
-
-        Args:
-            path: The path to process
-
-        Returns:
-            str: The suffix of the string
+    def _suffix(filename):
         """
-        return pathlib.Path(path).suffix
 
-    def update_from_file(self, filename: PathLike):
-        """Updates the run configuration file with the data within the passed file.
+        :param filename: Returns the file suffix of a filename
+        :type filename: str
+        :return: the suffix of the filename
+        :rtype: str
+        """
+        return pathlib.Path(filename).suffix
 
-        Args:
-            filename: The path to the configuration file (json or yaml)
+    def update_from_file(self, filename):
+        """
+        Updates the configuration self.data with the data within the passed file.
 
-        Returns:
-            The modified data object.
+        :param filename: The path to the configuration file (yaml, json, py, ipynb)
+        :type filename: str
+        :return: self.data with updated cloudmesh variables from the specified file
+        :rtype: dict
         """
         if self.verbose:
             print(f"Reading variables from {filename}")
 
-        suffix = self._suffix(filename)
+        suffix = self._suffix(filename).lower()
         content = readfile(filename)
 
-        if suffix.lower() in [".json"]:
-            regular_dict = json.loads(content)
-            values = dict(FlatDict(regular_dict, sep="."))
-        elif suffix.lower() in [".yml", ".yaml"]:
-            content = readfile(filename)
-            regular_dict = yaml.safe_load(content)
-            values = dict(FlatDict(regular_dict, sep="."))
-        elif suffix.lower() in [".py"]:
+        if suffix in [".json"]:
+            values = json.loads(content)
 
-            modulename = filename.replace(".py","").replace("/","_").replace("build_", "")
+        elif suffix in [".yml", ".yaml"]:
+            content = readfile(filename)
+            values = yaml.safe_load(content)
+
+        elif suffix in [".py"]:
+
+            modulename = filename.replace(".py", "").replace("/", "_").replace("build_", "")
             from importlib.machinery import SourceFileLoader
 
             mod = SourceFileLoader(modulename, filename).load_module()
 
-            regular_dict = {}
+            values = {}
             for name, value in vars(mod).items():
                 if not name.startswith("__"):
-                    print (name, value)
-                    regular_dict[name] = value
-            values = dict(FlatDict(regular_dict, sep="."))
+                    values[name] = value
 
-        elif suffix.lower() in [".ipynb"]:
-            # regular_dict = None
-            # values = None
+        elif suffix in [".ipynb"]:
 
             py_name = filename.replace(".ipynb", ".py")
             jupy = PythonExporter()
@@ -312,55 +339,58 @@ class SBatch:
             # Shell.run(f"jupyter nbconvert --to python {filename}")
 
             filename = py_name
-            modulename = filename.replace(".py","").replace("/","_").replace("build_", "")
+            modulename = filename.replace(".py", "").replace("/", "_").replace("build_", "")
             from importlib.machinery import SourceFileLoader
 
             mod = SourceFileLoader(modulename, filename).load_module()
 
-            regular_dict = {}
+            values = {}
             for name, value in vars(mod).items():
                 if not name.startswith("__"):
-                    print(name, value)
-                    regular_dict[name] = value
+                    values[name] = value
 
-            values = dict(FlatDict(regular_dict, sep="."))
         else:
             raise RuntimeError(f"Unsupported config type {suffix}")
 
-        self.read_config_from_dict(regular_dict)
-        if regular_dict is not None and 'experiments' in regular_dict:
-            exp_values = regular_dict['experiments']
+        self.update_from_dict(values)
 
-            banner(str(exp_values))
+        # self.read_config_from_dict(regular_dict)
+        if values is not None and 'experiment' in values:
+            experiments = values['experiment']
 
-            if isinstance(exp_values, dict):
-                entries = []
-                for key, value in exp_values.items():
-                    entry = f"{key}={value}"
-                    entries.append(entry)
-                exp_values = " ".join(entries)
+            for key, value in experiments.items():
+                print (key, value)
+                try:
+                    experiments[key] = Parameter.expand(value)
+                except:
+                    experiments[key] = [value]
 
-            elif isinstance(exp_values, str):
-                banner(f"Generate permutations from experiment in {filename}")
-            else:
-                Console.error(f"experiment datatype {type(exp_values)} for {exp_values} not supported")
-            experiments = self._apply_leaf(regular_dict['experiments'], Parameter.expand)
-            perms = self.permutation_generator(experiments)
-            self.permutations = self.permutations + perms
-            # self.generate_experiment_permutations(experiments)
-
-        # if values is not None:
-        #     self.update_from_dict(experiments)
+            self.permutations = self.permutation_generator(experiments)
 
         return self.data
 
-    def generate(self, script, data=None, fences=("{", "}")):
-        """Expands the script template given the passed configuration.
+    def generate(self, script=None, variables=None, fences=("{", "}")):
+        """
+        Expands the script template given the passed configuration.
 
-        Args:
-            script: The string contents of the script file.
-            data: A single-level dictionary used to replace strings that match the key with its values.
-            fences: A 2 position tuple, that encloses template variables (start and end).
+        :param script: The string contents of the script file.
+        :type script: str
+        :param variables: the variables to be replaced, if ommitted uses the internal variables found
+        :type variables: dict
+        :param fences: A 2 position tuple, that encloses template variables (start and end).
+        :type fences: (str,str)
+        :return: The script that has expanded its values based on `data`.
+        :rtype: str
+        """
+
+        replaced = {}
+
+        if variables is None:
+            variables = self.data
+        if script is None:
+            script = self.template_content
+        content = str(script)
+        flat = FlatDict(variables, sep=".")
 
         Returns:
             The script that has expanded its values based on `data`.
