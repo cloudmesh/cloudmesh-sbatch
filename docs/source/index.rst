@@ -1,28 +1,32 @@
 cloudmesh-sbatch
 ================
 
-Generation of experimat submission scripts based on parameter permuattions.
 
-.. rubric:: Summary
+.. cloudmesh-cc documentation master file, created by
+   sphinx-quickstart on Thu Aug  4 08:29:16 2022.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
-.. autosummary::
-   :toctree: generated
+Cloudmesh Compute Cluster
+=========================
 
-   cloudmesh.sbatch
+Generation of experiment submission scripts based on parameter permuattions.
 
-.. rubric:: CLI
-
-.. toctree::
-   :maxdepth: 2
-
-   manual/sbatch
-
-.. rubric:: Modules
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+   :caption: Documentation
 
-   modules
+   guide
+   readme
+
+.. toctree::
+   :maxdepth: 1
+   :caption: API
+
+   api
+
+
 
 Indices and tables
 ==================
