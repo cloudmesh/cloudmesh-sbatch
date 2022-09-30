@@ -14,54 +14,76 @@ Load Sharing Facility
 (`LSF <https://www.ibm.com/docs/en/spectrum-lsf/10.1.0?topic=overview-lsf-introduction>`__).
 While these ecosystems provide a great deal of control and extension for
 planning, scheduling, and batching jobs, they are limited in their
-ability to support parameterization in a scheduled task. While there are
-facilities in place to execute jobs on an Array, the ability to do
-permutation based experments are limited to what you integrate into your
-own batch script. Even then, parameterization of values are only made
-availabile as environment variables, which can be limited depending on
-your OS or selected programming language. In many cases limitations set
-by the deployment trhough the compute center also hinder optimal use
+ability to support parameterization in a scheduled task when system restrictions
+have been implemented by the system
+administrative staff. These restrictions in time and space
+may not even allow the user to use
+build in functionality to execute jobs on an array of jobs and thus eliminate
+the ability to do
+permutation-based experiments are limited to what you integrate into your
+own batch script. Even then, parameterization of values is only made
+available as environment variables, which can be too restrictive.
+We found that in many cases limitations set
+by the deployment through the computing center hinder optimal use
 while restrictions are placed on duration and number of parallel
 accessible resources. In some cases these restrictions are soo
-established that removing them is impractical and takes weks to
-implement on temporary basis.
+established that removing them is impractical and takes weeks to
+implement temporarily.
 
-Cloudmesh Sbatch is a framework that wraps the SLURM batch processor
+Cloudmesh-sbatch is a framework that wraps the batch processor (for SLURM and LSF)
 into a templated framework such that experiments can be generated based
-on configuration files focusing on the livecycle of generating many
+on configuration files focusing on the live cycle of generating many
 permutations of experiments with standard tooling, so that you can focus
-more on modeling your experiments than how to orchestrate them with
-tools. A number of batch scripts can be generated that than can be
+more on modeling your experiments rather than on how to orchestrate them with
+tools that break due to the restrictions put in place.
+A number of batch scripts can be generated that can be
 executed according to center policies.
 
-Dependencies
-------------
 
-When you install cloudmesh-sbatch, you will also be installing a minimum
-baseline of the ``cms`` command (as part of the Cloudmesh ecosystem).
-For more details on Cloudmesh, see its documentation on `read the
-docs <https://cloudmesh.github.io/cloudmesh-manual/>`__. However all
-instalation can be done thorugh pip. After instalation, you will need to
-initialize cloudmesh with the command
+Instalation
+-----------
 
-.. code:: bash
+When you install cloudmesh-sbatch, you will also be installing cloudmesh
+shell (`cms`) as part of the Cloudmesh ecosystem. It allows cloudmesh sbatch to
+be run either in commandline or scripted mode.
 
+The instalation is easy via pip
+
+.. code-block:: console
+
+   $ pip install cloudmesh-sbatch
    $ cms help
 
-While SLURM is not needed to run the ``cloudmesh sbatch`` command, the
-generated output will not exectue unless your system has slurm installed
-and you are able to run jobs via the ``slurm sbatch`` command.
+Please do not forget to say `cms help` the first time you use cms as it set
+it up with some default values.
+The SLURM or LSF commands are  not needed to be installed locally, as we assume that
+all access to the batch environment is conducted indirectly and remotely through `ssh`.
 
-Documentation
--------------
+In case you like to install cloudmesh-sbatch from source we have a convenient
+program that downloads all cloudmesh repositories its depeds on.
+
+.. code-block:: console
+
+   $ python -m venv ~/ENV3
+   $ source ~/ENV#/bin/activate
+   $ pip install pip -U
+   $ mkdir cm
+   $ cd cm
+   $ pip install cloudmesh-installer
+   $ cloudmesh-installer get sbatch
+   $ cms help
+
+
+NOTE THIS IS OUTDATED FROM HERE ON AND NEEDS TO BE UPDATED
+
 
 Running Cloudmesh SBatch
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 The ``cloudmesh sbatch`` command takes one of two forms of execution. It
 is started with
 
-.. code:: bash
+.. code-block:: console
 
    $ cms sbatch <command> <parameters>
 
@@ -78,16 +100,28 @@ are prioritized in the following order (highest priority first)
 3. Preset values
 
 Generating Experiments with the CLI
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------
 
 The ``generate`` command is used to generate your experiments based upon
 either a passed configuration file, or via CLI arguments. You can issue
 the command using either of the below forms:
 
+
+
 .. code:: text
 
-   cms sbatch generate SOURCE --name=NAME [--verbose] [--mode=MODE] [--config=CONFIG] [--attributes=PARAMS] [--out=DESTINATION] [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT]
-   cms sbatch generate --setup=FILE [SOURCE] [--verbose] [--mode=MODE]  [--config=CONFIG] [--attributes=PARAMS] [--out=DESTINATION] [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT] [--name=NAME]
+   cms sbatch generate SOURCE
+                       --name=NAME
+                       [--verbose]
+                       [--mode=MODE]
+                       [--config=CONFIG]
+                       [--attributes=PARAMS]
+                       [--out=DESTINATION]
+                       [--dryrun]
+                       [--noos]
+                       [--nocm]
+                       [--dir=DIR]
+                       [--experiment=EXPERIMENT]
 
 If you have prepared a configuration file that conforms to the schema
 defined in `Setup Config <#setup-config>`__, then you can use the second
@@ -182,13 +216,10 @@ gpu. The YAML file also points to the desired slurm template.
        - num_cpus: 6
        - num_gpus: 1
 
-example:
-
-::
+Example::
 
    cms sbatch slurm.in.sh --config=a.py,b.json,c.yaml --attributes=a=1,b=4  --noos --dir=example --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\"
    sbatch slurm.in.sh --config=a.py,b.json,c.yaml --attributes=a=1,b=4 --noos --dir=example --experiment="epoch=[1-3] x=[1,4] y=[10,11]"
-   # ERROR: Importing python not yet implemented
    epoch=1 x=1 y=10  sbatch example/slurm.sh
    epoch=1 x=1 y=11  sbatch example/slurm.sh
    epoch=1 x=4 y=10  sbatch example/slurm.sh
@@ -208,4 +239,5 @@ example:
 Cheatsheet
 ~~~~~~~~~~
 
--  https://slurm.schedmd.com/pdfs/summary.pdf
+- SLURM: https://slurm.schedmd.com/pdfs/summary.pdf
+- LSF: https://www.ibm.com/docs/en/spectrum-lsf/10.1.0?topic=started-quick-reference

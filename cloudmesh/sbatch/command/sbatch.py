@@ -59,15 +59,18 @@ class SbatchCommand(PluginCommand):
               FILENAME       name of a slurm script generated with sbatch
               CONFIG_FILE    yaml file with configuration
               ACCOUNT        account name for host system
-              SOURCE         name for input script slurm.in.sh, lsf.in.sh,  script.in.sh or similar
+              SOURCE         name for input script slurm.in.sh, lsf.in.sh,
+                             script.in.sh or similar
               PARAMS         parameter lists for experimentation
               GPU            name of gpu
 
           Options:
               -h                        help
-              --config=CONFIG...        a list of comma seperated configuration files in yaml or json format.
+              --config=CONFIG...        a list of comma seperated configuration
+                                        files in yaml or json format.
                                         The endings must be .json or .yaml
-              --type=JOB_TYPE           The method to generate submission scripts.  One of slurm, lsf. [default: slurm]
+              --type=JOB_TYPE           The method to generate submission scripts.
+                                        One of slurm, lsf. [default: slurm]
               --attributes=PARAMS       a list of coma separated attribute value pairs
                                         to set parameters that are used. [default: None]
               --output_dir=OUTPUT_DIR   The directory where the result is written to
@@ -76,52 +79,54 @@ class SbatchCommand(PluginCommand):
               --gpu=GPU                 The name of the GPU. Tyoically k80, v100, a100, rtx3090, rtx3080
               --noos                    ignores environment variable substitution from the shell. This
                                         can be helpfull when debugging as the list is quite lareg
-              --nocm                    cloudmesh as a variable dictionary build in. Any vaiable refered to
-                                        by cloudmes. and its name is replaced from the
+              --nocm                    cloudmesh as a variable dictionary build in. Any vaiable referred to
+                                        by cloudmesh. and its name is replaced from the
                                         cloudmesh variables
-              --experiment=EXPERIMENT   This specifies all parameters that are used to create permutations of them.
+              --experiment=EXPERIMENT   This specifies all parameters that are used to create
+                                        permutations of them.
                                         They are comma separated key value pairs
               --mode=MODE               one of "flat", "debug", "hierachical" can also just
                                         use "f". "d", "h" [default: h]
               --name=NAME               name of the experiment configuration file
               --os=OS                   Selected OS variables
               --flat                    produce flatdict
-              --dryrun                  flag to do a dryrun and not create files and directories [defualt: False]
-              --verbose                 Print more information whne executing [default: False]
+              --dryrun                  flag to do a dryrun and not create files and
+                                        directories [default: False]
+              --verbose                 Print more information when executing [default: False]
 
           Description:
 
-               > Examples:
-               >
-               > cms sbatch generate slurm.in.sh --verbose \
-               >     --config=a.py,b.json,c.yaml \
-               >     --attributes=a=1,b=4 \
-               >     --dryrun --noos --input_dir=example \
-               >     --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" \
-               >     --name=a --mode=h
-
-               > cms sbatch generate slurm.in.sh \
-               >    --config=a.py,b.json,c.yaml \
-               >    --attributes=a=1,b=4  \
-               >    --noos \
-               >    --input_dir=example \
-               >    --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" \
-               >    --name=a \
-               >    --mode=h\
-
-               > cms sbatch generate slurm.in.sh \
-               >    --verbose \
-               >    --config=a.py,b.json,c.yaml \
-               >    --attributes=name=gregor,a=1,b=4 \
-               >    --noos \
-               >    --input_dir=example \
-               >    --experiment="epoch=[1-3] x=[1,4] y=[10,11]" \
-               >    --mode=f \
-               >    --name=a
-
-               > cms sbatch generate slurm.in.sh --experiments-file=experiments.yaml --name=a
-
-               > cms sbatch generate submit --name=a
+            > Examples:
+            >
+            > cms sbatch generate slurm.in.sh --verbose \\
+            >     --config=a.py,b.json,c.yaml \\
+            >     --attributes=a=1,b=4 \\
+            >     --dryrun --noos --input_dir=example \\
+            >     --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" \\
+            >     --name=a --mode=h
+            >
+            > cms sbatch generate slurm.in.sh \\
+            >    --config=a.py,b.json,c.yaml \\
+            >    --attributes=a=1,b=4 \\
+            >    --noos \\
+            >    --input_dir=example \\
+            >    --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" \\
+            >    --name=a \\
+            >    --mode=h
+            >
+            > cms sbatch generate slurm.in.sh \\
+            >    --verbose \\
+            >    --config=a.py,b.json,c.yaml \\
+            >    --attributes=name=gregor,a=1,b=4 \\
+            >    --noos \\
+            >    --input_dir=example \\
+            >    --experiment="epoch=[1-3] x=[1,4] y=[10,11]" \\
+            >    --mode=f \\
+            >    --name=a
+            >
+            > cms sbatch generate slurm.in.sh --experiments-file=experiments.yaml --name=a
+            >
+            > cms sbatch generate submit --name=a
 
         """
 

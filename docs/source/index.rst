@@ -19,6 +19,7 @@ Generation of experiment submission scripts based on parameter permuattions.
 
    guide
    readme
+   sbatch
    slurm
 
 .. toctree::
