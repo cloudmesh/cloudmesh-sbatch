@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Slurm on a single node computer &mdash; cloudmesh-sbatch 4.3.8 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="_static/readthedocs-custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Cloudmesh sbatch" href="api.html" />
+    <link rel="prev" title="Cloudmesh Sbatch" href="readme.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> cloudmesh-sbatch
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="guide.html">Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Cloudmesh Sbatch</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Slurm on a single node computer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#install">Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#start">Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stop">Stop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#info">Info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#job">Job</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sbatch-slurm-manageement-commands-for-localhost">sbatch slurm manageement commands for localhost</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Cloudmesh sbatch</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">cloudmesh-sbatch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Slurm on a single node computer</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/cloudmesh/cloudmesh-cc/blob/main/api/source/slurm.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="slurm-on-a-single-node-computer">
+<h1>Slurm on a single node computer<a class="headerlink" href="#slurm-on-a-single-node-computer" title="Permalink to this heading"></a></h1>
+<section id="install">
+<h2>Install<a class="headerlink" href="#install" title="Permalink to this heading"></a></h2>
+<p>This instruction targets the instalation of SLURM on a single node compute cluster running
+ubuntu 20.04.</p>
+<p>see
+<a class="reference external" href="https://drtailor.medium.com/how-to-setup-slurm-on-ubuntu-20-04-for-single-node-work-scheduling-6cc909574365">https://drtailor.medium.com/how-to-setup-slurm-on-ubuntu-20-04-for-single-node-work-scheduling-6cc909574365</a></p>
+<p>32 Processors (threads)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt update -y
+sudo apt install slurmd slurmctld -y
+
+sudo chmod <span class="m">777</span> /etc/slurm-llnl
+
+<span class="c1"># make sure to use the HOSTNAME</span>
+
+sudo cat <span class="s">&lt;&lt; EOF &gt; /etc/slurm-llnl/slurm.conf</span>
+<span class="s"># slurm.conf file generated by configurator.html.</span>
+<span class="s"># Put this file on all nodes of your cluster.</span>
+<span class="s"># See the slurm.conf man page for more information.</span>
+<span class="s">#</span>
+<span class="s">ClusterName=localcluster</span>
+<span class="s">SlurmctldHost=$HOSTNAME</span>
+<span class="s">MpiDefault=none</span>
+<span class="s">ProctrackType=proctrack/linuxproc</span>
+<span class="s">ReturnToService=2</span>
+<span class="s">SlurmctldPidFile=/var/run/slurmctld.pid</span>
+<span class="s">SlurmctldPort=6817</span>
+<span class="s">SlurmdPidFile=/var/run/slurmd.pid</span>
+<span class="s">SlurmdPort=6818</span>
+<span class="s">SlurmdSpoolDir=/var/lib/slurm-llnl/slurmd</span>
+<span class="s">SlurmUser=slurm</span>
+<span class="s">StateSaveLocation=/var/lib/slurm-llnl/slurmctld</span>
+<span class="s">SwitchType=switch/none</span>
+<span class="s">TaskPlugin=task/none</span>
+<span class="s">#</span>
+<span class="s"># TIMERS</span>
+<span class="s">InactiveLimit=0</span>
+<span class="s">KillWait=30</span>
+<span class="s">MinJobAge=300</span>
+<span class="s">SlurmctldTimeout=120</span>
+<span class="s">SlurmdTimeout=300</span>
+<span class="s">Waittime=0</span>
+<span class="s"># SCHEDULING</span>
+<span class="s">SchedulerType=sched/backfill</span>
+<span class="s">SelectType=select/cons_tres</span>
+<span class="s">SelectTypeParameters=CR_Core</span>
+<span class="s">#</span>
+<span class="s">#AccountingStoragePort=</span>
+<span class="s">AccountingStorageType=accounting_storage/none</span>
+<span class="s">JobCompType=jobcomp/none</span>
+<span class="s">JobAcctGatherFrequency=30</span>
+<span class="s">JobAcctGatherType=jobacct_gather/none</span>
+<span class="s">SlurmctldDebug=info</span>
+<span class="s">SlurmctldLogFile=/var/log/slurm-llnl/slurmctld.log</span>
+<span class="s">SlurmdDebug=info</span>
+<span class="s">SlurmdLogFile=/var/log/slurm-llnl/slurmd.log</span>
+<span class="s">#</span>
+<span class="s"># COMPUTE NODES # THis machine has 128GB main memory</span>
+<span class="s">NodeName=$HOSTNAME CPUs=32 RealMemory==128762 State=UNKNOWN</span>
+<span class="s">PartitionName=local Nodes=ALL Default=YES MaxTime=INFINITE State=UP</span>
+<span class="s">EOF</span>
+
+sudo chmod <span class="m">755</span> /etc/slurm-llnl/
+</pre></div>
+</div>
+</section>
+<section id="start">
+<h2>Start<a class="headerlink" href="#start" title="Permalink to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">slurmctld</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">slurmd</span>
+<span class="n">sudo</span> <span class="n">scontrol</span> <span class="n">update</span> <span class="n">nodename</span><span class="o">=</span><span class="n">localhost</span> <span class="n">state</span><span class="o">=</span><span class="n">idle</span>
+</pre></div>
+</div>
+</section>
+<section id="stop">
+<h2>Stop<a class="headerlink" href="#stop" title="Permalink to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">stop</span> <span class="n">slurmd</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">stop</span> <span class="n">slurmctld</span>
+</pre></div>
+</div>
+</section>
+<section id="info">
+<h2>Info<a class="headerlink" href="#info" title="Permalink to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sinfo</span>
+</pre></div>
+</div>
+</section>
+<section id="job">
+<h2>Job<a class="headerlink" href="#job" title="Permalink to this heading"></a></h2>
+<p>save into gregor.slurm</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="c1">#SBATCH --job-name=gregors_test          # Job name</span>
+<span class="c1">#SBATCH --mail-type=END,FAIL             # Mail events (NONE, BEGIN, END, FAIL, ALL)</span>
+<span class="c1">#SBATCH --mail-user=laszewski@gmail.com  # Where to send mail</span>
+<span class="c1">#SBATCH --ntasks=1                       # Run on a single CPU</span>
+<span class="c1">####  XBATCH --mem=1gb                        # Job memory request</span>
+<span class="c1">#SBATCH --time=00:05:00                  # Time limit hrs:min:sec</span>
+<span class="c1">#SBATCH --output=sgregors_test_%j.log    # Standard output and error log</span>
+
+<span class="n">pwd</span><span class="p">;</span> <span class="n">hostname</span><span class="p">;</span> <span class="n">date</span>
+
+<span class="n">echo</span> <span class="s2">&quot;Gregors Test&quot;</span>
+<span class="n">date</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">date</span>
+</pre></div>
+</div>
+<p>Run with</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sbatch</span> <span class="n">gregor</span><span class="o">.</span><span class="n">slurm</span>
+<span class="n">watch</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="n">squeue</span>
+</pre></div>
+</div>
+<p>BUG</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">JOBID</span> <span class="n">PARTITION</span>     <span class="n">NAME</span>     <span class="n">USER</span> <span class="n">ST</span>       <span class="n">TIME</span>  <span class="n">NODES</span> <span class="n">NODELIST</span><span class="p">(</span><span class="n">REASON</span><span class="p">)</span>
+                 <span class="mi">2</span>    <span class="n">LocalQ</span> <span class="n">gregors_</span>    <span class="n">green</span> <span class="n">PD</span>       <span class="mi">0</span><span class="p">:</span><span class="mi">00</span>      <span class="mi">1</span> <span class="p">(</span><span class="n">Nodes</span> <span class="n">required</span> <span class="k">for</span> <span class="n">job</span> <span class="n">are</span> <span class="n">DOWN</span><span class="p">,</span> <span class="n">DRAINED</span> <span class="ow">or</span> <span class="n">reserved</span> <span class="k">for</span> <span class="n">jobs</span> <span class="ow">in</span> <span class="n">higher</span> <span class="n">priority</span> <span class="n">partitions</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="sbatch-slurm-manageement-commands-for-localhost">
+<h2>sbatch slurm manageement commands for localhost<a class="headerlink" href="#sbatch-slurm-manageement-commands-for-localhost" title="Permalink to this heading"></a></h2>
+<p>start slurm deamons</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cms sbatch slurm start
+</pre></div>
+</div>
+<p>stop surm deamons</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cms sbatch slurm stop
+</pre></div>
+</div>
+<p>BUG:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>srun gregor.slurm
+
+srun: Required node not available <span class="o">(</span>down, drained or reserved<span class="o">)</span>
+srun: job <span class="m">7</span> queued and waiting <span class="k">for</span> resources
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">scontrol</span> <span class="n">update</span> <span class="n">nodename</span><span class="o">=</span><span class="n">localhost</span> <span class="n">state</span><span class="o">=</span><span class="n">POWER_UP</span>
+
+<span class="n">Valid</span> <span class="n">states</span> <span class="n">are</span><span class="p">:</span> <span class="n">NoResp</span> <span class="n">DRAIN</span> <span class="n">FAIL</span> <span class="n">FUTURE</span> <span class="n">RESUME</span> <span class="n">POWER_DOWN</span> <span class="n">POWER_UP</span> <span class="n">UNDRAIN</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="readme.html" class="btn btn-neutral float-left" title="Cloudmesh Sbatch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api.html" class="btn btn-neutral float-right" title="Cloudmesh sbatch" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Gregor von Laszewski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
