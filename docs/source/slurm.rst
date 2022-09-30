@@ -1,8 +1,11 @@
-Slurm on a single computer ubuntu 20.04
----------------------------------------
+Slurm on a single node computer
+===============================
 
 Install
-~~~~~~~
+-------
+
+This instruction targets the instalation of SLURM on a single node compute cluster running
+ubuntu 20.04.
 
 see
 https://drtailor.medium.com/how-to-setup-slurm-on-ubuntu-20-04-for-single-node-work-scheduling-6cc909574365
@@ -68,7 +71,7 @@ https://drtailor.medium.com/how-to-setup-slurm-on-ubuntu-20-04-for-single-node-w
    sudo chmod 755 /etc/slurm-llnl/
 
 Start
-~~~~~
+-----
 
 ::
 
@@ -77,7 +80,7 @@ Start
    sudo scontrol update nodename=localhost state=idle
 
 Stop
-~~~~
+----
 
 ::
 
@@ -85,14 +88,14 @@ Stop
    sudo systemctl stop slurmctld
 
 Info
-~~~~
+----
 
 ::
 
    sinfo
 
 Job
-~~~
+---
 
 save into gregor.slurm
 
@@ -130,7 +133,7 @@ BUG
                     2    LocalQ gregors_    green PD       0:00      1 (Nodes required for job are DOWN, DRAINED or reserved for jobs in higher priority partitions)
 
 sbatch slurm manageement commands for localhost
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------------
 
 start slurm deamons
 
