@@ -1,17 +1,14 @@
-from pprint import pprint
+import pathlib
 
+from cloudmesh.common.Shell import Shell
+from cloudmesh.common.console import Console
+from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.util import banner
-from cloudmesh.common.util import readfile
-from cloudmesh.common.util import writefile
-from cloudmesh.common.util import yn_choice
 from cloudmesh.sbatch.sbatch import SBatch
 from cloudmesh.sbatch.slurm import Slurm
 from cloudmesh.shell.command import PluginCommand
 from cloudmesh.shell.command import command
 from cloudmesh.shell.command import map_parameters
-from cloudmesh.common.debug import VERBOSE
-from cloudmesh.common.variables import Variables
-from cloudmesh.common.parameter import Parameter
 
 
 class SbatchCommand(PluginCommand):
@@ -22,9 +19,21 @@ class SbatchCommand(PluginCommand):
         """::
 
           Usage:
-                sbatch generate submit --name=NAME [--type=JOB_TYPE] [--verbose]
-                sbatch generate SOURCE --name=NAME [--verbose] [--mode=MODE] [--config=CONFIG] [--attributes=PARAMS] [--out=DESTINATION] [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT]
-                sbatch generate --setup=FILE [SOURCE] [--verbose] [--mode=MODE]  [--config=CONFIG] [--attributes=PARAMS] [--out=DESTINATION] [--dryrun] [--noos] [--nocm] [--dir=DIR] [--experiment=EXPERIMENT] [--name=NAME]
+                sbatch generate submit --name=NAME [--job_type=JOB_TYPE] [--verbose]
+                sbatch generate --source=SOURCE --name=NAME
+                                [--out=OUT]
+                                [--verbose]
+                                [--mode=MODE]
+                                [--config=CONFIG]
+                                [--attributes=PARAMS]
+                                [--output_dir=OUTPUT_DIR]
+                                [--dryrun]
+                                [--noos]
+                                [--os=OS]
+                                [--nocm]
+                                [--source_dir=SOURCE_DIR]
+                                [--experiment=EXPERIMENT]
+                                [--flat]
                 sbatch slurm start
                 sbatch slurm stop
                 sbatch slurm info
@@ -50,26 +59,35 @@ class SbatchCommand(PluginCommand):
               FILENAME       name of a slurm script generated with sbatch
               CONFIG_FILE    yaml file with configuration
               ACCOUNT        account name for host system
-              SOURCE         name for slurm script
+              SOURCE         name for input script slurm.in.sh, lsf.in.sh,  script.in.sh or similar
               PARAMS         parameter lists for experimentation
               GPU            name of gpu
 
           Options:
               -h                        help
-              --dryrun                  flag to do a dryrun and not create files and directories (not tested)
-              --config=CONFIG...        a list of comma seperated configuration files in yaml or json format. The endings must be .json or .yaml
-              --setup=FILE              TBD
+              --config=CONFIG...        a list of comma seperated configuration files in yaml or json format.
+                                        The endings must be .json or .yaml
               --type=JOB_TYPE           The method to generate submission scripts.  One of slurm, lsf. [default: slurm]
-              --attributes=PARAMS       a list of coma separated attribute value pars to set parameters that are used.
-              --out=DESTINATION         TBD
+              --attributes=PARAMS       a list of coma separated attribute value pairs
+                                        to set parameters that are used. [default: None]
+              --output_dir=OUTPUT_DIR   The directory where the result is written to
+              --source_dir=SOURCE_DIR   location of the input directory [default: .]
               --account=ACCOUNT         TBD
               --gpu=GPU                 The name of the GPU. Tyoically k80, v100, a100, rtx3090, rtx3080
-              --noos                    ignores environment variable substitution from the shell. This can be helpfull when debugging as the list is quite lareg
-              --nocm                    cloudmesh as a variable dictionary build in. Any vaiable refered to by cloudmes. and its name is replaced from the
+              --noos                    ignores environment variable substitution from the shell. This
+                                        can be helpfull when debugging as the list is quite lareg
+              --nocm                    cloudmesh as a variable dictionary build in. Any vaiable refered to
+                                        by cloudmes. and its name is replaced from the
                                         cloudmesh variables
-              --experiment=EXPERIMENT   This specifies all parameters that are used to create permutations of them. They are comma separated key value pairs
-              --mode=MODE               one of "flat", "debug", "hierachical" can also just use "f". "d", "h" [default: debug]
+              --experiment=EXPERIMENT   This specifies all parameters that are used to create permutations of them.
+                                        They are comma separated key value pairs
+              --mode=MODE               one of "flat", "debug", "hierachical" can also just
+                                        use "f". "d", "h" [default: h]
               --name=NAME               name of the experiment configuration file
+              --os=OS                   Selected OS variables
+              --flat                    produce flatdict
+              --dryrun                  flag to do a dryrun and not create files and directories [defualt: False]
+              --verbose                 Print more information whne executing [default: False]
 
           Description:
 
@@ -78,7 +96,7 @@ class SbatchCommand(PluginCommand):
                > cms sbatch generate slurm.in.sh --verbose \
                >     --config=a.py,b.json,c.yaml \
                >     --attributes=a=1,b=4 \
-               >     --dryrun --noos --dir=example \
+               >     --dryrun --noos --input_dir=example \
                >     --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" \
                >     --name=a --mode=h
 
@@ -86,7 +104,7 @@ class SbatchCommand(PluginCommand):
                >    --config=a.py,b.json,c.yaml \
                >    --attributes=a=1,b=4  \
                >    --noos \
-               >    --dir=example \
+               >    --input_dir=example \
                >    --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" \
                >    --name=a \
                >    --mode=h\
@@ -96,7 +114,7 @@ class SbatchCommand(PluginCommand):
                >    --config=a.py,b.json,c.yaml \
                >    --attributes=name=gregor,a=1,b=4 \
                >    --noos \
-               >    --dir=example \
+               >    --input_dir=example \
                >    --experiment="epoch=[1-3] x=[1,4] y=[10,11]" \
                >    --mode=f \
                >    --name=a
@@ -106,40 +124,24 @@ class SbatchCommand(PluginCommand):
                > cms sbatch generate submit --name=a
 
         """
-        arguments.verbose = arguments["--verbose"]
 
         map_parameters(arguments,
+                       "verbose",
+                       "source",
+                       "name",
+                       "out",
+                       "mode",
+                       "config",
+                       "attributes",
+                       "output_dir",
+                       "source_dir",
+                       "experiment",
                        "account",
                        "filename",
-                       "attributes",
                        "gpu",
-                       "dryrun",
-                       "config",
-                       "out",
-                       "experiment",
-                       "mode",
-                       "name")
-
-        # pprint(args)
-        # pprint(arguments)
-
-        # arguments["experiments_file"] = arguments["--experiments-file"]
-
-        #
-        # UNDO GREGORS CHANGES
-        #
-        #if arguments.config:
-        #    try:
-        #        arguments.config = Parameter.expand(arguments.config[0])
-        #    except Exception as e:
-        #        Console.error("issue with config expansion")
-        #        print(e)
-        #
-        ### Handling in sbatch class now
-        # if arguments.attributes:
-        #     arguments.attributes = Parameter.arguments_to_dict(arguments.attributes)
-        # if arguments.config:
-        #     arguments.config = Parameter.expand(arguments.config[0])
+                       "os",
+                       "flat",
+                       "dryrun")
 
         verbose = arguments["--verbose"]
         if verbose:
@@ -159,19 +161,17 @@ class SbatchCommand(PluginCommand):
             if not arguments.name.endswith(".json"):
                 arguments.name = arguments.name + ".json"
 
-        VERBOSE(arguments)
+        if verbose:
+            VERBOSE(arguments)
 
         if arguments.generate and arguments.submit:
 
-            # sbatch generate submit [--verbose] [--mode=MODE] [--experiment=EXPERIMENT] [--dir=DIR]
+            #  sbatch generate submit --name=NAME [--job_type=JOB_TYPE] [--verbose]
 
             sbatch = SBatch()
             sbatch.verbose = arguments.verbose
-            if '--type' not in arguments or arguments['--type'] is None:
-                type_ = "slurm"
-            else:
-                type_ = arguments['--type']
-            sbatch.generate_submit(name=arguments.name, type_=type_)
+            job_type = arguments.job_type or "slurm"
+            sbatch.generate_submit(name=arguments.name, job_type=job_type)
 
             return ""
 
@@ -179,33 +179,144 @@ class SbatchCommand(PluginCommand):
 
             sbatch = SBatch()
 
-            if arguments.get('--setup') is not None:
-                sbatch.config_from_yaml(arguments["--setup"])
-
             # CLI arguments override the experiments
-            sbatch.config_from_cli(arguments)
+
+            sbatch.dryrun = arguments.dryrun or False
+            sbatch.verbose = arguments.verbose or False
+            sbatch.execution_mode = arguments.mode or "h"
+            sbatch.name = arguments.name
+            sbatch.source = arguments.source
+            sbatch.input_dir = str(Shell.map_filename(arguments["source_dir"]).path)
+            sbatch.output_dir = str(Shell.map_filename(arguments["output_dir"]).path)
+            sbatch.script_in = f"{sbatch.input_dir}/{sbatch.source}"
+
+            #
+            # set source and name
+            #
+
+            sbatch.name = arguments.name
+            sbatch.source = arguments.source
+            sbatch.source = SBatch.update_with_directory(sbatch.input_dir, sbatch.source)
+
+            #
+            # set output_script
+            #
+            if arguments.out is None:
+                sbatch.script_out = pathlib.Path(sbatch.source).name.replace(".in.", ".")  # .replace(".in", "")
+            else:
+                sbatch.script_out = pathlib.Path(arguments.get('out', sbatch.script_out)).name
+            sbatch.script_out = SBatch.update_with_directory(sbatch.output_dir, sbatch.script_out)
+
+            #
+            # make sure output script is not input script
+            #
+            if sbatch.source == sbatch.script_out:
+                Console.error("The source and destination filenames are the same.", traceflag=True)
+                return ""
+
+            #
+            # LOAD TEMPLATE
+            #
+            sbatch.load_source_template(sbatch.source)
+
+            # order of replace is defined by
+            # config
+            # os
+            # cm
+            # attributes
+
+            if arguments.config:
+
+                # ok create list of config files
+                try:
+                    sbatch.config_files = arguments.config.split(",")
+                    sbatch.config_files = [SBatch.update_with_directory(sbatch.input_dir, filename) for filename in
+                                           sbatch.config_files]
+                except Exception as e:
+                    print(e)
+
+                #
+                # GENERATE THE REPLACEMENTS
+                #
+
+                for config_file in sbatch.config_files:
+                    sbatch.update_from_file(config_file)
+
+            if arguments.os:
+                sbatch.os_variables = (arguments.os).split(",")
+                sbatch.update_from_os(sbatch.os_variables)
+
+            if not arguments["--noos"]:
+                sbatch.update_from_os_environ()
+
+            # replace variables from cm
+            if not arguments["--nocm"]:
+                sbatch.update_from_cm_variables()
+
+            # expriments from commandline overwrites experiments in configs
+
+            # if "experiment" in sbatch.data:
+            #     try:
+            #         d = sbatch.data["experiment"]
+            #         print ("EEEEE", d, sbatch.permutation_generator(d))
+            #         sbatch.experiment = sbatch.permutation_generator(d)
+            #     except:
+            #         pass
+
+            if arguments.experiment:
+                sbatch.experiments = arguments.experiment
+                sbatch.experiment = sbatch.generate_experiment_permutations(sbatch.experiments)
+
+            #
+            #
+            # result = sbatch.get_data(flat=arguments.flat)
+            #
+            # experiments = result["experiment"]
+            # for e in experiments:
+            #     experiments[e] = Parameter.expand(experiments[e])
+            #
+            # sbatch.permutations = sbatch.permutation_generator(experiments)
+
+            # MOVE TO END
+            #
+            # ADD ADDITIONAL ATTRIBUTES
+            #
+            # move to last
+            # if arguments.attributes:
+            #    sbatch.attributes = arguments.attributes
+            #    sbatch.update_from_attributes(arguments.attributes)
+
+            sbatch.info()
+
+            sbatch.generate_experiment_batch_scripts()
+
+            sbatch.save_experiment_configuration(name=arguments.name)
+
+            return ""
+
+            # sbatch.config_from_cli(arguments)
 
             # sbatch.mode = arguments.mode
             # content = readfile(sbatch.source)
 
-            if sbatch.dryrun or verbose:
-                banner("Configuration")
-                print(sbatch.debug_state(key=".."))
-                print()
-                banner(f"Original Script {sbatch.source}")
-                print(sbatch.template_content)
-                banner("end script")
-            result = sbatch.generate(sbatch.template_content)
-
-            if sbatch.dryrun or verbose:
-                banner("Expanded Script")
-                print(result)
-                banner("Script End")
-            else:
-                writefile(sbatch.script_out, result)
-
-            sbatch.generate_experiment_slurm_scripts()
-
-            sbatch.save_experiment_configuration(name=arguments.name)
+            # if sbatch.dryrun or verbose:
+            #     banner("Configuration")
+            #     print(sbatch.debug_state(key=".."))
+            #     print()
+            #     banner(f"Original Script {sbatch.source}")
+            #     print(sbatch.template_content)
+            #     banner("end script")
+            # result = sbatch.generate(sbatch.template_content)
+            #
+            # if sbatch.dryrun or verbose:
+            #     banner("Expanded Script")
+            #     print(result)
+            #     banner("Script End")
+            # else:
+            #     writefile(sbatch.script_out, result)
+            #
+            # sbatch.generate_experiment_batch_scripts()
+            #
+            # sbatch.save_experiment_configuration(name=arguments.name)
 
         return ""

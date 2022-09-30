@@ -4,5 +4,6 @@ a={a}
 debug={cloudmesh.debug}
 user={USERNAME}
 home={HOME}
-p_gregor={p_gregor}
+p_gregor={py_data.name}
 d="{d}"
+identifier="{sbatch.identifier}"

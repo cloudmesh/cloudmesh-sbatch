@@ -1,0 +1,8 @@
+name: cloudmesh-sbatch
+dependencies:
+  - cloudmesh-cmd5
+  - cloudmesh-sys
+  - cloudmesh-inventory
+  - cloudmesh-configuration
+  - cloudmesh-progress
+  - nbconvert

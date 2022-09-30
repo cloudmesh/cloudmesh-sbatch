@@ -392,30 +392,25 @@ class SBatch:
         content = str(script)
         flat = FlatDict(variables, sep=".")
 
-        Returns:
-            The script that has expanded its values based on `data`.
-        """
-        if data is None:
-            data = self.data
-        content = self.template_content
-        for attribute, value in data.items():
+        for attribute in flat:
+            value = flat[attribute]
             frame = fences[0] + attribute + fences[1]
-            if self.verbose:
-                print(f"Expanding {frame} with {value}")
-            # print(content)
             if frame in content:
+                if self.verbose:
+                    print(f"- Expanding {frame} with {value}")
+                replaced[attribute] = value
                 content = content.replace(frame, str(value))
-        return content
+        return content, replaced
 
     @staticmethod
-    def permutation_generator(exp_dict: dict) -> list:
-        """Creates a cartisian product of a {key: list, ...} object.
+    def permutation_generator(exp_dict):
+        """
+        Creates a cartisian product of a {key: list, ...} object.
 
-        Args:
-            exp_dict: The dictionary to process
-
-        Returns:
-            A list of dictionaries containing the resulting cartisian product.
+        :param exp_dict: The dictionary to process
+        :type exp_dict: dict
+        :return: A list of dictionaries containing the resulting cartisian product.
+        :rtype: list
 
         For example
             my_dict = {"key1": ["value1", "value2"], "key2": ["value3", "value4"]}
@@ -424,38 +419,39 @@ class SBatch:
                 #  {"key1": "value1", "key2": "value4"},
                 #  {"key1": "value2", "key2": "value3"},
                 #  {"key1": "value2", "key2": "value4"}
+
         """
         keys, values = zip(*exp_dict.items())
         return [dict(zip(keys, value)) for value in itertools.product(*values)]
 
     def generate_experiment_permutations(self, variable_str):
-        """Generates experiment permutations based on the passed string and appends it to the current instance.
+        """
+        Generates experiment permutations based on the passed string and appends it to the current instance.
 
-        Args:
-            variable_str: A Parameter.expand string (such as epoch=[1-3] x=[1,4] y=[10,11])
-
-        Returns:
-            list with permutations over the experiment variables
+        :param variable_str: A Parameter.expand string (such as epoch=[1-3] x=[1,4] y=[10,11])
+        :type variable_str: str
+        :return: list with permutations over the experiment variables
+        :rtype: list
         """
         experiments = OrderedDict()
         entries = variable_str.split(' ')
 
-        # pprint(entries)
         for entry in entries:
             k, v = entry.split("=")
             experiments[k] = Parameter.expand(v)
         self.permutations = self.permutation_generator(experiments)
         return self.permutations
 
-    #for permutation in self.permutations:
-    #    values = ""
-    #    for attribute, value in permutation.items():
-    #        values = values + f"{attribute}={value} "
-    #        script = f"{self.destination}{values}".replace("=", "_")
-    #    print(f"{values} sbatch {self.destination} {script}")
-
     @staticmethod
     def _generate_bootstrapping(permutation):
+        """
+        creates an identifier, a list of assignments, ad values.
+
+        :param permutation: the permutation list
+        :type permutation: list
+        :return: identifier, assignments, values
+        :rtype: str, list, list
+        """
         values = list()
         for attribute, value in permutation.items():
             values.append(f"{attribute}_{value}")
@@ -467,33 +463,55 @@ class SBatch:
         identifier = "_".join(values)
         return identifier, assignments, values
 
-    def _generate_flat_config(self):
-
-        configuration = dict()
-        # self.script_variables = list()
-        suffix = self._suffix(self.script_out)
-        name = self.script_out.replace(suffix, "")
-        # directory = os.path.dirname(name)
-        directory = self.out_directory
-        for permutation in self.permutations:
-            identifier, assignments, values = self._generate_bootstrapping(permutation)
-            print(identifier)
-            script = f"{directory}/{name}_{identifier}{suffix}"
-            config = f"{directory}/config_{identifier}.yaml"
-            variables = dict(self.data)
-            variables.update(FlatDict({'experiments': permutation}, sep="."))
-
-            configuration[identifier] = {
-                "id"        : identifier,
-                "directory" : directory,
-                "experiment": assignments,
-                "script"    : script,
-                "config"    : config,
-                "variables" : variables
-            }
-        return configuration
+    # def _generate_flat_config(self):
+    #     """
+    #     deprecated. IT is no longer supported
+    #
+    #     Creates a flat configuration file.
+    #
+    #     :return: dict with information where the variables are a flatdict
+    #     :rtype: dict
+    #     """
+    #
+    #     configuration = dict()
+    #     # self.script_variables = list()
+    #     suffix = self._suffix(self.script_out)
+    #     spec = yaml.dump(self.data, indent=2)
+    #     spec = self.spec_replace(spec)
+    #
+    #     directory = self.output_dir
+    #     for permutation in self.permutations:
+    #         identifier, assignments, values = self._generate_bootstrapping(permutation)
+    #
+    #         spec = yaml.dump(self.data, indent=2)
+    #         spec = self.spec_replace(spec)
+    #
+    #         variables = yaml.safe_load(spec)
+    #
+    #         name = os.path.basename(self.script_out)
+    #         script = f"{directory}/{name}_{identifier}{suffix}"
+    #         config = f"{directory}/config_{identifier}.yaml"
+    #
+    #         variables.update({'experiment': permutation})
+    #         variables["sbatch"]["idenitfier"] = identifier
+    #
+    #         configuration[identifier] = {
+    #             "id": identifier,
+    #             "directory": directory,
+    #             "experiment": assignments,
+    #             "script": script,
+    #             "config": config,
+    #             "variables": variables
+    #         }
+    #     return configuration
 
     def _generate_hierarchical_config(self):
+        """
+        Creates a hierarchical directory with configuration yaml files, and shell script
+
+        :return: directory with configuration and yaml files
+        :rtype: dict
+        """
         """Runs process to build out all templates in a hierarchical-style
 
         Returns:
@@ -503,39 +521,51 @@ class SBatch:
             Writes two files for each established experiment, each in their own directory.
 
         """
-        print("Outputting Hierarchical Experiments")
+        if self.verbose:
+            print("Outputting Hierarchical Experiments")
         configuration = dict()
         self.script_variables = []
         suffix = self._suffix(self.script_out)
-        # name = self.script_out.replace(suffix, "")
-        directory = self.out_directory  # .path.dirname(name)
+        directory = self.output_dir  # .path.dirname(name)
         for permutation in self.permutations:
+
             identifier, assignments, values = self._generate_bootstrapping(permutation)
-            print(identifier)
-            script = f"{directory}/{identifier}/slurm.sh"
+
+            if self.verbose:
+                print(identifier, assignments, values)
+
+            spec = yaml.dump(self.data, indent=2)
+            spec = self.spec_replace(spec)
+
+            variables = yaml.safe_load(spec)
+
+            name = os.path.basename(self.script_out)
+            script = f"{directory}/{identifier}/{name}"
             config = f"{directory}/{identifier}/config.yaml"
-            variables = dict(self.data)
-            variables.update(FlatDict({'experiments': permutation}, sep="."))
+
+            variables.update({'experiment': permutation})
+            variables["sbatch"]["identifier"] = identifier
 
             configuration[identifier] = {
-                "id"        : identifier,
-                "directory" : f"{directory}/{identifier}",
+                "id": identifier,
+                "directory": f"{directory}/{identifier}",
                 "experiment": assignments,
-                "script"    : script,
-                "config"    : config,
-                "variables" : variables
+                "script": script,
+                "config": config,
+                "variables": variables
             }
-            # pprint(configuration)
         return configuration
 
-    def generate_experiment_slurm_scripts(self, out_mode=None):
-        """Utility method to genrerate either hierarchical or flat outputs; or debug.
+    def generate_experiment_batch_scripts(self, out_mode=None):
+        """
+        Utility method to genrerate either hierarchical or flat outputs; or debug.
 
-        Args:
-            mode: The mode of operation.  One of: "debug", "flat", "hierarchical"
+        NOte the falt mode is no longer supported
 
-        Returns:
-
+        :param out_mode: The mode of operation.  One of: "debug", "flat", "hierarchical"
+        :type out_mode: string
+        :return: generates the batch scripts
+        :rtype: None
         """
         mode = self.execution_mode if out_mode is None else out_mode.lower()
         if mode.startswith("d"):
@@ -545,116 +575,116 @@ class SBatch:
                 values = ""
                 for attribute, value in permutation.items():
                     values = values + f"{attribute}={value} "
-                script = f"{self.out_directory}/{self.script_out}{values}".replace("=", "_")
+                script = f"{self.output_dir}/{self.script_out}{values}".replace("=", "_")
         else:
             if mode.startswith("f"):
-                configuration = self._generate_flat_config()
+                Console.error("Flat mode is no longer supported", traceflag=True)
+                # configuration = self._generate_flat_config()
             elif mode.startswith("h"):
                 configuration = self._generate_hierarchical_config()
             else:
                 raise RuntimeError(f"Invalid generator mode {mode}")
+            if self.verbose:
+                banner("Script generation")
 
-            banner("Script generation")
             print(Printer.write(configuration, order=["id", "experiment", "script", "config", "directory"]))
 
             self.configuration_parameters = configuration
+
             self.generate_setup_from_configuration(configuration)
 
-    def generate_submit(self, name=None, type_='slurm'):
-        if type_ == 'slurm':
+    def generate_submit(self, name=None, job_type='slurm'):
+        """
+        Generates a list of commands based on the permutations for submission
+
+        :param name: Name of the experiments
+        :type name: str
+        :param job_type: name of the job type used at submission such as
+                         sbatch, slurm, jsrun, mpirun, sh, bash
+        :type job_type: str
+        :param verbose: prints the generated command lines
+        :type verbose: bool
+        :return: prepars the internal data for the experiments, if set to verbose, prints them
+        :rtype: None
+        """
+
+        if ".json" not in name:
+            name = f"{name}.json"
+
+        if job_type == 'slurm':
             cmd = 'sbatch'
-        elif type_ == 'lsf':
+        elif job_type == 'lsf':
             cmd = 'bsub'
         else:
-            cmd = type
+            cmd = job_type
 
-        #else:
+        # else:
         #    raise RuntimeError(f"Unsupported submission type {type_}")
 
         experiments = json.loads(readfile(name))
+
+       #  print (experiments)
 
         if experiments is None:
             Console.error("please define the experiment parameters")
             return ""
 
         for entry in experiments:
+            if self.verbose:
+                print(f"# Generate {entry}")
             experiment = experiments[entry]
             parameters = experiment["experiment"]
             directory = experiment["directory"]
             script = os.path.basename(experiment["script"])
-            print(f"( {parameters} cd {directory} && {cmd} {script} )")
+            print(f"{parameters} cd {directory} && {cmd} {script}")
 
     def generate_setup_from_configuration(self, configuration):
-        # pprint(configuration)
         for identifier in configuration:
-            perm_uuid = str(uuid.uuid4())
-            Console.info(f"setup experiment {identifier}")
             experiment = configuration[identifier]
             Shell.mkdir(experiment["directory"])
-            print(f"Making dir {experiment['directory']}")
-            #
-            # Generate config.yml
-            #
-            Console.info(f"* write file {experiment['config']}")
+            if self.verbose:
+                print()
+                Console.info(f"Setup experiment {identifier}")
+                print(f"- Making dir {experiment['directory']}")
+                print(f"- write file {experiment['config']}")
 
             # Generate UUID for each perm
-            experiment["variables"].update({ 'meta.uuid': perm_uuid })
+            experiment["variables"]['sbatch']['uuid'] = str(uuid.uuid4())
+
             writefile(experiment["config"], yaml.dump(experiment["variables"], indent=2))
             content_config = readfile(experiment["config"])
             try:
                 check = yaml.safe_load(content_config)
             except Exception as e:
-                print (e)
+                print(e)
                 Console.error("We had issues with our check for the config.yaml file")
-            #
-            # Generate slurm.sh
-            #
-            content_script = readfile(self.source)
-            content_script = self.generate(content_script, experiment["variables"])
+
+            content_script, replaced = self.generate(self.template_content, variables=experiment["variables"])
+
+            # if self.verbose:
+            #    for attribute, value in replaced.items():
+            #        print (f"- replaced {attribute}={value}")
+
             writefile(experiment["script"], content_script)
 
     @property
     def now(self):
+        """
+        The time of now in the format "%Y-m-%d"
+        :return: "%Y-m-%d"
+        :rtype: str
+        """
         return datetime.now().strftime("%Y-m-%d")
 
-    def debug_state(self, key=""):
-        """Outputs the current state of persistent values in class.
-        Args:
-            key: A string to prefix the string with.
-        Returns:
-            A mutliline string with all class variables in a key = value pattern.
-        """
-        return textwrap.dedent(f"""
-        {key}===OBJ===
-        {key}   {self.name = }
-        {key}   {self.data = }
-        {key}   {self.verbose = }
-        {key}   {self.source = }
-        {key}   {self.script_out = }
-        {key}   {self.out_directory = }
-        {key}   {self.attributes = }
-        {key}   {self.dryrun = }
-        {key}   {self.execution_mode = }
-        {key}   {self.permutations = }
-        {key}   {self.configuration_parameters = }
-        {key}   {self.template_path = }
-        {key}===END===""")
-
-    # def __str__(self):
-    #     return self.content
-    #
-    # def save_slurm_script(self, filename):
-    #     """
-    #     Writes the custom slurm script to a file for submission
-    #     If the file already exists, the user will be prompted to override
-    #     """
-    #     if os.path.exists(path_expand(filename)):
-    #         if yn_choice(f"{filename} exists, would you like to overwrite?"):
-    #             writefile(filename, self.content)
-    #     else:
-    #         writefile(filename, self.content)
-
     def save_experiment_configuration(self, name=None):
+        """
+        Saves the experiment configuration in a json file
+
+        :param name: name of the configuration file
+        :type name: str
+        :return: writes into the file with given name the json content
+        :rtype: None
+        """
         if name is not None:
             content = json.dumps(self.configuration_parameters, indent=2)
             writefile(name, content)

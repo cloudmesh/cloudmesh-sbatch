@@ -1,6 +1,6 @@
 a = 101
 
-p_data = {
+py_data = {
     "name": "Gregor",
     "address": {
         "city": "Bloomington",
@@ -9,4 +9,4 @@ p_data = {
     }
 }
 
-p_gregor = "GREGOR"
+py_gregor = "GREGOR"

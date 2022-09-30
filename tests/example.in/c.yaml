@@ -1,4 +1,7 @@
 name: "Gregor"
+sbatch:
+  mode: h
+  dir: project
 address:
   street: "Seasame Str."
 config:
@@ -8,4 +11,12 @@ config:
   DLinputCheckpointpostfix: ""
   TFTTransformerepochs: 66
   TFTTransformerepochs: 10 
-  TFTTransformerepochs: 2 
+  TFTTransformerepochs: 2
+cm:
+  x: "{cloudmesh.debug}"
+env:
+  name: "{os.USER}"
+other:
+  name: "{address.street}"
+fancy:
+  name: "{cm.x}"
