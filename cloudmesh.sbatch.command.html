@@ -47,6 +47,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="guide.html">Manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="readme.html">Cloudmesh Sbatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sbatch.html">Command sbatch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slurm.html">Slurm on a single node computer</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
@@ -148,8 +149,11 @@ file.</p>
 <dt>Arguments:</dt><dd><p>FILENAME       name of a slurm script generated with sbatch
 CONFIG_FILE    yaml file with configuration
 ACCOUNT        account name for host system
-SOURCE         name for input script slurm.in.sh, lsf.in.sh,  script.in.sh or similar
-PARAMS         parameter lists for experimentation
+SOURCE         name for input script slurm.in.sh, lsf.in.sh,</p>
+<blockquote>
+<div><p>script.in.sh or similar</p>
+</div></blockquote>
+<p>PARAMS         parameter lists for experimentation
 GPU            name of gpu</p>
 </dd>
 <dt>Options:</dt><dd><dl class="option-list">
@@ -158,12 +162,14 @@ GPU            name of gpu</p>
 </dd>
 </dl>
 <dl class="simple">
-<dt>–config=CONFIG…        a list of comma seperated configuration files in yaml or json format.</dt><dd><p>The endings must be .json or .yaml</p>
+<dt>–config=CONFIG…        a list of comma seperated configuration</dt><dd><p>files in yaml or json format.
+The endings must be .json or .yaml</p>
 </dd>
 </dl>
 <dl class="option-list">
 <dt><kbd><span class="option">--type=<var>JOB_TYPE</var></span></kbd></dt>
-<dd><p>The method to generate submission scripts.  One of slurm, lsf. [default: slurm]</p>
+<dd><p>The method to generate submission scripts.
+One of slurm, lsf. [default: slurm]</p>
 </dd>
 <dt><kbd><span class="option">--attributes=<var>PARAMS</var></span></kbd></dt>
 <dd><p>a list of coma separated attribute value pairs
@@ -186,12 +192,13 @@ to set parameters that are used. [default: None]</p>
 can be helpfull when debugging as the list is quite lareg</p>
 </dd>
 <dt><kbd><span class="option">--nocm</span></kbd></dt>
-<dd><p>cloudmesh as a variable dictionary build in. Any vaiable refered to
-by cloudmes. and its name is replaced from the
+<dd><p>cloudmesh as a variable dictionary build in. Any vaiable referred to
+by cloudmesh. and its name is replaced from the
 cloudmesh variables</p>
 </dd>
 <dt><kbd><span class="option">--experiment=<var>EXPERIMENT</var></span></kbd></dt>
-<dd><p>This specifies all parameters that are used to create permutations of them.
+<dd><p>This specifies all parameters that are used to create
+permutations of them.
 They are comma separated key value pairs</p>
 </dd>
 <dt><kbd><span class="option">--mode=<var>MODE</var></span></kbd></dt>
@@ -208,10 +215,11 @@ use “f”. “d”, “h” [default: h]</p>
 <dd><p>produce flatdict</p>
 </dd>
 <dt><kbd><span class="option">--dryrun</span></kbd></dt>
-<dd><p>flag to do a dryrun and not create files and directories [defualt: False]</p>
+<dd><p>flag to do a dryrun and not create files and
+directories [default: False]</p>
 </dd>
 <dt><kbd><span class="option">--verbose</span></kbd></dt>
-<dd><p>Print more information whne executing [default: False]</p>
+<dd><p>Print more information when executing [default: False]</p>
 </dd>
 </dl>
 </dd>
@@ -220,11 +228,15 @@ use “f”. “d”, “h” [default: h]</p>
 <blockquote>
 <div><p>&gt; Examples:
 &gt;
-&gt; cms sbatch generate slurm.in.sh –verbose                &gt;     –config=a.py,b.json,c.yaml                &gt;     –attributes=a=1,b=4                &gt;     –dryrun –noos –input_dir=example                &gt;     –experiment=”epoch=[1-3] x=[1,4] y=[10,11]”                &gt;     –name=a –mode=h</p>
-<p>&gt; cms sbatch generate slurm.in.sh                &gt;    –config=a.py,b.json,c.yaml                &gt;    –attributes=a=1,b=4                 &gt;    –noos                &gt;    –input_dir=example                &gt;    –experiment=”epoch=[1-3] x=[1,4] y=[10,11]”                &gt;    –name=a                &gt;    –mode=h
-&gt; cms sbatch generate slurm.in.sh                &gt;    –verbose                &gt;    –config=a.py,b.json,c.yaml                &gt;    –attributes=name=gregor,a=1,b=4                &gt;    –noos                &gt;    –input_dir=example                &gt;    –experiment=”epoch=[1-3] x=[1,4] y=[10,11]”                &gt;    –mode=f                &gt;    –name=a</p>
-<p>&gt; cms sbatch generate slurm.in.sh –experiments-file=experiments.yaml –name=a</p>
-<p>&gt; cms sbatch generate submit –name=a</p>
+&gt; cms sbatch generate slurm.in.sh –verbose &gt;     –config=a.py,b.json,c.yaml &gt;     –attributes=a=1,b=4 &gt;     –dryrun –noos –input_dir=example &gt;     –experiment=”epoch=[1-3] x=[1,4] y=[10,11]” &gt;     –name=a –mode=h
+&gt;
+&gt; cms sbatch generate slurm.in.sh &gt;    –config=a.py,b.json,c.yaml &gt;    –attributes=a=1,b=4 &gt;    –noos &gt;    –input_dir=example &gt;    –experiment=”epoch=[1-3] x=[1,4] y=[10,11]” &gt;    –name=a &gt;    –mode=h
+&gt;
+&gt; cms sbatch generate slurm.in.sh &gt;    –verbose &gt;    –config=a.py,b.json,c.yaml &gt;    –attributes=name=gregor,a=1,b=4 &gt;    –noos &gt;    –input_dir=example &gt;    –experiment=”epoch=[1-3] x=[1,4] y=[10,11]” &gt;    –mode=f &gt;    –name=a
+&gt;
+&gt; cms sbatch generate slurm.in.sh –experiments-file=experiments.yaml –name=a
+&gt;
+&gt; cms sbatch generate submit –name=a</p>
 </div></blockquote>
 </dd></dl>
 
