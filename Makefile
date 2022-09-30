@@ -1,10 +1,14 @@
 package=sbatch
 UNAME=$(shell uname)
 VERSION=`head -1 VERSION`
-OPEN=gopen
 
+ifeq ($(OS),Windows_NT)
+detected_OS := Windows
+else
+detected_OS := $(shell sh -c 'uname 2>/dev/null || echo Unknown')
+endif
 
-.PHONY: conda doc
+.PHONY: conda doc view
 
 define banner
 	@echo
@@ -20,8 +24,18 @@ source:
 doc:
 	cd docs; make clean; make html
 
+
 view:
-	${OPEN} docs/build/html/index.html
+ifeq ($(detected_OS),Windows)
+	cmd //C "start firefox file://$(mkfile_dir)docs/build/html/index.html"
+endif
+ifeq ($(detected_OS),Darwin)        # Mac OS X
+	$(shell open docs/build/html/index.html)
+endif
+ifeq ($(detected_OS),Linux)
+	$(shell firefox docs/build/html/index.html)
+endif
+
 
 flake8:
 	cd ..; flake8 --max-line-length 124 --ignore=E722 cloudmesh-$(package)/cloudmesh
