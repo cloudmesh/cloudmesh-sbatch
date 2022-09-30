@@ -19,6 +19,7 @@ jobs:
       - name: Install cloudmesh-sbatch
         run: |
           python -m pip install -r requirements.txt
+          python -m pip install -r requirements-dev.txt
           python -m pip install -e .
 
       # Runs a set of commands using the runners shell
