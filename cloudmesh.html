@@ -4,9 +4,12 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>cloudmesh package &mdash; cloudmesh-sbatch 0.1 documentation</title>
+  <title>cloudmesh package &mdash; cloudmesh-sbatch 4.3.8 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="_static/readthedocs-custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -16,6 +19,9 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -38,20 +44,20 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="generated/cloudmesh.sbatch.html">cloudmesh.sbatch</a></li>
-</ul>
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="manual/sbatch.html">Command sbatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide.html">Manual</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cloudmesh</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">cloudmesh package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html">cloudmesh.sbatch package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">Cloudmesh sbatch</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="generated/cloudmesh.sbatch.html">cloudmesh.sbatch</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="modules.html">cloudmesh</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">cloudmesh package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cloudmesh">Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#module-cloudmesh">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -72,10 +78,11 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="api.html">Cloudmesh sbatch</a> &raquo;</li>
           <li><a href="modules.html">cloudmesh</a> &raquo;</li>
       <li>cloudmesh package</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/cloudmesh.rst.txt" rel="nofollow"> View page source</a>
+              <a href="https://github.com/cloudmesh/cloudmesh-cc/blob/main/api/source/cloudmesh.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -100,8 +107,40 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="cloudmesh.sbatch.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cloudmesh.sbatch.html#module-cloudmesh.sbatch.sbatch">cloudmesh.sbatch.sbatch module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cloudmesh.sbatch.html#module-cloudmesh.sbatch.slurm">cloudmesh.sbatch.slurm module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cloudmesh.sbatch.html#module-cloudmesh.sbatch.sbatch">cloudmesh.sbatch.sbatch module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch"><code class="docutils literal notranslate"><span class="pre">SBatch</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate"><code class="docutils literal notranslate"><span class="pre">SBatch.generate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_experiment_batch_scripts"><code class="docutils literal notranslate"><span class="pre">SBatch.generate_experiment_batch_scripts()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_experiment_permutations"><code class="docutils literal notranslate"><span class="pre">SBatch.generate_experiment_permutations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_setup_from_configuration"><code class="docutils literal notranslate"><span class="pre">SBatch.generate_setup_from_configuration()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_submit"><code class="docutils literal notranslate"><span class="pre">SBatch.generate_submit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.get_data"><code class="docutils literal notranslate"><span class="pre">SBatch.get_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.info"><code class="docutils literal notranslate"><span class="pre">SBatch.info()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.load_source_template"><code class="docutils literal notranslate"><span class="pre">SBatch.load_source_template()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.now"><code class="docutils literal notranslate"><span class="pre">SBatch.now</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.permutation_generator"><code class="docutils literal notranslate"><span class="pre">SBatch.permutation_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.save_experiment_configuration"><code class="docutils literal notranslate"><span class="pre">SBatch.save_experiment_configuration()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.spec_replace"><code class="docutils literal notranslate"><span class="pre">SBatch.spec_replace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_attributes"><code class="docutils literal notranslate"><span class="pre">SBatch.update_from_attributes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_cm_variables"><code class="docutils literal notranslate"><span class="pre">SBatch.update_from_cm_variables()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_dict"><code class="docutils literal notranslate"><span class="pre">SBatch.update_from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_file"><code class="docutils literal notranslate"><span class="pre">SBatch.update_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_os"><code class="docutils literal notranslate"><span class="pre">SBatch.update_from_os()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_os_environ"><code class="docutils literal notranslate"><span class="pre">SBatch.update_from_os_environ()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_with_directory"><code class="docutils literal notranslate"><span class="pre">SBatch.update_with_directory()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cloudmesh.sbatch.html#module-cloudmesh.sbatch.slurm">cloudmesh.sbatch.slurm module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.slurm.Slurm"><code class="docutils literal notranslate"><span class="pre">Slurm</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.slurm.Slurm.start"><code class="docutils literal notranslate"><span class="pre">Slurm.start()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.slurm.Slurm.status"><code class="docutils literal notranslate"><span class="pre">Slurm.status()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.html#cloudmesh.sbatch.slurm.Slurm.stop"><code class="docutils literal notranslate"><span class="pre">Slurm.stop()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="cloudmesh.sbatch.html#module-cloudmesh.sbatch">Module contents</a></li>
 </ul>
 </li>

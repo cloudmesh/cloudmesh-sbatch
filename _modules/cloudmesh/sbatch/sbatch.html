@@ -3,9 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>cloudmesh.sbatch.sbatch &mdash; cloudmesh-sbatch 0.1 documentation</title>
+  <title>cloudmesh.sbatch.sbatch &mdash; cloudmesh-sbatch 4.3.8 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/readthedocs-custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -15,6 +18,9 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -35,14 +41,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../generated/cloudmesh.sbatch.html">cloudmesh.sbatch</a></li>
-</ul>
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../manual/sbatch.html">Command sbatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide.html">Manual</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cloudmesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">Cloudmesh sbatch</a></li>
 </ul>
 
         </div>
@@ -74,16 +79,13 @@
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
-<span class="kn">import</span> <span class="nn">textwrap</span>
 <span class="kn">import</span> <span class="nn">typing</span>
-<span class="kn">import</span> <span class="nn">yaml</span>
 <span class="kn">import</span> <span class="nn">uuid</span>
-
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
 
+<span class="kn">import</span> <span class="nn">yaml</span>
 <span class="kn">from</span> <span class="nn">nbconvert.exporters</span> <span class="kn">import</span> <span class="n">PythonExporter</span>
 
 <span class="kn">from</span> <span class="nn">cloudmesh.common.FlatDict</span> <span class="kn">import</span> <span class="n">FlatDict</span>
@@ -91,7 +93,7 @@
 <span class="kn">from</span> <span class="nn">cloudmesh.common.Shell</span> <span class="kn">import</span> <span class="n">Shell</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.console</span> <span class="kn">import</span> <span class="n">Console</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
-<span class="kn">from</span> <span class="nn">cloudmesh.common.util</span> <span class="kn">import</span> <span class="n">banner</span><span class="p">,</span> <span class="n">readfile</span><span class="p">,</span> <span class="n">writefile</span><span class="p">,</span> <span class="n">yn_choice</span>
+<span class="kn">from</span> <span class="nn">cloudmesh.common.util</span> <span class="kn">import</span> <span class="n">banner</span><span class="p">,</span> <span class="n">readfile</span><span class="p">,</span> <span class="n">writefile</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.variables</span> <span class="kn">import</span> <span class="n">Variables</span>
 
 <span class="n">PathLike</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">]</span>
@@ -103,279 +105,309 @@
 <div class="viewcode-block" id="SBatch"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch">[docs]</a><span class="k">class</span> <span class="nc">SBatch</span><span class="p">:</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the SBatch Object</span>
+
+<span class="sd">        :param verbose: If true prints additional infromation when SBatch methods are called</span>
+<span class="sd">        :type verbose: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flat</span> <span class="o">=</span> <span class="n">FlatDict</span><span class="p">({},</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dryrun</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">execution_mode</span> <span class="o">=</span> <span class="s2">&quot;h&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Shell</span><span class="o">.</span><span class="n">map_filename</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Shell</span><span class="o">.</span><span class="n">map_filename</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">os_variables</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
-        <span class="c1"># self.gpu = None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">configuration_parameters</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">template_path</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">template_content</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">out_directory</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configuration_parameters</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">script_out</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">execution_mode</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dryrun</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># self.gpu = None</span>
 
-<div class="viewcode-block" id="SBatch.config_from_cli"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.config_from_cli">[docs]</a>    <span class="k">def</span> <span class="nf">config_from_cli</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arguments</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Configures the object from command.sbatch CLI arguments</span>
+<div class="viewcode-block" id="SBatch.info"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prints information about the SBatch object for debugging purposes</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            arguments: The docopts object from the cms sbatch command.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Fluent API of the current object.</span>
+<span class="sd">        :param verbose:  if True prints even more information</span>
+<span class="sd">        :type verbose: bool</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;SOURCE&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;SOURCE&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">register_script</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dryrun</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dryrun&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dryrun</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">execution_mode</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">execution_mode</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">mode</span>
+        <span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">script_out</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">arguments</span><span class="o">.</span><span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">script_out</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.in.&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>  <span class="c1">#.replace(&quot;.in&quot;, &quot;&quot;)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s2">&quot;dryrun&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;verbose&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;destination&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;attributes&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gpu&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;config_files&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;directory&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;experiment&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;execution_mode&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;template&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;script_output&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;output_dir&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;input_dir&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;script_in&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;script_out&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;os_variables&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;experiments&quot;</span>
+        <span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>  <span class="c1"># noqa: E722</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">a</span><span class="si">:</span><span class="s1">&lt;12</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;permutations:&quot;</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;permutations&quot;</span><span class="p">)</span>
+        <span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BEGIN FLAT&quot;</span><span class="p">)</span>
+        <span class="n">pprint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flat</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;END FLAT&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BEGIN DATA&quot;</span><span class="p">)</span>
+        <span class="n">pprint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;END DATA&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BEGIN YAML&quot;</span><span class="p">)</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;END YAML&quot;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BEGIN SPEC&quot;</span><span class="p">)</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_replace</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;END SPEC&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BEGIN PERMUTATION&quot;</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span>
+        <span class="n">pprint</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;END PERMUTATION&quot;</span><span class="p">)</span>
+
+        <span class="c1"># self.info()</span>
+        <span class="c1">#</span>
+        <span class="c1"># self.data = result</span>
+        <span class="c1">#</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BEGIN DATA&quot;</span><span class="p">)</span>
+        <span class="n">pprint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;END DATA&quot;</span><span class="p">)</span>
+
+        <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;BEGIN TEMPLATE&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template_content</span><span class="p">)</span>
+        <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;END TEMPLATE&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SBatch.update_with_directory"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_with_directory">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">update_with_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        prefix with the directory if the filename is not starting with . / ~</span>
+
+<span class="sd">        :param directory: the string value of the directory</span>
+<span class="sd">        :type directory: str</span>
+<span class="sd">        :param filename: the filename</span>
+<span class="sd">        :type filename: str</span>
+<span class="sd">        :return: directory/filename</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">directory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">filename</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">filename</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">filename</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">filename</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">script_out</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">script_out</span><span class="p">))</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">return</span> <span class="n">filename</span></div>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">script_out</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">yn_choice</span><span class="p">(</span><span class="s2">&quot;The source and destination filenames are the same. Do you want to continue?&quot;</span><span class="p">):</span>
-                <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+<div class="viewcode-block" id="SBatch.get_data"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
 
-        <span class="k">if</span> <span class="n">arguments</span><span class="p">[</span><span class="s1">&#39;--dir&#39;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">out_directory</span> <span class="o">=</span> <span class="n">arguments</span><span class="p">[</span><span class="s1">&#39;--dir&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">flat</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">cloudmesh.common.FlatDict</span> <span class="kn">import</span> <span class="n">FlatDict</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">FlatDict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;sep&quot;</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;--noos&quot;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">update_from_os_environ</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">result</span></div>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;--nocm&quot;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">update_from_cm_variables</span><span class="p">()</span>
+<div class="viewcode-block" id="SBatch.spec_replace"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.spec_replace">[docs]</a>    <span class="k">def</span> <span class="nf">spec_replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        given a spec in yaml format, replaces all values in the yaml file taht are of the form &quot;{a.b}&quot;</span>
+<span class="sd">        with the value of</span>
 
-        <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">update_from_attributes</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">attributes</span><span class="p">)</span>
+<span class="sd">        a:</span>
+<span class="sd">           b: value</span>
 
-        <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">experiment</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_experiment_permutations</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">experiment</span><span class="p">)</span>
+<span class="sd">        if it is defined in the yaml file</span>
 
-        <span class="k">if</span> <span class="n">arguments</span><span class="o">.</span><span class="n">config</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">config_file</span> <span class="ow">in</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">config</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">update_from_file</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">({</span> <span class="s1">&#39;meta.parent.uuid&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span> <span class="p">})</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
-
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_apply_leaf</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">my_dict</span><span class="p">:</span> <span class="n">DictOrList</span><span class="p">,</span> <span class="n">my_lambda</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Walks python dictionary and applies a lambda to all leaf nodes.</span>
-<span class="sd">        Args:</span>
-<span class="sd">            my_dict: The dictionary to process</span>
-<span class="sd">            my_lambda: The lambda function to apply to the leaf nodes.</span>
-<span class="sd">            *args: positional arguments passed directly to my_lambda</span>
-<span class="sd">            **kwargs: keyword arguments passed directoy to my_lambda</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            A new dictionary that has applied the my_lambda function on</span>
-<span class="sd">            each leaf node.</span>
+<span class="sd">        :param spec: yaml string</span>
+<span class="sd">        :type spec: str</span>
+<span class="sd">        :return: replaced yaml file</span>
+<span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">new_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">my_dict</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">new_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="n">new_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_apply_leaf</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">my_lambda</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="n">inner_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                        <span class="n">inner_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_apply_leaf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">my_lambda</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">inner_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">my_lambda</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
-                    <span class="n">new_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">inner_list</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">new_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">my_lambda</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">new_dict</span>
+        <span class="kn">import</span> <span class="nn">re</span>
+        <span class="kn">import</span> <span class="nn">munch</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\{\w.+\}&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SBatch.config_from_yaml"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.config_from_yaml">[docs]</a>    <span class="k">def</span> <span class="nf">config_from_yaml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">yaml_file</span><span class="p">:</span> <span class="n">PathLike</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Configures the object from a standard YAML structure.</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">SafeLoader</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">munch</span><span class="o">.</span><span class="n">DefaultMunch</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-<span class="sd">        This supports the following YAML structures:</span>
-<span class="sd">            template: path</span>
-<span class="sd">            config: path</span>
-<span class="sd">            name: str</span>
-<span class="sd">            experiments:</span>
-<span class="sd">              card_name: Parameter.expand string</span>
-<span class="sd">              gpu_count: Parameter.expand string</span>
-<span class="sd">              cpu_num: Parameter.expand string</span>
-<span class="sd">              mem: Parameter.expand string</span>
-<span class="sd">            attributes:</span>
-<span class="sd">              property: substitution</span>
-<span class="sd">            mode: str</span>
-<span class="sd">            dir: path</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">)):</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            yaml_file: The path to the yaml file to parse</span>
+            <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="n">variable</span>
+                <span class="n">variable</span> <span class="o">=</span> <span class="n">variable</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s2">&quot;m.</span><span class="si">{variable}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="nb">locals</span><span class="p">()))</span>
+                    <span class="k">if</span> <span class="s2">&quot;{&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                        <span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>  <span class="c1"># noqa: E722</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">variable</span>
+        <span class="k">return</span> <span class="n">spec</span></div>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            Fluent API of the current object.</span>
+<div class="viewcode-block" id="SBatch.update_from_os"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_os">[docs]</a>    <span class="k">def</span> <span class="nf">update_from_os</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variables</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        LOads all variables from os.environ into self.data with os.name</span>
+
+<span class="sd">        :param variables: tha name of the variables such as &quot;HOME&quot;</span>
+<span class="sd">        :type variables:  [str]</span>
+<span class="sd">        :return: self.data with all variaples added with os.name: value</span>
+<span class="sd">        :rtype: dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">variables</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;os&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;os&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span></div>
 
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">yaml_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">yaml_data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<div class="viewcode-block" id="SBatch.load_source_template"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.load_source_template">[docs]</a>    <span class="k">def</span> <span class="nf">load_source_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">script</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Registers and reads the template script in for processing</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">read_config_from_dict</span><span class="p">(</span><span class="n">yaml_data</span><span class="p">)</span>
+<span class="sd">        This method must be run at least once prior to generating the batch script output.</span>
 
-        <span class="k">return</span> <span class="bp">self</span></div>
-
-<div class="viewcode-block" id="SBatch.read_config_from_dict"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.read_config_from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">read_config_from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
-        <span class="k">if</span> <span class="s1">&#39;template&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">root</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">register_script</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">])</span>
-        <span class="k">if</span> <span class="s1">&#39;config&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">update_from_file</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">])</span>
-        <span class="k">if</span> <span class="s1">&#39;name&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">root</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s1">&#39;mode&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">execution_mode</span> <span class="o">=</span> <span class="n">root</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s1">&#39;dir&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">out_directory</span> <span class="o">=</span> <span class="n">root</span><span class="p">[</span><span class="s1">&#39;dir&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s1">&#39;experiments&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
-            <span class="n">experiments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_leaf</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="s1">&#39;experiments&#39;</span><span class="p">],</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">expand</span><span class="p">)</span>
-            <span class="n">perms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutation_generator</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">+</span> <span class="n">perms</span>
-        <span class="c1"># if &#39;attributes&#39; in root:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">({</span> <span class="s1">&#39;meta.parent.uuid&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span> <span class="p">})</span></div>
-
-<div class="viewcode-block" id="SBatch.register_script"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.register_script">[docs]</a>    <span class="k">def</span> <span class="nf">register_script</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">script</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Registers and reads the template script in for processing</span>
-
-<span class="sd">        This method must be run at least once prior to generating the slurm script output.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            script: A string that is the path to the template script.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The text of the template file unaltered.</span>
+<span class="sd">        :param script: A string that is the path to the template script.</span>
+<span class="sd">        :type script: str</span>
+<span class="sd">        :return: The text of the template file unaltered.</span>
+<span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">template_path</span> <span class="o">=</span> <span class="n">script</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">template_content</span> <span class="o">=</span> <span class="n">readfile</span><span class="p">(</span><span class="n">script</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_content</span></div>
 
-<div class="viewcode-block" id="SBatch.info"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;destination&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;attributes&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;gpu&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;dryrun&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;config&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;directory&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;experiment&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;mode&quot;</span>
-                  <span class="p">]:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">result</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">a</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">a</span><span class="si">:</span><span class="s1">&lt;12</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;permutations:&quot;</span><span class="p">)</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;permutations&quot;</span><span class="p">)</span>
-        <span class="c1"># pprint(result)</span>
-        <span class="nb">print</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="SBatch.set_attribute"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.set_attribute">[docs]</a>    <span class="k">def</span> <span class="nf">set_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
-
 <div class="viewcode-block" id="SBatch.update_from_dict"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">update_from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">d</span><span class="p">)</span></div>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a dict to self. data</span>
 
-<div class="viewcode-block" id="SBatch.update_from_attributes"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">update_from_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributes</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;attributes are of the form &quot;a=1,b=3&quot;</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            attributes: A string to expand into key-value pairs</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            dict[str,str]: The expanded dictionary</span>
+<span class="sd">        :param d: dictionary</span>
+<span class="sd">        :type d: dict</span>
+<span class="sd">        :return: self.data with updated dict</span>
+<span class="sd">        :rtype: dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">entries</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">arguments_to_dict</span><span class="p">(</span><span class="n">attributes</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">entries</span></div>
-
-<div class="viewcode-block" id="SBatch.update_from_os_environ"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_os_environ">[docs]</a>    <span class="k">def</span> <span class="nf">update_from_os_environ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Updates the config file output to include OS environment variables</span>
-<span class="sd">        Args:</span>
-<span class="sd">            load: When true, loads the environment variables into the config.</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            The current value of the data configuration variable</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">load</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span></div>
 
-<div class="viewcode-block" id="SBatch.update_from_cm_variables"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_cm_variables">[docs]</a>    <span class="k">def</span> <span class="nf">update_from_cm_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Adds Cloudmesh variables to the class&#39;s data parameter as a flat dict.</span>
+<div class="viewcode-block" id="SBatch.update_from_attributes"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">update_from_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributes</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        attributes are of the form &quot;a=1,b=3&quot;</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            load: Toggles execution; if false, method does nothing.</span>
+<span class="sd">        :param attributes: A string to expand into key-value pairs</span>
+<span class="sd">        :type attributes:</span>
+<span class="sd">        :return: self.data with updated dict</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">flatdict</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">arguments_to_dict</span><span class="p">(</span><span class="n">attributes</span><span class="p">)</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            The updated data parameter with the cloudmesh variables set.</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">FlatDict</span><span class="p">(</span><span class="n">flatdict</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">unflatten</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;sep&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span></div>
+
+<div class="viewcode-block" id="SBatch.update_from_os_environ"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_os_environ">[docs]</a>    <span class="k">def</span> <span class="nf">update_from_os_environ</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the config file output to include OS environment variables</span>
+
+<span class="sd">        :return: The current value of the data configuration variable</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span></div>
+
+<div class="viewcode-block" id="SBatch.update_from_cm_variables"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_cm_variables">[docs]</a>    <span class="k">def</span> <span class="nf">update_from_cm_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds Cloudmesh variables to the class&#39;s data parameter as a flat dict.</span>
+
+<span class="sd">        :param load: Toggles execution; if false, method does nothing.</span>
+<span class="sd">        :type load: bool</span>
+<span class="sd">        :return: self.data with updated cloudmesh variables</span>
+<span class="sd">        :rtype: dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">load</span><span class="p">:</span>
             <span class="n">variables</span> <span class="o">=</span> <span class="n">Variables</span><span class="p">()</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">FlatDict</span><span class="p">({</span><span class="s2">&quot;cloudmesh&quot;</span><span class="p">:</span> <span class="n">variables</span><span class="o">.</span><span class="n">dict</span><span class="p">()},</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">unflatten</span><span class="p">()</span>
+            <span class="k">del</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;sep&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span></div>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_suffix</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the file suffix of a path</span>
+    <span class="k">def</span> <span class="nf">_suffix</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            path: The path to process</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            str: The suffix of the string</span>
+<span class="sd">        :param filename: Returns the file suffix of a filename</span>
+<span class="sd">        :type filename: str</span>
+<span class="sd">        :return: the suffix of the filename</span>
+<span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span>
+        <span class="k">return</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span>
 
-<div class="viewcode-block" id="SBatch.update_from_file"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">update_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">PathLike</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Updates the run configuration file with the data within the passed file.</span>
+<div class="viewcode-block" id="SBatch.update_from_file"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">update_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the configuration self.data with the data within the passed file.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            filename: The path to the configuration file (json or yaml)</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The modified data object.</span>
+<span class="sd">        :param filename: The path to the configuration file (yaml, json, py, ipynb)</span>
+<span class="sd">        :type filename: str</span>
+<span class="sd">        :return: self.data with updated cloudmesh variables from the specified file</span>
+<span class="sd">        :rtype: dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading variables from </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="n">suffix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="n">content</span> <span class="o">=</span> <span class="n">readfile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.json&quot;</span><span class="p">]:</span>
-            <span class="n">regular_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-            <span class="n">values</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">(</span><span class="n">regular_dict</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
-        <span class="k">elif</span> <span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.yml&quot;</span><span class="p">,</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">]:</span>
-            <span class="n">content</span> <span class="o">=</span> <span class="n">readfile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-            <span class="n">regular_dict</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-            <span class="n">values</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">(</span><span class="n">regular_dict</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
-        <span class="k">elif</span> <span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.py&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.json&quot;</span><span class="p">]:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
 
-            <span class="n">modulename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.py&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span><span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;build_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.yml&quot;</span><span class="p">,</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">]:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">readfile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.py&quot;</span><span class="p">]:</span>
+
+            <span class="n">modulename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.py&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;build_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="kn">from</span> <span class="nn">importlib.machinery</span> <span class="kn">import</span> <span class="n">SourceFileLoader</span>
 
             <span class="n">mod</span> <span class="o">=</span> <span class="n">SourceFileLoader</span><span class="p">(</span><span class="n">modulename</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">load_module</span><span class="p">()</span>
 
-            <span class="n">regular_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">):</span>
-                    <span class="nb">print</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-                    <span class="n">regular_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-            <span class="n">values</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">(</span><span class="n">regular_dict</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
+                    <span class="n">values</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
-        <span class="k">elif</span> <span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.ipynb&quot;</span><span class="p">]:</span>
-            <span class="c1"># regular_dict = None</span>
-            <span class="c1"># values = None</span>
+        <span class="k">elif</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.ipynb&quot;</span><span class="p">]:</span>
 
             <span class="n">py_name</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.ipynb&quot;</span><span class="p">,</span> <span class="s2">&quot;.py&quot;</span><span class="p">)</span>
             <span class="n">jupy</span> <span class="o">=</span> <span class="n">PythonExporter</span><span class="p">()</span>
@@ -384,80 +416,78 @@
             <span class="c1"># Shell.run(f&quot;jupyter nbconvert --to python {filename}&quot;)</span>
 
             <span class="n">filename</span> <span class="o">=</span> <span class="n">py_name</span>
-            <span class="n">modulename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.py&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span><span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;build_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">modulename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.py&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;build_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="kn">from</span> <span class="nn">importlib.machinery</span> <span class="kn">import</span> <span class="n">SourceFileLoader</span>
 
             <span class="n">mod</span> <span class="o">=</span> <span class="n">SourceFileLoader</span><span class="p">(</span><span class="n">modulename</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">load_module</span><span class="p">()</span>
 
-            <span class="n">regular_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">):</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-                    <span class="n">regular_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                    <span class="n">values</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
-            <span class="n">values</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">(</span><span class="n">regular_dict</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported config type </span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">read_config_from_dict</span><span class="p">(</span><span class="n">regular_dict</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">regular_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">&#39;experiments&#39;</span> <span class="ow">in</span> <span class="n">regular_dict</span><span class="p">:</span>
-            <span class="n">exp_values</span> <span class="o">=</span> <span class="n">regular_dict</span><span class="p">[</span><span class="s1">&#39;experiments&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_from_dict</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
 
-            <span class="n">banner</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exp_values</span><span class="p">))</span>
+        <span class="c1"># self.read_config_from_dict(regular_dict)</span>
+        <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">&#39;experiment&#39;</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+            <span class="n">experiments</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span>
 
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp_values</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="n">entries</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">exp_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="n">entry</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
-                <span class="n">exp_values</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">experiments</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">print</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">experiments</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">experiments</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
 
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp_values</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">banner</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generate permutations from experiment in </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;experiment datatype </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exp_values</span><span class="p">)</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">exp_values</span><span class="si">}</span><span class="s2"> not supported&quot;</span><span class="p">)</span>
-            <span class="n">experiments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_leaf</span><span class="p">(</span><span class="n">regular_dict</span><span class="p">[</span><span class="s1">&#39;experiments&#39;</span><span class="p">],</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">expand</span><span class="p">)</span>
-            <span class="n">perms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutation_generator</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">+</span> <span class="n">perms</span>
-            <span class="c1"># self.generate_experiment_permutations(experiments)</span>
-
-        <span class="c1"># if values is not None:</span>
-        <span class="c1">#     self.update_from_dict(experiments)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutation_generator</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span></div>
 
-<div class="viewcode-block" id="SBatch.generate"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">script</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fences</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">)):</span>
-        <span class="sd">&quot;&quot;&quot;Expands the script template given the passed configuration.</span>
+<div class="viewcode-block" id="SBatch.generate"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">script</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fences</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Expands the script template given the passed configuration.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            script: The string contents of the script file.</span>
-<span class="sd">            data: A single-level dictionary used to replace strings that match the key with its values.</span>
-<span class="sd">            fences: A 2 position tuple, that encloses template variables (start and end).</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The script that has expanded its values based on `data`.</span>
+<span class="sd">        :param script: The string contents of the script file.</span>
+<span class="sd">        :type script: str</span>
+<span class="sd">        :param variables: the variables to be replaced, if ommitted uses the internal variables found</span>
+<span class="sd">        :type variables: dict</span>
+<span class="sd">        :param fences: A 2 position tuple, that encloses template variables (start and end).</span>
+<span class="sd">        :type fences: (str,str)</span>
+<span class="sd">        :return: The script that has expanded its values based on `data`.</span>
+<span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-        <span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_content</span>
-        <span class="k">for</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="n">replaced</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">variables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="n">script</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">script</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_content</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">script</span><span class="p">)</span>
+        <span class="n">flat</span> <span class="o">=</span> <span class="n">FlatDict</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">flat</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">flat</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span>
             <span class="n">frame</span> <span class="o">=</span> <span class="n">fences</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">attribute</span> <span class="o">+</span> <span class="n">fences</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expanding </span><span class="si">{</span><span class="n">frame</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="c1"># print(content)</span>
             <span class="k">if</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- Expanding </span><span class="si">{</span><span class="n">frame</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">replaced</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
                 <span class="n">content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">content</span></div>
+        <span class="k">return</span> <span class="n">content</span><span class="p">,</span> <span class="n">replaced</span></div>
 
 <div class="viewcode-block" id="SBatch.permutation_generator"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.permutation_generator">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">permutation_generator</span><span class="p">(</span><span class="n">exp_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Creates a cartisian product of a {key: list, ...} object.</span>
+    <span class="k">def</span> <span class="nf">permutation_generator</span><span class="p">(</span><span class="n">exp_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a cartisian product of a {key: list, ...} object.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            exp_dict: The dictionary to process</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            A list of dictionaries containing the resulting cartisian product.</span>
+<span class="sd">        :param exp_dict: The dictionary to process</span>
+<span class="sd">        :type exp_dict: dict</span>
+<span class="sd">        :return: A list of dictionaries containing the resulting cartisian product.</span>
+<span class="sd">        :rtype: list</span>
 
 <span class="sd">        For example</span>
 <span class="sd">            my_dict = {&quot;key1&quot;: [&quot;value1&quot;, &quot;value2&quot;], &quot;key2&quot;: [&quot;value3&quot;, &quot;value4&quot;]}</span>
@@ -466,38 +496,39 @@
 <span class="sd">                #  {&quot;key1&quot;: &quot;value1&quot;, &quot;key2&quot;: &quot;value4&quot;},</span>
 <span class="sd">                #  {&quot;key1&quot;: &quot;value2&quot;, &quot;key2&quot;: &quot;value3&quot;},</span>
 <span class="sd">                #  {&quot;key1&quot;: &quot;value2&quot;, &quot;key2&quot;: &quot;value4&quot;}</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">keys</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">exp_dict</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
         <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">)]</span></div>
 
 <div class="viewcode-block" id="SBatch.generate_experiment_permutations"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_experiment_permutations">[docs]</a>    <span class="k">def</span> <span class="nf">generate_experiment_permutations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variable_str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Generates experiment permutations based on the passed string and appends it to the current instance.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates experiment permutations based on the passed string and appends it to the current instance.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            variable_str: A Parameter.expand string (such as epoch=[1-3] x=[1,4] y=[10,11])</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            list with permutations over the experiment variables</span>
+<span class="sd">        :param variable_str: A Parameter.expand string (such as epoch=[1-3] x=[1,4] y=[10,11])</span>
+<span class="sd">        :type variable_str: str</span>
+<span class="sd">        :return: list with permutations over the experiment variables</span>
+<span class="sd">        :rtype: list</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">experiments</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
         <span class="n">entries</span> <span class="o">=</span> <span class="n">variable_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
 
-        <span class="c1"># pprint(entries)</span>
         <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
             <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
             <span class="n">experiments</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutation_generator</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span></div>
 
-    <span class="c1">#for permutation in self.permutations:</span>
-    <span class="c1">#    values = &quot;&quot;</span>
-    <span class="c1">#    for attribute, value in permutation.items():</span>
-    <span class="c1">#        values = values + f&quot;{attribute}={value} &quot;</span>
-    <span class="c1">#        script = f&quot;{self.destination}{values}&quot;.replace(&quot;=&quot;, &quot;_&quot;)</span>
-    <span class="c1">#    print(f&quot;{values} sbatch {self.destination} {script}&quot;)</span>
-
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_generate_bootstrapping</span><span class="p">(</span><span class="n">permutation</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        creates an identifier, a list of assignments, ad values.</span>
+
+<span class="sd">        :param permutation: the permutation list</span>
+<span class="sd">        :type permutation: list</span>
+<span class="sd">        :return: identifier, assignments, values</span>
+<span class="sd">        :rtype: str, list, list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">permutation</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attribute</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -509,33 +540,55 @@
         <span class="n">identifier</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">assignments</span><span class="p">,</span> <span class="n">values</span>
 
-    <span class="k">def</span> <span class="nf">_generate_flat_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="n">configuration</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="c1"># self.script_variables = list()</span>
-        <span class="n">suffix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script_out</span><span class="p">)</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">script_out</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">suffix</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="c1"># directory = os.path.dirname(name)</span>
-        <span class="n">directory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_directory</span>
-        <span class="k">for</span> <span class="n">permutation</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span><span class="p">:</span>
-            <span class="n">identifier</span><span class="p">,</span> <span class="n">assignments</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_bootstrapping</span><span class="p">(</span><span class="n">permutation</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
-            <span class="n">script</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">identifier</span><span class="si">}{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="n">config</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">/config_</span><span class="si">{</span><span class="n">identifier</span><span class="si">}</span><span class="s2">.yaml&quot;</span>
-            <span class="n">variables</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-            <span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">({</span><span class="s1">&#39;experiments&#39;</span><span class="p">:</span> <span class="n">permutation</span><span class="p">},</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
-
-            <span class="n">configuration</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;id&quot;</span>        <span class="p">:</span> <span class="n">identifier</span><span class="p">,</span>
-                <span class="s2">&quot;directory&quot;</span> <span class="p">:</span> <span class="n">directory</span><span class="p">,</span>
-                <span class="s2">&quot;experiment&quot;</span><span class="p">:</span> <span class="n">assignments</span><span class="p">,</span>
-                <span class="s2">&quot;script&quot;</span>    <span class="p">:</span> <span class="n">script</span><span class="p">,</span>
-                <span class="s2">&quot;config&quot;</span>    <span class="p">:</span> <span class="n">config</span><span class="p">,</span>
-                <span class="s2">&quot;variables&quot;</span> <span class="p">:</span> <span class="n">variables</span>
-            <span class="p">}</span>
-        <span class="k">return</span> <span class="n">configuration</span>
+    <span class="c1"># def _generate_flat_config(self):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     deprecated. IT is no longer supported</span>
+    <span class="c1">#</span>
+    <span class="c1">#     Creates a flat configuration file.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :return: dict with information where the variables are a flatdict</span>
+    <span class="c1">#     :rtype: dict</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#</span>
+    <span class="c1">#     configuration = dict()</span>
+    <span class="c1">#     # self.script_variables = list()</span>
+    <span class="c1">#     suffix = self._suffix(self.script_out)</span>
+    <span class="c1">#     spec = yaml.dump(self.data, indent=2)</span>
+    <span class="c1">#     spec = self.spec_replace(spec)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     directory = self.output_dir</span>
+    <span class="c1">#     for permutation in self.permutations:</span>
+    <span class="c1">#         identifier, assignments, values = self._generate_bootstrapping(permutation)</span>
+    <span class="c1">#</span>
+    <span class="c1">#         spec = yaml.dump(self.data, indent=2)</span>
+    <span class="c1">#         spec = self.spec_replace(spec)</span>
+    <span class="c1">#</span>
+    <span class="c1">#         variables = yaml.safe_load(spec)</span>
+    <span class="c1">#</span>
+    <span class="c1">#         name = os.path.basename(self.script_out)</span>
+    <span class="c1">#         script = f&quot;{directory}/{name}_{identifier}{suffix}&quot;</span>
+    <span class="c1">#         config = f&quot;{directory}/config_{identifier}.yaml&quot;</span>
+    <span class="c1">#</span>
+    <span class="c1">#         variables.update({&#39;experiment&#39;: permutation})</span>
+    <span class="c1">#         variables[&quot;sbatch&quot;][&quot;idenitfier&quot;] = identifier</span>
+    <span class="c1">#</span>
+    <span class="c1">#         configuration[identifier] = {</span>
+    <span class="c1">#             &quot;id&quot;: identifier,</span>
+    <span class="c1">#             &quot;directory&quot;: directory,</span>
+    <span class="c1">#             &quot;experiment&quot;: assignments,</span>
+    <span class="c1">#             &quot;script&quot;: script,</span>
+    <span class="c1">#             &quot;config&quot;: config,</span>
+    <span class="c1">#             &quot;variables&quot;: variables</span>
+    <span class="c1">#         }</span>
+    <span class="c1">#     return configuration</span>
 
     <span class="k">def</span> <span class="nf">_generate_hierarchical_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a hierarchical directory with configuration yaml files, and shell script</span>
+
+<span class="sd">        :return: directory with configuration and yaml files</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="sd">&quot;&quot;&quot;Runs process to build out all templates in a hierarchical-style</span>
 
 <span class="sd">        Returns:</span>
@@ -545,39 +598,51 @@
 <span class="sd">            Writes two files for each established experiment, each in their own directory.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Outputting Hierarchical Experiments&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Outputting Hierarchical Experiments&quot;</span><span class="p">)</span>
         <span class="n">configuration</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">script_variables</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">suffix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script_out</span><span class="p">)</span>
-        <span class="c1"># name = self.script_out.replace(suffix, &quot;&quot;)</span>
-        <span class="n">directory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_directory</span>  <span class="c1"># .path.dirname(name)</span>
+        <span class="n">directory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span>  <span class="c1"># .path.dirname(name)</span>
         <span class="k">for</span> <span class="n">permutation</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">permutations</span><span class="p">:</span>
+
             <span class="n">identifier</span><span class="p">,</span> <span class="n">assignments</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_bootstrapping</span><span class="p">(</span><span class="n">permutation</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
-            <span class="n">script</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">identifier</span><span class="si">}</span><span class="s2">/slurm.sh&quot;</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">assignments</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_replace</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+
+            <span class="n">variables</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+
+            <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script_out</span><span class="p">)</span>
+            <span class="n">script</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">identifier</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="n">config</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">identifier</span><span class="si">}</span><span class="s2">/config.yaml&quot;</span>
-            <span class="n">variables</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-            <span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">({</span><span class="s1">&#39;experiments&#39;</span><span class="p">:</span> <span class="n">permutation</span><span class="p">},</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
+
+            <span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;experiment&#39;</span><span class="p">:</span> <span class="n">permutation</span><span class="p">})</span>
+            <span class="n">variables</span><span class="p">[</span><span class="s2">&quot;sbatch&quot;</span><span class="p">][</span><span class="s2">&quot;identifier&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">identifier</span>
 
             <span class="n">configuration</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;id&quot;</span>        <span class="p">:</span> <span class="n">identifier</span><span class="p">,</span>
-                <span class="s2">&quot;directory&quot;</span> <span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">identifier</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">identifier</span><span class="p">,</span>
+                <span class="s2">&quot;directory&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">identifier</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;experiment&quot;</span><span class="p">:</span> <span class="n">assignments</span><span class="p">,</span>
-                <span class="s2">&quot;script&quot;</span>    <span class="p">:</span> <span class="n">script</span><span class="p">,</span>
-                <span class="s2">&quot;config&quot;</span>    <span class="p">:</span> <span class="n">config</span><span class="p">,</span>
-                <span class="s2">&quot;variables&quot;</span> <span class="p">:</span> <span class="n">variables</span>
+                <span class="s2">&quot;script&quot;</span><span class="p">:</span> <span class="n">script</span><span class="p">,</span>
+                <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="n">config</span><span class="p">,</span>
+                <span class="s2">&quot;variables&quot;</span><span class="p">:</span> <span class="n">variables</span>
             <span class="p">}</span>
-            <span class="c1"># pprint(configuration)</span>
         <span class="k">return</span> <span class="n">configuration</span>
 
-<div class="viewcode-block" id="SBatch.generate_experiment_slurm_scripts"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_experiment_slurm_scripts">[docs]</a>    <span class="k">def</span> <span class="nf">generate_experiment_slurm_scripts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Utility method to genrerate either hierarchical or flat outputs; or debug.</span>
+<div class="viewcode-block" id="SBatch.generate_experiment_batch_scripts"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_experiment_batch_scripts">[docs]</a>    <span class="k">def</span> <span class="nf">generate_experiment_batch_scripts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Utility method to genrerate either hierarchical or flat outputs; or debug.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            mode: The mode of operation.  One of: &quot;debug&quot;, &quot;flat&quot;, &quot;hierarchical&quot;</span>
+<span class="sd">        NOte the falt mode is no longer supported</span>
 
-<span class="sd">        Returns:</span>
-
+<span class="sd">        :param out_mode: The mode of operation.  One of: &quot;debug&quot;, &quot;flat&quot;, &quot;hierarchical&quot;</span>
+<span class="sd">        :type out_mode: string</span>
+<span class="sd">        :return: generates the batch scripts</span>
+<span class="sd">        :rtype: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">execution_mode</span> <span class="k">if</span> <span class="n">out_mode</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">out_mode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">mode</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">):</span>
@@ -587,116 +652,116 @@
                 <span class="n">values</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
                 <span class="k">for</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">permutation</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="n">values</span> <span class="o">=</span> <span class="n">values</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attribute</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> &quot;</span>
-                <span class="n">script</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">out_directory</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">script_out</span><span class="si">}{</span><span class="n">values</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+                <span class="n">script</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">script_out</span><span class="si">}{</span><span class="n">values</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">mode</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;f&quot;</span><span class="p">):</span>
-                <span class="n">configuration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_flat_config</span><span class="p">()</span>
+                <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Flat mode is no longer supported&quot;</span><span class="p">,</span> <span class="n">traceflag</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="c1"># configuration = self._generate_flat_config()</span>
             <span class="k">elif</span> <span class="n">mode</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;h&quot;</span><span class="p">):</span>
                 <span class="n">configuration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_hierarchical_config</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid generator mode </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;Script generation&quot;</span><span class="p">)</span>
 
-            <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;Script generation&quot;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">Printer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">configuration</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;experiment&quot;</span><span class="p">,</span> <span class="s2">&quot;script&quot;</span><span class="p">,</span> <span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="s2">&quot;directory&quot;</span><span class="p">]))</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">configuration_parameters</span> <span class="o">=</span> <span class="n">configuration</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">generate_setup_from_configuration</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SBatch.generate_submit"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_submit">[docs]</a>    <span class="k">def</span> <span class="nf">generate_submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="s1">&#39;slurm&#39;</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">type_</span> <span class="o">==</span> <span class="s1">&#39;slurm&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="SBatch.generate_submit"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_submit">[docs]</a>    <span class="k">def</span> <span class="nf">generate_submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">job_type</span><span class="o">=</span><span class="s1">&#39;slurm&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a list of commands based on the permutations for submission</span>
+
+<span class="sd">        :param name: Name of the experiments</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param job_type: name of the job type used at submission such as</span>
+<span class="sd">                         sbatch, slurm, jsrun, mpirun, sh, bash</span>
+<span class="sd">        :type job_type: str</span>
+<span class="sd">        :param verbose: prints the generated command lines</span>
+<span class="sd">        :type verbose: bool</span>
+<span class="sd">        :return: prepars the internal data for the experiments, if set to verbose, prints them</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="s2">&quot;.json&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.json&quot;</span>
+
+        <span class="k">if</span> <span class="n">job_type</span> <span class="o">==</span> <span class="s1">&#39;slurm&#39;</span><span class="p">:</span>
             <span class="n">cmd</span> <span class="o">=</span> <span class="s1">&#39;sbatch&#39;</span>
-        <span class="k">elif</span> <span class="n">type_</span> <span class="o">==</span> <span class="s1">&#39;lsf&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">job_type</span> <span class="o">==</span> <span class="s1">&#39;lsf&#39;</span><span class="p">:</span>
             <span class="n">cmd</span> <span class="o">=</span> <span class="s1">&#39;bsub&#39;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">cmd</span> <span class="o">=</span> <span class="nb">type</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="n">job_type</span>
 
-        <span class="c1">#else:</span>
+        <span class="c1"># else:</span>
         <span class="c1">#    raise RuntimeError(f&quot;Unsupported submission type {type_}&quot;)</span>
 
         <span class="n">experiments</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">readfile</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+       <span class="c1">#  print (experiments)</span>
 
         <span class="k">if</span> <span class="n">experiments</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;please define the experiment parameters&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 
         <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">experiments</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;# Generate </span><span class="si">{</span><span class="n">entry</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">experiment</span> <span class="o">=</span> <span class="n">experiments</span><span class="p">[</span><span class="n">entry</span><span class="p">]</span>
             <span class="n">parameters</span> <span class="o">=</span> <span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;experiment&quot;</span><span class="p">]</span>
             <span class="n">directory</span> <span class="o">=</span> <span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;directory&quot;</span><span class="p">]</span>
             <span class="n">script</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;script&quot;</span><span class="p">])</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;( </span><span class="si">{</span><span class="n">parameters</span><span class="si">}</span><span class="s2"> cd </span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2"> &amp;&amp; </span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">script</span><span class="si">}</span><span class="s2"> )&quot;</span><span class="p">)</span></div>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parameters</span><span class="si">}</span><span class="s2"> cd </span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2"> &amp;&amp; </span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">script</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SBatch.generate_setup_from_configuration"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_setup_from_configuration">[docs]</a>    <span class="k">def</span> <span class="nf">generate_setup_from_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configuration</span><span class="p">):</span>
-        <span class="c1"># pprint(configuration)</span>
         <span class="k">for</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="n">configuration</span><span class="p">:</span>
-            <span class="n">perm_uuid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
-            <span class="n">Console</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;setup experiment </span><span class="si">{</span><span class="n">identifier</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">experiment</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span>
             <span class="n">Shell</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;directory&quot;</span><span class="p">])</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Making dir </span><span class="si">{</span><span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;directory&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="c1">#</span>
-            <span class="c1"># Generate config.yml</span>
-            <span class="c1">#</span>
-            <span class="n">Console</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;* write file </span><span class="si">{</span><span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">()</span>
+                <span class="n">Console</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Setup experiment </span><span class="si">{</span><span class="n">identifier</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- Making dir </span><span class="si">{</span><span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;directory&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- write file </span><span class="si">{</span><span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
             <span class="c1"># Generate UUID for each perm</span>
-            <span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span> <span class="s1">&#39;meta.uuid&#39;</span><span class="p">:</span> <span class="n">perm_uuid</span> <span class="p">})</span>
+            <span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">][</span><span class="s1">&#39;sbatch&#39;</span><span class="p">][</span><span class="s1">&#39;uuid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+
             <span class="n">writefile</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">],</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">],</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
             <span class="n">content_config</span> <span class="o">=</span> <span class="n">readfile</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">])</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">check</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">content_config</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
                 <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;We had issues with our check for the config.yaml file&quot;</span><span class="p">)</span>
-            <span class="c1">#</span>
-            <span class="c1"># Generate slurm.sh</span>
-            <span class="c1">#</span>
-            <span class="n">content_script</span> <span class="o">=</span> <span class="n">readfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
-            <span class="n">content_script</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">content_script</span><span class="p">,</span> <span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">])</span>
+
+            <span class="n">content_script</span><span class="p">,</span> <span class="n">replaced</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template_content</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">])</span>
+
+            <span class="c1"># if self.verbose:</span>
+            <span class="c1">#    for attribute, value in replaced.items():</span>
+            <span class="c1">#        print (f&quot;- replaced {attribute}={value}&quot;)</span>
+
             <span class="n">writefile</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;script&quot;</span><span class="p">],</span> <span class="n">content_script</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">now</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The time of now in the format &quot;%Y-m-%d&quot;</span>
+<span class="sd">        :return: &quot;%Y-m-%d&quot;</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SBatch.debug_state"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.debug_state">[docs]</a>    <span class="k">def</span> <span class="nf">debug_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Outputs the current state of persistent values in class.</span>
-<span class="sd">        Args:</span>
-<span class="sd">            key: A string to prefix the string with.</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            A mutliline string with all class variables in a key = value pattern.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">        </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">===OBJ===</span>
-<span class="s2">        </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">   </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="si">= }</span><span class="s2"></span>
-<span class="s2">        </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">   </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="si">= }</span><span class="s2"></span>
-<span class="s2">        </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">   </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="si">= }</span><span class="s2"></span>
-<span class="s2">        </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">   </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="si">= }</span><span class="s2"></span>
-<span class="s2">        </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">   </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">script_out</span> <span class="si">= }</span><span class="s2"></span>
-<span class="s2">        </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">   </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">out_directory</span> <span class="si">= }</span><span class="s2"></span>
-<span class="s2">        </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">   </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">attributes</span> <span class="si">= }</span><span class="s2"></span>
-<span class="s2">        </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">   </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dryrun</span> <span class="si">= }</span><span class="s2"></span>
-<span class="s2">        </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">   </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">execution_mode</span> <span class="si">= }</span><span class="s2"></span>
-<span class="s2">        </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">   </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">permutations</span> <span class="si">= }</span><span class="s2"></span>
-<span class="s2">        </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">   </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration_parameters</span> <span class="si">= }</span><span class="s2"></span>
-<span class="s2">        </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">   </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">template_path</span> <span class="si">= }</span><span class="s2"></span>
-<span class="s2">        </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">===END===&quot;&quot;&quot;</span><span class="p">)</span></div>
-
-    <span class="c1"># def __str__(self):</span>
-    <span class="c1">#     return self.content</span>
-    <span class="c1">#</span>
-    <span class="c1"># def save_slurm_script(self, filename):</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     Writes the custom slurm script to a file for submission</span>
-    <span class="c1">#     If the file already exists, the user will be prompted to override</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     if os.path.exists(path_expand(filename)):</span>
-    <span class="c1">#         if yn_choice(f&quot;{filename} exists, would you like to overwrite?&quot;):</span>
-    <span class="c1">#             writefile(filename, self.content)</span>
-    <span class="c1">#     else:</span>
-    <span class="c1">#         writefile(filename, self.content)</span>
-
 <div class="viewcode-block" id="SBatch.save_experiment_configuration"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.save_experiment_configuration">[docs]</a>    <span class="k">def</span> <span class="nf">save_experiment_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves the experiment configuration in a json file</span>
+
+<span class="sd">        :param name: name of the configuration file</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :return: writes into the file with given name the json content</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">content</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration_parameters</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
             <span class="n">writefile</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span></div></div>

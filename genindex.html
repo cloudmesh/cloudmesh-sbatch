@@ -3,9 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; cloudmesh-sbatch 0.1 documentation</title>
+  <title>Index &mdash; cloudmesh-sbatch 4.3.8 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="_static/readthedocs-custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -15,6 +18,9 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -35,14 +41,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="generated/cloudmesh.sbatch.html">cloudmesh.sbatch</a></li>
-</ul>
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="manual/sbatch.html">Command sbatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide.html">Manual</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">cloudmesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Cloudmesh sbatch</a></li>
 </ul>
 
         </div>
@@ -61,6 +66,7 @@
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
       <li>Index</li>
       <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/cloudmesh/cloudmesh-cc/blob/main/api/source/genindex" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -76,10 +82,10 @@
  | <a href="#D"><strong>D</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
  | <a href="#P"><strong>P</strong></a>
- | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#U"><strong>U</strong></a>
  
@@ -108,6 +114,8 @@
         <li><a href="cloudmesh.sbatch.command.html#module-cloudmesh.sbatch.command">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     cloudmesh.sbatch.command.sbatch
 
@@ -115,8 +123,6 @@
         <li><a href="cloudmesh.sbatch.command.html#module-cloudmesh.sbatch.command.sbatch">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     cloudmesh.sbatch.sbatch
 
@@ -131,21 +137,13 @@
         <li><a href="cloudmesh.sbatch.html#module-cloudmesh.sbatch.slurm">module</a>
 </li>
       </ul></li>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.config_from_cli">config_from_cli() (cloudmesh.sbatch.sbatch.SBatch method)</a>
-</li>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.config_from_yaml">config_from_yaml() (cloudmesh.sbatch.sbatch.SBatch method)</a>
-</li>
   </ul></td>
 </tr></table>
 
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.debug_state">debug_state() (cloudmesh.sbatch.sbatch.SBatch method)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cloudmesh.sbatch.command.html#cloudmesh.sbatch.command.sbatch.SbatchCommand.do_sbatch">do_sbatch() (cloudmesh.sbatch.command.sbatch.SbatchCommand method)</a>
+      <li><a href="cloudmesh.sbatch.command.html#cloudmesh.sbatch.command.sbatch.SbatchCommand.do_sbatch">do_sbatch() (SbatchCommand method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -153,17 +151,19 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate">generate() (cloudmesh.sbatch.sbatch.SBatch method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate">generate() (SBatch method)</a>
 </li>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_experiment_permutations">generate_experiment_permutations() (cloudmesh.sbatch.sbatch.SBatch method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_experiment_batch_scripts">generate_experiment_batch_scripts() (SBatch method)</a>
+</li>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_experiment_permutations">generate_experiment_permutations() (SBatch method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_experiment_slurm_scripts">generate_experiment_slurm_scripts() (cloudmesh.sbatch.sbatch.SBatch method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_setup_from_configuration">generate_setup_from_configuration() (SBatch method)</a>
 </li>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_setup_from_configuration">generate_setup_from_configuration() (cloudmesh.sbatch.sbatch.SBatch method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_submit">generate_submit() (SBatch method)</a>
 </li>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_submit">generate_submit() (cloudmesh.sbatch.sbatch.SBatch method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.get_data">get_data() (SBatch method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -171,7 +171,15 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.info">info() (cloudmesh.sbatch.sbatch.SBatch method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.info">info() (SBatch method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.load_source_template">load_source_template() (SBatch method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -202,7 +210,7 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.now">now (cloudmesh.sbatch.sbatch.SBatch property)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.now">now (SBatch property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -210,19 +218,7 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.permutation_generator">permutation_generator() (cloudmesh.sbatch.sbatch.SBatch static method)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="R">R</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.read_config_from_dict">read_config_from_dict() (cloudmesh.sbatch.sbatch.SBatch method)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.register_script">register_script() (cloudmesh.sbatch.sbatch.SBatch method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.permutation_generator">permutation_generator() (SBatch static method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -230,23 +226,23 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.save_experiment_configuration">save_experiment_configuration() (cloudmesh.sbatch.sbatch.SBatch method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.save_experiment_configuration">save_experiment_configuration() (SBatch method)</a>
 </li>
       <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch">SBatch (class in cloudmesh.sbatch.sbatch)</a>
 </li>
       <li><a href="cloudmesh.sbatch.command.html#cloudmesh.sbatch.command.sbatch.SbatchCommand">SbatchCommand (class in cloudmesh.sbatch.command.sbatch)</a>
 </li>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.set_attribute">set_attribute() (cloudmesh.sbatch.sbatch.SBatch method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.slurm.Slurm">Slurm (class in cloudmesh.sbatch.slurm)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.slurm.Slurm">Slurm (class in cloudmesh.sbatch.slurm)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.spec_replace">spec_replace() (SBatch method)</a>
 </li>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.slurm.Slurm.start">start() (cloudmesh.sbatch.slurm.Slurm static method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.slurm.Slurm.start">start() (Slurm static method)</a>
 </li>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.slurm.Slurm.status">status() (cloudmesh.sbatch.slurm.Slurm static method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.slurm.Slurm.status">status() (Slurm static method)</a>
 </li>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.slurm.Slurm.stop">stop() (cloudmesh.sbatch.slurm.Slurm static method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.slurm.Slurm.stop">stop() (Slurm static method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -254,17 +250,21 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_attributes">update_from_attributes() (cloudmesh.sbatch.sbatch.SBatch method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_attributes">update_from_attributes() (SBatch method)</a>
 </li>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_cm_variables">update_from_cm_variables() (cloudmesh.sbatch.sbatch.SBatch method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_cm_variables">update_from_cm_variables() (SBatch method)</a>
+</li>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_dict">update_from_dict() (SBatch method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_dict">update_from_dict() (cloudmesh.sbatch.sbatch.SBatch method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_file">update_from_file() (SBatch method)</a>
 </li>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_file">update_from_file() (cloudmesh.sbatch.sbatch.SBatch method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_os">update_from_os() (SBatch method)</a>
 </li>
-      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_os_environ">update_from_os_environ() (cloudmesh.sbatch.sbatch.SBatch method)</a>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_from_os_environ">update_from_os_environ() (SBatch method)</a>
+</li>
+      <li><a href="cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.update_with_directory">update_with_directory() (SBatch static method)</a>
 </li>
   </ul></td>
 </tr></table>

@@ -4,9 +4,12 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>cloudmesh.sbatch.command package &mdash; cloudmesh-sbatch 0.1 documentation</title>
+  <title>cloudmesh.sbatch.command package &mdash; cloudmesh-sbatch 4.3.8 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="_static/readthedocs-custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -16,6 +19,9 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -37,20 +43,20 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="generated/cloudmesh.sbatch.html">cloudmesh.sbatch</a></li>
-</ul>
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="manual/sbatch.html">Command sbatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide.html">Manual</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cloudmesh</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="cloudmesh.html">cloudmesh package</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="cloudmesh.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="cloudmesh.sbatch.html">cloudmesh.sbatch package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">Cloudmesh sbatch</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="generated/cloudmesh.sbatch.html">cloudmesh.sbatch</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="modules.html">cloudmesh</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cloudmesh.html">cloudmesh package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="cloudmesh.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.html#module-cloudmesh">Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="cloudmesh.html#module-cloudmesh">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -71,12 +77,13 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="api.html">Cloudmesh sbatch</a> &raquo;</li>
           <li><a href="modules.html">cloudmesh</a> &raquo;</li>
           <li><a href="cloudmesh.html">cloudmesh package</a> &raquo;</li>
           <li><a href="cloudmesh.sbatch.html">cloudmesh.sbatch package</a> &raquo;</li>
       <li>cloudmesh.sbatch.command package</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/cloudmesh.sbatch.command.rst.txt" rel="nofollow"> View page source</a>
+              <a href="https://github.com/cloudmesh/cloudmesh-cc/blob/main/api/source/cloudmesh.sbatch.command.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -93,16 +100,30 @@
 <span id="cloudmesh-sbatch-command-sbatch-module"></span><h2>cloudmesh.sbatch.command.sbatch module<a class="headerlink" href="#module-cloudmesh.sbatch.command.sbatch" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="cloudmesh.sbatch.command.sbatch.SbatchCommand">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cloudmesh.sbatch.command.sbatch.</span></span><span class="sig-name descname"><span class="pre">SbatchCommand</span></span><a class="reference internal" href="_modules/cloudmesh/sbatch/command/sbatch.html#SbatchCommand"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.command.sbatch.SbatchCommand" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SbatchCommand</span></span><a class="reference internal" href="_modules/cloudmesh/sbatch/command/sbatch.html#SbatchCommand"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.command.sbatch.SbatchCommand" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PluginCommand</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cloudmesh.sbatch.command.sbatch.SbatchCommand.do_sbatch">
 <span class="sig-name descname"><span class="pre">do_sbatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cloudmesh.sbatch.command.sbatch.SbatchCommand.do_sbatch" title="Permalink to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>Usage:</dt><dd><p>sbatch generate submit –name=NAME [–type=JOB_TYPE] [–verbose]
-sbatch generate SOURCE –name=NAME [–verbose] [–mode=MODE] [–config=CONFIG] [–attributes=PARAMS] [–out=DESTINATION] [–dryrun] [–noos] [–nocm] [–dir=DIR] [–experiment=EXPERIMENT]
-sbatch generate –setup=FILE [SOURCE] [–verbose] [–mode=MODE]  [–config=CONFIG] [–attributes=PARAMS] [–out=DESTINATION] [–dryrun] [–noos] [–nocm] [–dir=DIR] [–experiment=EXPERIMENT] [–name=NAME]
-sbatch slurm start
+<dd><dl>
+<dt>Usage:</dt><dd><p>sbatch generate submit –name=NAME [–job_type=JOB_TYPE] [–verbose]
+sbatch generate –source=SOURCE –name=NAME</p>
+<blockquote>
+<div><p>[–out=OUT]
+[–verbose]
+[–mode=MODE]
+[–config=CONFIG]
+[–attributes=PARAMS]
+[–output_dir=OUTPUT_DIR]
+[–dryrun]
+[–noos]
+[–os=OS]
+[–nocm]
+[–source_dir=SOURCE_DIR]
+[–experiment=EXPERIMENT]
+[–flat]</p>
+</div></blockquote>
+<p>sbatch slurm start
 sbatch slurm stop
 sbatch slurm info</p>
 </dd>
@@ -121,48 +142,74 @@ scripts to be defined easily to conduct parameter studies.</p>
 <p>Please note that the setup flag is deprecated and is in
 future versions fully covered while just using the config
 file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>sbatch</strong> (<em>FILENAME       name of a slurm script generated with</em>) – </p></li>
-<li><p><strong>configuration</strong> (<em>CONFIG_FILE    yaml file with</em>) – </p></li>
-<li><p><strong>system</strong> (<em>ACCOUNT        account name for host</em>) – </p></li>
-<li><p><strong>script</strong> (<em>SOURCE         name for slurm</em>) – </p></li>
-<li><p><strong>experimentation</strong> (<em>PARAMS         parameter lists for</em>) – </p></li>
-<li><p><strong>gpu</strong> (<em>GPU            name of</em>) – </p></li>
-</ul>
-</dd>
-</dl>
 <dl>
+<dt>Arguments:</dt><dd><p>FILENAME       name of a slurm script generated with sbatch
+CONFIG_FILE    yaml file with configuration
+ACCOUNT        account name for host system
+SOURCE         name for input script slurm.in.sh, lsf.in.sh,  script.in.sh or similar
+PARAMS         parameter lists for experimentation
+GPU            name of gpu</p>
+</dd>
 <dt>Options:</dt><dd><dl class="option-list">
 <dt><kbd><span class="option">-h</span></kbd></dt>
 <dd><p>help</p>
 </dd>
-<dt><kbd><span class="option">--dryrun</span></kbd></dt>
-<dd><p>flag to do a dryrun and not create files and directories (not tested)</p>
+</dl>
+<dl class="simple">
+<dt>–config=CONFIG…        a list of comma seperated configuration files in yaml or json format.</dt><dd><p>The endings must be .json or .yaml</p>
 </dd>
 </dl>
-<p>–config=CONFIG…        a list of comma seperated configuration files in yaml or json format. The endings must be .json or .yaml
-–setup=FILE              TBD
-–type=JOB_TYPE           The method to generate submission scripts.  One of slurm, lsf. [default: slurm]
-–attributes=PARAMS       a list of coma separated attribute value pars to set parameters that are used.
-–out=DESTINATION         TBD
-–account=ACCOUNT         TBD
-–gpu=GPU                 The name of the GPU. Tyoically k80, v100, a100, rtx3090, rtx3080
-–noos                    ignores environment variable substitution from the shell. This can be helpfull when debugging as the list is quite lareg
-–nocm                    cloudmesh as a variable dictionary build in. Any vaiable refered to by cloudmes. and its name is replaced from the</p>
-<blockquote>
-<div><p>cloudmesh variables</p>
-</div></blockquote>
 <dl class="option-list">
+<dt><kbd><span class="option">--type=<var>JOB_TYPE</var></span></kbd></dt>
+<dd><p>The method to generate submission scripts.  One of slurm, lsf. [default: slurm]</p>
+</dd>
+<dt><kbd><span class="option">--attributes=<var>PARAMS</var></span></kbd></dt>
+<dd><p>a list of coma separated attribute value pairs
+to set parameters that are used. [default: None]</p>
+</dd>
+<dt><kbd><span class="option">--output_dir=<var>OUTPUT_DIR</var></span></kbd></dt>
+<dd><p>The directory where the result is written to</p>
+</dd>
+<dt><kbd><span class="option">--source_dir=<var>SOURCE_DIR</var></span></kbd></dt>
+<dd><p>location of the input directory [default: .]</p>
+</dd>
+<dt><kbd><span class="option">--account=<var>ACCOUNT</var></span></kbd></dt>
+<dd><p>TBD</p>
+</dd>
+<dt><kbd><span class="option">--gpu=<var>GPU</var></span></kbd></dt>
+<dd><p>The name of the GPU. Tyoically k80, v100, a100, rtx3090, rtx3080</p>
+</dd>
+<dt><kbd><span class="option">--noos</span></kbd></dt>
+<dd><p>ignores environment variable substitution from the shell. This
+can be helpfull when debugging as the list is quite lareg</p>
+</dd>
+<dt><kbd><span class="option">--nocm</span></kbd></dt>
+<dd><p>cloudmesh as a variable dictionary build in. Any vaiable refered to
+by cloudmes. and its name is replaced from the
+cloudmesh variables</p>
+</dd>
 <dt><kbd><span class="option">--experiment=<var>EXPERIMENT</var></span></kbd></dt>
-<dd><p>This specifies all parameters that are used to create permutations of them. They are comma separated key value pairs</p>
+<dd><p>This specifies all parameters that are used to create permutations of them.
+They are comma separated key value pairs</p>
 </dd>
 <dt><kbd><span class="option">--mode=<var>MODE</var></span></kbd></dt>
-<dd><p>one of “flat”, “debug”, “hierachical” can also just use “f”. “d”, “h” [default: debug]</p>
+<dd><p>one of “flat”, “debug”, “hierachical” can also just
+use “f”. “d”, “h” [default: h]</p>
 </dd>
 <dt><kbd><span class="option">--name=<var>NAME</var></span></kbd></dt>
 <dd><p>name of the experiment configuration file</p>
+</dd>
+<dt><kbd><span class="option">--os=<var>OS</var></span></kbd></dt>
+<dd><p>Selected OS variables</p>
+</dd>
+<dt><kbd><span class="option">--flat</span></kbd></dt>
+<dd><p>produce flatdict</p>
+</dd>
+<dt><kbd><span class="option">--dryrun</span></kbd></dt>
+<dd><p>flag to do a dryrun and not create files and directories [defualt: False]</p>
+</dd>
+<dt><kbd><span class="option">--verbose</span></kbd></dt>
+<dd><p>Print more information whne executing [default: False]</p>
 </dd>
 </dl>
 </dd>
@@ -171,9 +218,9 @@ file.</p>
 <blockquote>
 <div><p>&gt; Examples:
 &gt;
-&gt; cms sbatch generate slurm.in.sh –verbose                &gt;     –config=a.py,b.json,c.yaml                &gt;     –attributes=a=1,b=4                &gt;     –dryrun –noos –dir=example                &gt;     –experiment=”epoch=[1-3] x=[1,4] y=[10,11]”                &gt;     –name=a –mode=h</p>
-<p>&gt; cms sbatch generate slurm.in.sh                &gt;    –config=a.py,b.json,c.yaml                &gt;    –attributes=a=1,b=4                 &gt;    –noos                &gt;    –dir=example                &gt;    –experiment=”epoch=[1-3] x=[1,4] y=[10,11]”                &gt;    –name=a                &gt;    –mode=h
-&gt; cms sbatch generate slurm.in.sh                &gt;    –verbose                &gt;    –config=a.py,b.json,c.yaml                &gt;    –attributes=name=gregor,a=1,b=4                &gt;    –noos                &gt;    –dir=example                &gt;    –experiment=”epoch=[1-3] x=[1,4] y=[10,11]”                &gt;    –mode=f                &gt;    –name=a</p>
+&gt; cms sbatch generate slurm.in.sh –verbose                &gt;     –config=a.py,b.json,c.yaml                &gt;     –attributes=a=1,b=4                &gt;     –dryrun –noos –input_dir=example                &gt;     –experiment=”epoch=[1-3] x=[1,4] y=[10,11]”                &gt;     –name=a –mode=h</p>
+<p>&gt; cms sbatch generate slurm.in.sh                &gt;    –config=a.py,b.json,c.yaml                &gt;    –attributes=a=1,b=4                 &gt;    –noos                &gt;    –input_dir=example                &gt;    –experiment=”epoch=[1-3] x=[1,4] y=[10,11]”                &gt;    –name=a                &gt;    –mode=h
+&gt; cms sbatch generate slurm.in.sh                &gt;    –verbose                &gt;    –config=a.py,b.json,c.yaml                &gt;    –attributes=name=gregor,a=1,b=4                &gt;    –noos                &gt;    –input_dir=example                &gt;    –experiment=”epoch=[1-3] x=[1,4] y=[10,11]”                &gt;    –mode=f                &gt;    –name=a</p>
 <p>&gt; cms sbatch generate slurm.in.sh –experiments-file=experiments.yaml –name=a</p>
 <p>&gt; cms sbatch generate submit –name=a</p>
 </div></blockquote>

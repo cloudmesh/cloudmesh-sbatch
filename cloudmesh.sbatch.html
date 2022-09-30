@@ -4,9 +4,12 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>cloudmesh.sbatch package &mdash; cloudmesh-sbatch 0.1 documentation</title>
+  <title>cloudmesh.sbatch package &mdash; cloudmesh-sbatch 4.3.8 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="_static/readthedocs-custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -16,6 +19,9 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -38,20 +44,20 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="generated/cloudmesh.sbatch.html">cloudmesh.sbatch</a></li>
-</ul>
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="manual/sbatch.html">Command sbatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide.html">Manual</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cloudmesh</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="cloudmesh.html">cloudmesh package</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="cloudmesh.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">cloudmesh.sbatch package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">Cloudmesh sbatch</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="generated/cloudmesh.sbatch.html">cloudmesh.sbatch</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="modules.html">cloudmesh</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cloudmesh.html">cloudmesh package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="cloudmesh.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.html#module-cloudmesh">Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="cloudmesh.html#module-cloudmesh">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -72,11 +78,12 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="api.html">Cloudmesh sbatch</a> &raquo;</li>
           <li><a href="modules.html">cloudmesh</a> &raquo;</li>
           <li><a href="cloudmesh.html">cloudmesh package</a> &raquo;</li>
       <li>cloudmesh.sbatch package</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/cloudmesh.sbatch.rst.txt" rel="nofollow"> View page source</a>
+              <a href="https://github.com/cloudmesh/cloudmesh-cc/blob/main/api/source/cloudmesh.sbatch.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -92,7 +99,13 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="cloudmesh.sbatch.command.html">cloudmesh.sbatch.command package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="cloudmesh.sbatch.command.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cloudmesh.sbatch.command.html#module-cloudmesh.sbatch.command.sbatch">cloudmesh.sbatch.command.sbatch module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cloudmesh.sbatch.command.html#module-cloudmesh.sbatch.command.sbatch">cloudmesh.sbatch.command.sbatch module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cloudmesh.sbatch.command.html#cloudmesh.sbatch.command.sbatch.SbatchCommand"><code class="docutils literal notranslate"><span class="pre">SbatchCommand</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cloudmesh.sbatch.command.html#cloudmesh.sbatch.command.sbatch.SbatchCommand.do_sbatch"><code class="docutils literal notranslate"><span class="pre">SbatchCommand.do_sbatch()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="cloudmesh.sbatch.command.html#module-cloudmesh.sbatch.command">Module contents</a></li>
 </ul>
 </li>
@@ -106,81 +119,49 @@
 <span id="cloudmesh-sbatch-sbatch-module"></span><h2>cloudmesh.sbatch.sbatch module<a class="headerlink" href="#module-cloudmesh.sbatch.sbatch" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cloudmesh.sbatch.sbatch.</span></span><span class="sig-name descname"><span class="pre">SBatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SBatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.config_from_cli">
-<span class="sig-name descname"><span class="pre">config_from_cli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arguments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.config_from_cli"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.config_from_cli" title="Permalink to this definition"></a></dt>
-<dd><p>Configures the object from command.sbatch CLI arguments</p>
+<p>Initialize the SBatch Object</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>arguments</strong> – The docopts object from the cms sbatch command.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Fluent API of the current object.</p>
+<dd class="field-odd"><p><strong>verbose</strong> (<em>bool</em>) – If true prints additional infromation when SBatch methods are called</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.config_from_yaml">
-<span class="sig-name descname"><span class="pre">config_from_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.config_from_yaml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.config_from_yaml" title="Permalink to this definition"></a></dt>
-<dd><p>Configures the object from a standard YAML structure.</p>
-<dl>
-<dt>This supports the following YAML structures:</dt><dd><p>template: path
-config: path
-name: str
-experiments:</p>
-<blockquote>
-<div><p>card_name: Parameter.expand string
-gpu_count: Parameter.expand string
-cpu_num: Parameter.expand string
-mem: Parameter.expand string</p>
-</div></blockquote>
-<dl class="simple">
-<dt>attributes:</dt><dd><p>property: substitution</p>
-</dd>
-</dl>
-<p>mode: str
-dir: path</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>yaml_file</strong> – The path to the yaml file to parse</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Fluent API of the current object.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.debug_state">
-<span class="sig-name descname"><span class="pre">debug_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.debug_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.debug_state" title="Permalink to this definition"></a></dt>
-<dd><p>Outputs the current state of persistent values in class.
-:param key: A string to prefix the string with.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A mutliline string with all class variables in a key = value pattern.</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.generate">
-<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">script</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fences</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('{',</span> <span class="pre">'}')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.generate" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">script</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fences</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('{',</span> <span class="pre">'}')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.generate" title="Permalink to this definition"></a></dt>
 <dd><p>Expands the script template given the passed configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>script</strong> – The string contents of the script file.</p></li>
-<li><p><strong>data</strong> – A single-level dictionary used to replace strings that match the key with its values.</p></li>
-<li><p><strong>fences</strong> – A 2 position tuple, that encloses template variables (start and end).</p></li>
+<li><p><strong>script</strong> (<em>str</em>) – The string contents of the script file.</p></li>
+<li><p><strong>variables</strong> (<em>dict</em>) – the variables to be replaced, if ommitted uses the internal variables found</p></li>
+<li><p><strong>fences</strong> (<em>(</em><em>str</em><em>,</em><em>str</em><em>)</em>) – A 2 position tuple, that encloses template variables (start and end).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The script that has expanded its values based on <cite>data</cite>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.generate_experiment_batch_scripts">
+<span class="sig-name descname"><span class="pre">generate_experiment_batch_scripts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.generate_experiment_batch_scripts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.generate_experiment_batch_scripts" title="Permalink to this definition"></a></dt>
+<dd><p>Utility method to genrerate either hierarchical or flat outputs; or debug.</p>
+<p>NOte the falt mode is no longer supported</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>out_mode</strong> (<em>string</em>) – The mode of operation.  One of: “debug”, “flat”, “hierarchical”</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>generates the batch scripts</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -191,24 +172,15 @@ dir: path</p>
 <dd><p>Generates experiment permutations based on the passed string and appends it to the current instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>variable_str</strong> – A Parameter.expand string (such as epoch=[1-3] x=[1,4] y=[10,11])</p>
+<dd class="field-odd"><p><strong>variable_str</strong> (<em>str</em>) – A Parameter.expand string (such as epoch=[1-3] x=[1,4] y=[10,11])</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>list with permutations over the experiment variables</p>
 </dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.generate_experiment_slurm_scripts">
-<span class="sig-name descname"><span class="pre">generate_experiment_slurm_scripts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.generate_experiment_slurm_scripts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.generate_experiment_slurm_scripts" title="Permalink to this definition"></a></dt>
-<dd><p>Utility method to genrerate either hierarchical or flat outputs; or debug.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>mode</strong> – The mode of operation.  One of: “debug”, “flat”, “hierarchical”</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
-<p>Returns:</p>
 </dd></dl>
 
 <dl class="py method">
@@ -218,29 +190,87 @@ dir: path</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.generate_submit">
-<span class="sig-name descname"><span class="pre">generate_submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'slurm'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.generate_submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.generate_submit" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">generate_submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">job_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'slurm'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.generate_submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.generate_submit" title="Permalink to this definition"></a></dt>
+<dd><p>Generates a list of commands based on the permutations for submission</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the experiments</p></li>
+<li><p><strong>job_type</strong> (<em>str</em>) – name of the job type used at submission such as
+sbatch, slurm, jsrun, mpirun, sh, bash</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – prints the generated command lines</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>prepars the internal data for the experiments, if set to verbose, prints them</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.get_data">
+<span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.get_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.get_data" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.info">
-<span class="sig-name descname"><span class="pre">info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.info" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.info" title="Permalink to this definition"></a></dt>
+<dd><p>Prints information about the SBatch object for debugging purposes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>verbose</strong> (<em>bool</em>) – if True prints even more information</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.load_source_template">
+<span class="sig-name descname"><span class="pre">load_source_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">script</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.load_source_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.load_source_template" title="Permalink to this definition"></a></dt>
+<dd><p>Registers and reads the template script in for processing</p>
+<p>This method must be run at least once prior to generating the batch script output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>script</strong> (<em>str</em>) – A string that is the path to the template script.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The text of the template file unaltered.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.now">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">now</span></span><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.now" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>The time of now in the format “%Y-m-%d”
+:return: “%Y-m-%d”
+:rtype: str</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.permutation_generator">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">permutation_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exp_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.permutation_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.permutation_generator" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">permutation_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exp_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.permutation_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.permutation_generator" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a cartisian product of a {key: list, …} object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>exp_dict</strong> – The dictionary to process</p>
+<dd class="field-odd"><p><strong>exp_dict</strong> (<em>dict</em>) – The dictionary to process</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A list of dictionaries containing the resulting cartisian product.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
 <dl>
@@ -257,62 +287,75 @@ out # [{“key1”: “value1”, “key2”: ‘value3”},</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.read_config_from_dict">
-<span class="sig-name descname"><span class="pre">read_config_from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.read_config_from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.read_config_from_dict" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.register_script">
-<span class="sig-name descname"><span class="pre">register_script</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">script</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.register_script"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.register_script" title="Permalink to this definition"></a></dt>
-<dd><p>Registers and reads the template script in for processing</p>
-<p>This method must be run at least once prior to generating the slurm script output.</p>
+<dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.save_experiment_configuration">
+<span class="sig-name descname"><span class="pre">save_experiment_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.save_experiment_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.save_experiment_configuration" title="Permalink to this definition"></a></dt>
+<dd><p>Saves the experiment configuration in a json file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>script</strong> – A string that is the path to the template script.</p>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – name of the configuration file</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The text of the template file unaltered.</p>
+<dd class="field-even"><p>writes into the file with given name the json content</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.save_experiment_configuration">
-<span class="sig-name descname"><span class="pre">save_experiment_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.save_experiment_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.save_experiment_configuration" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.set_attribute">
-<span class="sig-name descname"><span class="pre">set_attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.set_attribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.set_attribute" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.spec_replace">
+<span class="sig-name descname"><span class="pre">spec_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.spec_replace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.spec_replace" title="Permalink to this definition"></a></dt>
+<dd><p>given a spec in yaml format, replaces all values in the yaml file taht are of the form “{a.b}”
+with the value of</p>
+<dl class="simple">
+<dt>a:</dt><dd><p>b: value</p>
+</dd>
+</dl>
+<p>if it is defined in the yaml file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>spec</strong> (<em>str</em>) – yaml string</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>replaced yaml file</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.update_from_attributes">
-<span class="sig-name descname"><span class="pre">update_from_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_from_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_from_attributes" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_from_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_from_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_from_attributes" title="Permalink to this definition"></a></dt>
 <dd><p>attributes are of the form “a=1,b=3”</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>attributes</strong> – A string to expand into key-value pairs</p>
+<dd class="field-odd"><p><strong>attributes</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – A string to expand into key-value pairs</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The expanded dictionary</p>
+<dd class="field-even"><p>self.data with updated dict</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict[str,str]</p>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.update_from_cm_variables">
-<span class="sig-name descname"><span class="pre">update_from_cm_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">load</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_from_cm_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_from_cm_variables" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_from_cm_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">load</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_from_cm_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_from_cm_variables" title="Permalink to this definition"></a></dt>
 <dd><p>Adds Cloudmesh variables to the class’s data parameter as a flat dict.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>load</strong> – Toggles execution; if false, method does nothing.</p>
+<dd class="field-odd"><p><strong>load</strong> (<em>bool</em>) – Toggles execution; if false, method does nothing.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The updated data parameter with the cloudmesh variables set.</p>
+<dd class="field-even"><p>self.data with updated cloudmesh variables</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -320,30 +363,84 @@ out # [{“key1”: “value1”, “key2”: ‘value3”},</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.update_from_dict">
 <span class="sig-name descname"><span class="pre">update_from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_from_dict" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Add a dict to self. data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>d</strong> (<em>dict</em>) – dictionary</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>self.data with updated dict</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.update_from_file">
-<span class="sig-name descname"><span class="pre">update_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_from_file" title="Permalink to this definition"></a></dt>
-<dd><p>Updates the run configuration file with the data within the passed file.</p>
+<span class="sig-name descname"><span class="pre">update_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_from_file" title="Permalink to this definition"></a></dt>
+<dd><p>Updates the configuration self.data with the data within the passed file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>filename</strong> – The path to the configuration file (json or yaml)</p>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – The path to the configuration file (yaml, json, py, ipynb)</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The modified data object.</p>
+<dd class="field-even"><p>self.data with updated cloudmesh variables from the specified file</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.update_from_os">
+<span class="sig-name descname"><span class="pre">update_from_os</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variables</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_from_os"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_from_os" title="Permalink to this definition"></a></dt>
+<dd><p>LOads all variables from os.environ into self.data with os.name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>variables</strong> (<em>[</em><em>str</em><em>]</em>) – tha name of the variables such as “HOME”</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>self.data with all variaples added with os.name: value</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.update_from_os_environ">
-<span class="sig-name descname"><span class="pre">update_from_os_environ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">load</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_from_os_environ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_from_os_environ" title="Permalink to this definition"></a></dt>
-<dd><p>Updates the config file output to include OS environment variables
-:param load: When true, loads the environment variables into the config.</p>
+<span class="sig-name descname"><span class="pre">update_from_os_environ</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_from_os_environ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_from_os_environ" title="Permalink to this definition"></a></dt>
+<dd><p>Updates the config file output to include OS environment variables</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The current value of the data configuration variable</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cloudmesh.sbatch.sbatch.SBatch.update_with_directory">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">update_with_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_with_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_with_directory" title="Permalink to this definition"></a></dt>
+<dd><p>prefix with the directory if the filename is not starting with . / ~</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>str</em>) – the string value of the directory</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – the filename</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>directory/filename</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -386,15 +483,14 @@ First, you need to start the service with:</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="cloudmesh.sbatch.slurm.Slurm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cloudmesh.sbatch.slurm.</span></span><span class="sig-name descname"><span class="pre">Slurm</span></span><a class="reference internal" href="_modules/cloudmesh/sbatch/slurm.html#Slurm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.slurm.Slurm" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Slurm</span></span><a class="reference internal" href="_modules/cloudmesh/sbatch/slurm.html#Slurm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.slurm.Slurm" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cloudmesh.sbatch.slurm.Slurm.start">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/slurm.html#Slurm.start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.slurm.Slurm.start" title="Permalink to this definition"></a></dt>
 <dd><p>Starts the SLurm service oon your local machine.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>On stdout prints the action information</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>On stdout prints the action information</p>
 </dd>
 </dl>
 </dd></dl>
@@ -403,9 +499,8 @@ First, you need to start the service with:</p>
 <dt class="sig sig-object py" id="cloudmesh.sbatch.slurm.Slurm.status">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/slurm.html#Slurm.status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.slurm.Slurm.status" title="Permalink to this definition"></a></dt>
 <dd><p>Shows the status of the SLurm service oon your local machine.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>On stdout prints the action information</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>On stdout prints the action information</p>
 </dd>
 </dl>
 </dd></dl>
@@ -414,9 +509,8 @@ First, you need to start the service with:</p>
 <dt class="sig sig-object py" id="cloudmesh.sbatch.slurm.Slurm.stop">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/slurm.html#Slurm.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.slurm.Slurm.stop" title="Permalink to this definition"></a></dt>
 <dd><p>Stops the SLurm service oon your local machine.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>On stdout prints the action information</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>On stdout prints the action information</p>
 </dd>
 </dl>
 </dd></dl>
