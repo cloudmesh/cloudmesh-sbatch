@@ -1,15 +1,6 @@
 cloudmesh-sbatch
 ================
 
-
-.. cloudmesh-cc documentation master file, created by
-   sphinx-quickstart on Thu Aug  4 08:29:16 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Cloudmesh Compute Cluster
-=========================
-
 Generation of experiment submission scripts based on parameter permuattions.
 
 
