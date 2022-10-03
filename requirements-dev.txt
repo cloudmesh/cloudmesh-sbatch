@@ -12,3 +12,4 @@ mistune==0.8.4
 sphinxcontrib-openapi
 sphinx-copybutton
 sphinx_autodoc_typehints
+wheel
