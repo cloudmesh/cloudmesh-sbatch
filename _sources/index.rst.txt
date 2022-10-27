@@ -1,7 +1,7 @@
 cloudmesh-sbatch
 ================
 
-Generation of experiment submission scripts based on parameter permuattions.
+Generation of experiment submission scripts based on parameter permutations.
 
 
 .. toctree::
