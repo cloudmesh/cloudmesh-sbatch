@@ -8,9 +8,8 @@ Generation of experiment submission scripts based on parameter permutations.
    :maxdepth: 1
    :caption: Documentation
 
-   guide
    readme
-   sbatch
+   manual/sbatch
    slurm
 
 .. toctree::
