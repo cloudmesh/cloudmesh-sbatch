@@ -24,7 +24,9 @@
         <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Slurm on a single node computer" href="../slurm.html" />
+    <link rel="prev" title="Cloudmesh Sbatch" href="../readme.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -43,10 +45,9 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../guide.html">Manual</a></li>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">Cloudmesh Sbatch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../sbatch.html">Command sbatch</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Command sbatch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slurm.html">Slurm on a single node computer</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
@@ -101,16 +102,16 @@
       <span class="n">sbatch</span> <span class="n">slurm</span> <span class="n">info</span>
 
 <span class="n">sbatch</span> <span class="n">allows</span> <span class="n">the</span> <span class="n">creation</span> <span class="n">of</span> <span class="n">parameterized</span> <span class="n">batch</span>
-<span class="n">scripts</span><span class="o">.</span> <span class="n">The</span> <span class="n">initioal</span> <span class="n">support</span> <span class="n">includes</span> <span class="n">slurm</span><span class="p">,</span> <span class="n">but</span> <span class="n">we</span> <span class="n">intend</span>
+<span class="n">scripts</span><span class="o">.</span> <span class="n">The</span> <span class="n">initial</span> <span class="n">support</span> <span class="n">includes</span> <span class="n">slurm</span><span class="p">,</span> <span class="n">but</span> <span class="n">we</span> <span class="n">intend</span>
 <span class="n">also</span> <span class="n">to</span> <span class="n">support</span> <span class="n">LSF</span><span class="o">.</span> <span class="n">Parameters</span> <span class="n">can</span> <span class="n">be</span> <span class="n">specified</span> <span class="n">on</span> <span class="n">the</span>
 <span class="n">commandline</span> <span class="ow">or</span> <span class="ow">in</span> <span class="n">configuration</span> <span class="n">files</span><span class="o">.</span> <span class="n">Configuration</span> <span class="n">files</span>
 <span class="n">can</span> <span class="n">be</span> <span class="n">formulated</span> <span class="k">as</span> <span class="n">json</span><span class="p">,</span><span class="n">yaml</span><span class="p">,</span> <span class="n">python</span><span class="p">,</span> <span class="ow">or</span> <span class="n">jupyter</span>
 <span class="n">notebooks</span><span class="o">.</span>
 
-<span class="n">Parameters</span> <span class="n">defined</span> <span class="ow">in</span> <span class="n">this</span> <span class="n">file</span> <span class="n">arethen</span> <span class="n">used</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">slur</span>
-<span class="n">batc</span> <span class="n">script</span> <span class="ow">and</span> <span class="n">substituted</span> <span class="k">with</span> <span class="n">their</span> <span class="n">values</span><span class="o">.</span> <span class="n">A</span> <span class="n">special</span>
+<span class="n">Parameters</span> <span class="n">defined</span> <span class="ow">in</span> <span class="n">this</span> <span class="n">file</span> <span class="n">are</span> <span class="n">then</span> <span class="n">used</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">slurm</span>
+<span class="n">batch</span> <span class="n">script</span> <span class="ow">and</span> <span class="n">substituted</span> <span class="k">with</span> <span class="n">their</span> <span class="n">values</span><span class="o">.</span> <span class="n">A</span> <span class="n">special</span>
 <span class="n">parameter</span> <span class="n">called</span> <span class="n">experiment</span> <span class="n">defines</span> <span class="n">a</span> <span class="n">number</span> <span class="n">of</span> <span class="n">variables</span>
-<span class="n">thet</span> <span class="n">are</span> <span class="n">permuted</span> <span class="n">on</span> <span class="n">when</span> <span class="n">used</span> <span class="n">allowing</span> <span class="n">mutliple</span> <span class="n">batch</span>
+<span class="n">that</span> <span class="n">are</span> <span class="n">permuted</span> <span class="n">on</span> <span class="n">when</span> <span class="n">used</span> <span class="n">allowing</span> <span class="n">multiple</span> <span class="n">batch</span>
 <span class="n">scripts</span> <span class="n">to</span> <span class="n">be</span> <span class="n">defined</span> <span class="n">easily</span> <span class="n">to</span> <span class="n">conduct</span> <span class="n">parameter</span> <span class="n">studies</span><span class="o">.</span>
 
 <span class="n">Please</span> <span class="n">note</span> <span class="n">that</span> <span class="n">the</span> <span class="n">setup</span> <span class="n">flag</span> <span class="ow">is</span> <span class="n">deprecated</span> <span class="ow">and</span> <span class="ow">is</span> <span class="ow">in</span>
@@ -160,30 +161,30 @@
 
   <span class="o">&gt;</span> <span class="n">Examples</span><span class="p">:</span>
   <span class="o">&gt;</span>
-  <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">slurm</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">verbose</span> \
-  <span class="o">&gt;</span>     <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">py</span><span class="p">,</span><span class="n">b</span><span class="o">.</span><span class="n">json</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">yaml</span> \
-  <span class="o">&gt;</span>     <span class="o">--</span><span class="n">attributes</span><span class="o">=</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="mi">4</span> \
-  <span class="o">&gt;</span>     <span class="o">--</span><span class="n">dryrun</span> <span class="o">--</span><span class="n">noos</span> <span class="o">--</span><span class="n">input_dir</span><span class="o">=</span><span class="n">example</span> \
-  <span class="o">&gt;</span>     <span class="o">--</span><span class="n">experiment</span><span class="o">=</span><span class="s2">&quot;epoch=[1-3] x=[1,4] y=[10,11]&quot;</span> \
+  <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">slurm</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">verbose</span> \\
+  <span class="o">&gt;</span>     <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">py</span><span class="p">,</span><span class="n">b</span><span class="o">.</span><span class="n">json</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">yaml</span> \\
+  <span class="o">&gt;</span>     <span class="o">--</span><span class="n">attributes</span><span class="o">=</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="mi">4</span> \\
+  <span class="o">&gt;</span>     <span class="o">--</span><span class="n">dryrun</span> <span class="o">--</span><span class="n">noos</span> <span class="o">--</span><span class="n">input_dir</span><span class="o">=</span><span class="n">example</span> \\
+  <span class="o">&gt;</span>     <span class="o">--</span><span class="n">experiment</span><span class="o">=</span>\<span class="s2">&quot;epoch=[1-3] x=[1,4] y=[10,11]</span><span class="se">\&quot;</span><span class="s2"> </span><span class="se">\\</span>
   <span class="o">&gt;</span>     <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">a</span> <span class="o">--</span><span class="n">mode</span><span class="o">=</span><span class="n">h</span>
   <span class="o">&gt;</span>
-  <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">slurm</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span> \
-  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">py</span><span class="p">,</span><span class="n">b</span><span class="o">.</span><span class="n">json</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">yaml</span> \
-  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">attributes</span><span class="o">=</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="mi">4</span> \
-  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">noos</span> \
-  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">input_dir</span><span class="o">=</span><span class="n">example</span> \
-  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">experiment</span><span class="o">=</span><span class="s2">&quot;epoch=[1-3] x=[1,4] y=[10,11]&quot;</span> \
-  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">a</span> \
+  <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">slurm</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">py</span><span class="p">,</span><span class="n">b</span><span class="o">.</span><span class="n">json</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">yaml</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">attributes</span><span class="o">=</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="mi">4</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">noos</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">input_dir</span><span class="o">=</span><span class="n">example</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">experiment</span><span class="o">=</span>\<span class="s2">&quot;epoch=[1-3] x=[1,4] y=[10,11]</span><span class="se">\&quot;</span><span class="s2"> </span><span class="se">\\</span>
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">a</span> \\
   <span class="o">&gt;</span>    <span class="o">--</span><span class="n">mode</span><span class="o">=</span><span class="n">h</span>
   <span class="o">&gt;</span>
-  <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">slurm</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span> \
-  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">verbose</span> \
-  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">py</span><span class="p">,</span><span class="n">b</span><span class="o">.</span><span class="n">json</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">yaml</span> \
-  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">attributes</span><span class="o">=</span><span class="n">name</span><span class="o">=</span><span class="n">gregor</span><span class="p">,</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="mi">4</span> \
-  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">noos</span> \
-  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">input_dir</span><span class="o">=</span><span class="n">example</span> \
-  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">experiment</span><span class="o">=</span><span class="s2">&quot;epoch=[1-3] x=[1,4] y=[10,11]&quot;</span> \
-  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">mode</span><span class="o">=</span><span class="n">f</span> \
+  <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">slurm</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">verbose</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">py</span><span class="p">,</span><span class="n">b</span><span class="o">.</span><span class="n">json</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">yaml</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">attributes</span><span class="o">=</span><span class="n">name</span><span class="o">=</span><span class="n">gregor</span><span class="p">,</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="mi">4</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">noos</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">input_dir</span><span class="o">=</span><span class="n">example</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">experiment</span><span class="o">=</span><span class="s2">&quot;epoch=[1-3] x=[1,4] y=[10,11]&quot;</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">mode</span><span class="o">=</span><span class="n">f</span> \\
   <span class="o">&gt;</span>    <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">a</span>
   <span class="o">&gt;</span>
   <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">slurm</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">experiments</span><span class="o">-</span><span class="n">file</span><span class="o">=</span><span class="n">experiments</span><span class="o">.</span><span class="n">yaml</span> <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">a</span>
@@ -196,7 +197,10 @@
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../readme.html" class="btn btn-neutral float-left" title="Cloudmesh Sbatch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../slurm.html" class="btn btn-neutral float-right" title="Slurm on a single node computer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

@@ -43,9 +43,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../guide.html">Manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../readme.html">Cloudmesh Sbatch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../sbatch.html">Command sbatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/sbatch.html">Command sbatch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../slurm.html">Slurm on a single node computer</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
@@ -96,7 +95,8 @@
     <span class="c1"># noinspection PyUnusedLocal</span>
     <span class="nd">@command</span>
     <span class="k">def</span> <span class="nf">do_sbatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">arguments</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;::</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ::</span>
 
 <span class="sd">          Usage:</span>
 <span class="sd">                sbatch generate submit --name=NAME [--job_type=JOB_TYPE] [--verbose]</span>
@@ -119,16 +119,16 @@
 <span class="sd">                sbatch slurm info</span>
 
 <span class="sd">          sbatch allows the creation of parameterized batch</span>
-<span class="sd">          scripts. The initioal support includes slurm, but we intend</span>
+<span class="sd">          scripts. The initial support includes slurm, but we intend</span>
 <span class="sd">          also to support LSF. Parameters can be specified on the</span>
 <span class="sd">          commandline or in configuration files. Configuration files</span>
 <span class="sd">          can be formulated as json,yaml, python, or jupyter</span>
 <span class="sd">          notebooks.</span>
 
-<span class="sd">          Parameters defined in this file arethen used in the slur</span>
-<span class="sd">          batc script and substituted with their values. A special</span>
+<span class="sd">          Parameters defined in this file are then used in the slurm</span>
+<span class="sd">          batch script and substituted with their values. A special</span>
 <span class="sd">          parameter called experiment defines a number of variables</span>
-<span class="sd">          thet are permuted on when used allowing mutliple batch</span>
+<span class="sd">          that are permuted on when used allowing multiple batch</span>
 <span class="sd">          scripts to be defined easily to conduct parameter studies.</span>
 
 <span class="sd">          Please note that the setup flag is deprecated and is in</span>

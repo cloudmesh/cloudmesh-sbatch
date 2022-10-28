@@ -45,9 +45,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="guide.html">Manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="readme.html">Cloudmesh Sbatch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sbatch.html">Command sbatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manual/sbatch.html">Command sbatch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slurm.html">Slurm on a single node computer</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
@@ -108,136 +107,117 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="cloudmesh.sbatch.command.sbatch.SbatchCommand.do_sbatch">
 <span class="sig-name descname"><span class="pre">do_sbatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cloudmesh.sbatch.command.sbatch.SbatchCommand.do_sbatch" title="Permalink to this definition"></a></dt>
-<dd><dl>
-<dt>Usage:</dt><dd><p>sbatch generate submit –name=NAME [–job_type=JOB_TYPE] [–verbose]
-sbatch generate –source=SOURCE –name=NAME</p>
-<blockquote>
-<div><p>[–out=OUT]
-[–verbose]
-[–mode=MODE]
-[–config=CONFIG]
-[–attributes=PARAMS]
-[–output_dir=OUTPUT_DIR]
-[–dryrun]
-[–noos]
-[–os=OS]
-[–nocm]
-[–source_dir=SOURCE_DIR]
-[–experiment=EXPERIMENT]
-[–flat]</p>
-</div></blockquote>
-<p>sbatch slurm start
-sbatch slurm stop
-sbatch slurm info</p>
-</dd>
-</dl>
-<p>sbatch allows the creation of parameterized batch
-scripts. The initioal support includes slurm, but we intend
-also to support LSF. Parameters can be specified on the
-commandline or in configuration files. Configuration files
-can be formulated as json,yaml, python, or jupyter
-notebooks.</p>
-<p>Parameters defined in this file arethen used in the slur
-batc script and substituted with their values. A special
-parameter called experiment defines a number of variables
-thet are permuted on when used allowing mutliple batch
-scripts to be defined easily to conduct parameter studies.</p>
-<p>Please note that the setup flag is deprecated and is in
-future versions fully covered while just using the config
-file.</p>
-<dl>
-<dt>Arguments:</dt><dd><p>FILENAME       name of a slurm script generated with sbatch
-CONFIG_FILE    yaml file with configuration
-ACCOUNT        account name for host system
-SOURCE         name for input script slurm.in.sh, lsf.in.sh,</p>
-<blockquote>
-<div><p>script.in.sh or similar</p>
-</div></blockquote>
-<p>PARAMS         parameter lists for experimentation
-GPU            name of gpu</p>
-</dd>
-<dt>Options:</dt><dd><dl class="option-list">
-<dt><kbd><span class="option">-h</span></kbd></dt>
-<dd><p>help</p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>–config=CONFIG…        a list of comma seperated configuration</dt><dd><p>files in yaml or json format.
-The endings must be .json or .yaml</p>
-</dd>
-</dl>
-<dl class="option-list">
-<dt><kbd><span class="option">--type=<var>JOB_TYPE</var></span></kbd></dt>
-<dd><p>The method to generate submission scripts.
-One of slurm, lsf. [default: slurm]</p>
-</dd>
-<dt><kbd><span class="option">--attributes=<var>PARAMS</var></span></kbd></dt>
-<dd><p>a list of coma separated attribute value pairs
-to set parameters that are used. [default: None]</p>
-</dd>
-<dt><kbd><span class="option">--output_dir=<var>OUTPUT_DIR</var></span></kbd></dt>
-<dd><p>The directory where the result is written to</p>
-</dd>
-<dt><kbd><span class="option">--source_dir=<var>SOURCE_DIR</var></span></kbd></dt>
-<dd><p>location of the input directory [default: .]</p>
-</dd>
-<dt><kbd><span class="option">--account=<var>ACCOUNT</var></span></kbd></dt>
-<dd><p>TBD</p>
-</dd>
-<dt><kbd><span class="option">--gpu=<var>GPU</var></span></kbd></dt>
-<dd><p>The name of the GPU. Tyoically k80, v100, a100, rtx3090, rtx3080</p>
-</dd>
-<dt><kbd><span class="option">--noos</span></kbd></dt>
-<dd><p>ignores environment variable substitution from the shell. This
-can be helpfull when debugging as the list is quite lareg</p>
-</dd>
-<dt><kbd><span class="option">--nocm</span></kbd></dt>
-<dd><p>cloudmesh as a variable dictionary build in. Any vaiable referred to
-by cloudmesh. and its name is replaced from the
-cloudmesh variables</p>
-</dd>
-<dt><kbd><span class="option">--experiment=<var>EXPERIMENT</var></span></kbd></dt>
-<dd><p>This specifies all parameters that are used to create
-permutations of them.
-They are comma separated key value pairs</p>
-</dd>
-<dt><kbd><span class="option">--mode=<var>MODE</var></span></kbd></dt>
-<dd><p>one of “flat”, “debug”, “hierachical” can also just
-use “f”. “d”, “h” [default: h]</p>
-</dd>
-<dt><kbd><span class="option">--name=<var>NAME</var></span></kbd></dt>
-<dd><p>name of the experiment configuration file</p>
-</dd>
-<dt><kbd><span class="option">--os=<var>OS</var></span></kbd></dt>
-<dd><p>Selected OS variables</p>
-</dd>
-<dt><kbd><span class="option">--flat</span></kbd></dt>
-<dd><p>produce flatdict</p>
-</dd>
-<dt><kbd><span class="option">--dryrun</span></kbd></dt>
-<dd><p>flag to do a dryrun and not create files and
-directories [default: False]</p>
-</dd>
-<dt><kbd><span class="option">--verbose</span></kbd></dt>
-<dd><p>Print more information when executing [default: False]</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>Description:</p>
-<blockquote>
-<div><p>&gt; Examples:
-&gt;
-&gt; cms sbatch generate slurm.in.sh –verbose &gt;     –config=a.py,b.json,c.yaml &gt;     –attributes=a=1,b=4 &gt;     –dryrun –noos –input_dir=example &gt;     –experiment=”epoch=[1-3] x=[1,4] y=[10,11]” &gt;     –name=a –mode=h
-&gt;
-&gt; cms sbatch generate slurm.in.sh &gt;    –config=a.py,b.json,c.yaml &gt;    –attributes=a=1,b=4 &gt;    –noos &gt;    –input_dir=example &gt;    –experiment=”epoch=[1-3] x=[1,4] y=[10,11]” &gt;    –name=a &gt;    –mode=h
-&gt;
-&gt; cms sbatch generate slurm.in.sh &gt;    –verbose &gt;    –config=a.py,b.json,c.yaml &gt;    –attributes=name=gregor,a=1,b=4 &gt;    –noos &gt;    –input_dir=example &gt;    –experiment=”epoch=[1-3] x=[1,4] y=[10,11]” &gt;    –mode=f &gt;    –name=a
-&gt;
-&gt; cms sbatch generate slurm.in.sh –experiments-file=experiments.yaml –name=a
-&gt;
-&gt; cms sbatch generate submit –name=a</p>
-</div></blockquote>
+<dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span>
+      <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">submit</span> <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">NAME</span> <span class="p">[</span><span class="o">--</span><span class="n">job_type</span><span class="o">=</span><span class="n">JOB_TYPE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">verbose</span><span class="p">]</span>
+      <span class="n">sbatch</span> <span class="n">generate</span> <span class="o">--</span><span class="n">source</span><span class="o">=</span><span class="n">SOURCE</span> <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">NAME</span>
+                      <span class="p">[</span><span class="o">--</span><span class="n">out</span><span class="o">=</span><span class="n">OUT</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">--</span><span class="n">verbose</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">--</span><span class="n">mode</span><span class="o">=</span><span class="n">MODE</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">CONFIG</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">--</span><span class="n">attributes</span><span class="o">=</span><span class="n">PARAMS</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">--</span><span class="n">output_dir</span><span class="o">=</span><span class="n">OUTPUT_DIR</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">--</span><span class="n">dryrun</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">--</span><span class="n">noos</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">--</span><span class="n">os</span><span class="o">=</span><span class="n">OS</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">--</span><span class="n">nocm</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">--</span><span class="n">source_dir</span><span class="o">=</span><span class="n">SOURCE_DIR</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">--</span><span class="n">experiment</span><span class="o">=</span><span class="n">EXPERIMENT</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">--</span><span class="n">flat</span><span class="p">]</span>
+      <span class="n">sbatch</span> <span class="n">slurm</span> <span class="n">start</span>
+      <span class="n">sbatch</span> <span class="n">slurm</span> <span class="n">stop</span>
+      <span class="n">sbatch</span> <span class="n">slurm</span> <span class="n">info</span>
+
+<span class="n">sbatch</span> <span class="n">allows</span> <span class="n">the</span> <span class="n">creation</span> <span class="n">of</span> <span class="n">parameterized</span> <span class="n">batch</span>
+<span class="n">scripts</span><span class="o">.</span> <span class="n">The</span> <span class="n">initial</span> <span class="n">support</span> <span class="n">includes</span> <span class="n">slurm</span><span class="p">,</span> <span class="n">but</span> <span class="n">we</span> <span class="n">intend</span>
+<span class="n">also</span> <span class="n">to</span> <span class="n">support</span> <span class="n">LSF</span><span class="o">.</span> <span class="n">Parameters</span> <span class="n">can</span> <span class="n">be</span> <span class="n">specified</span> <span class="n">on</span> <span class="n">the</span>
+<span class="n">commandline</span> <span class="ow">or</span> <span class="ow">in</span> <span class="n">configuration</span> <span class="n">files</span><span class="o">.</span> <span class="n">Configuration</span> <span class="n">files</span>
+<span class="n">can</span> <span class="n">be</span> <span class="n">formulated</span> <span class="k">as</span> <span class="n">json</span><span class="p">,</span><span class="n">yaml</span><span class="p">,</span> <span class="n">python</span><span class="p">,</span> <span class="ow">or</span> <span class="n">jupyter</span>
+<span class="n">notebooks</span><span class="o">.</span>
+
+<span class="n">Parameters</span> <span class="n">defined</span> <span class="ow">in</span> <span class="n">this</span> <span class="n">file</span> <span class="n">are</span> <span class="n">then</span> <span class="n">used</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">slurm</span>
+<span class="n">batch</span> <span class="n">script</span> <span class="ow">and</span> <span class="n">substituted</span> <span class="k">with</span> <span class="n">their</span> <span class="n">values</span><span class="o">.</span> <span class="n">A</span> <span class="n">special</span>
+<span class="n">parameter</span> <span class="n">called</span> <span class="n">experiment</span> <span class="n">defines</span> <span class="n">a</span> <span class="n">number</span> <span class="n">of</span> <span class="n">variables</span>
+<span class="n">that</span> <span class="n">are</span> <span class="n">permuted</span> <span class="n">on</span> <span class="n">when</span> <span class="n">used</span> <span class="n">allowing</span> <span class="n">multiple</span> <span class="n">batch</span>
+<span class="n">scripts</span> <span class="n">to</span> <span class="n">be</span> <span class="n">defined</span> <span class="n">easily</span> <span class="n">to</span> <span class="n">conduct</span> <span class="n">parameter</span> <span class="n">studies</span><span class="o">.</span>
+
+<span class="n">Please</span> <span class="n">note</span> <span class="n">that</span> <span class="n">the</span> <span class="n">setup</span> <span class="n">flag</span> <span class="ow">is</span> <span class="n">deprecated</span> <span class="ow">and</span> <span class="ow">is</span> <span class="ow">in</span>
+<span class="n">future</span> <span class="n">versions</span> <span class="n">fully</span> <span class="n">covered</span> <span class="k">while</span> <span class="n">just</span> <span class="n">using</span> <span class="n">the</span> <span class="n">config</span>
+<span class="n">file</span><span class="o">.</span>
+
+<span class="n">Arguments</span><span class="p">:</span>
+    <span class="n">FILENAME</span>       <span class="n">name</span> <span class="n">of</span> <span class="n">a</span> <span class="n">slurm</span> <span class="n">script</span> <span class="n">generated</span> <span class="k">with</span> <span class="n">sbatch</span>
+    <span class="n">CONFIG_FILE</span>    <span class="n">yaml</span> <span class="n">file</span> <span class="k">with</span> <span class="n">configuration</span>
+    <span class="n">ACCOUNT</span>        <span class="n">account</span> <span class="n">name</span> <span class="k">for</span> <span class="n">host</span> <span class="n">system</span>
+    <span class="n">SOURCE</span>         <span class="n">name</span> <span class="k">for</span> <span class="nb">input</span> <span class="n">script</span> <span class="n">slurm</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span><span class="p">,</span> <span class="n">lsf</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span><span class="p">,</span>
+                   <span class="n">script</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span> <span class="ow">or</span> <span class="n">similar</span>
+    <span class="n">PARAMS</span>         <span class="n">parameter</span> <span class="n">lists</span> <span class="k">for</span> <span class="n">experimentation</span>
+    <span class="n">GPU</span>            <span class="n">name</span> <span class="n">of</span> <span class="n">gpu</span>
+
+<span class="n">Options</span><span class="p">:</span>
+    <span class="o">-</span><span class="n">h</span>                        <span class="n">help</span>
+    <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">CONFIG</span><span class="o">...</span>        <span class="n">a</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">comma</span> <span class="n">seperated</span> <span class="n">configuration</span>
+                              <span class="n">files</span> <span class="ow">in</span> <span class="n">yaml</span> <span class="ow">or</span> <span class="n">json</span> <span class="nb">format</span><span class="o">.</span>
+                              <span class="n">The</span> <span class="n">endings</span> <span class="n">must</span> <span class="n">be</span> <span class="o">.</span><span class="n">json</span> <span class="ow">or</span> <span class="o">.</span><span class="n">yaml</span>
+    <span class="o">--</span><span class="nb">type</span><span class="o">=</span><span class="n">JOB_TYPE</span>           <span class="n">The</span> <span class="n">method</span> <span class="n">to</span> <span class="n">generate</span> <span class="n">submission</span> <span class="n">scripts</span><span class="o">.</span>
+                              <span class="n">One</span> <span class="n">of</span> <span class="n">slurm</span><span class="p">,</span> <span class="n">lsf</span><span class="o">.</span> <span class="p">[</span><span class="n">default</span><span class="p">:</span> <span class="n">slurm</span><span class="p">]</span>
+    <span class="o">--</span><span class="n">attributes</span><span class="o">=</span><span class="n">PARAMS</span>       <span class="n">a</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">coma</span> <span class="n">separated</span> <span class="n">attribute</span> <span class="n">value</span> <span class="n">pairs</span>
+                              <span class="n">to</span> <span class="nb">set</span> <span class="n">parameters</span> <span class="n">that</span> <span class="n">are</span> <span class="n">used</span><span class="o">.</span> <span class="p">[</span><span class="n">default</span><span class="p">:</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="o">--</span><span class="n">output_dir</span><span class="o">=</span><span class="n">OUTPUT_DIR</span>   <span class="n">The</span> <span class="n">directory</span> <span class="n">where</span> <span class="n">the</span> <span class="n">result</span> <span class="ow">is</span> <span class="n">written</span> <span class="n">to</span>
+    <span class="o">--</span><span class="n">source_dir</span><span class="o">=</span><span class="n">SOURCE_DIR</span>   <span class="n">location</span> <span class="n">of</span> <span class="n">the</span> <span class="nb">input</span> <span class="n">directory</span> <span class="p">[</span><span class="n">default</span><span class="p">:</span> <span class="o">.</span><span class="p">]</span>
+    <span class="o">--</span><span class="n">account</span><span class="o">=</span><span class="n">ACCOUNT</span>         <span class="n">TBD</span>
+    <span class="o">--</span><span class="n">gpu</span><span class="o">=</span><span class="n">GPU</span>                 <span class="n">The</span> <span class="n">name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">GPU</span><span class="o">.</span> <span class="n">Tyoically</span> <span class="n">k80</span><span class="p">,</span> <span class="n">v100</span><span class="p">,</span> <span class="n">a100</span><span class="p">,</span> <span class="n">rtx3090</span><span class="p">,</span> <span class="n">rtx3080</span>
+    <span class="o">--</span><span class="n">noos</span>                    <span class="n">ignores</span> <span class="n">environment</span> <span class="n">variable</span> <span class="n">substitution</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">shell</span><span class="o">.</span> <span class="n">This</span>
+                              <span class="n">can</span> <span class="n">be</span> <span class="n">helpfull</span> <span class="n">when</span> <span class="n">debugging</span> <span class="k">as</span> <span class="n">the</span> <span class="nb">list</span> <span class="ow">is</span> <span class="n">quite</span> <span class="n">lareg</span>
+    <span class="o">--</span><span class="n">nocm</span>                    <span class="n">cloudmesh</span> <span class="k">as</span> <span class="n">a</span> <span class="n">variable</span> <span class="n">dictionary</span> <span class="n">build</span> <span class="ow">in</span><span class="o">.</span> <span class="n">Any</span> <span class="n">vaiable</span> <span class="n">referred</span> <span class="n">to</span>
+                              <span class="n">by</span> <span class="n">cloudmesh</span><span class="o">.</span> <span class="ow">and</span> <span class="n">its</span> <span class="n">name</span> <span class="ow">is</span> <span class="n">replaced</span> <span class="kn">from</span> <span class="nn">the</span>
+                              <span class="n">cloudmesh</span> <span class="n">variables</span>
+    <span class="o">--</span><span class="n">experiment</span><span class="o">=</span><span class="n">EXPERIMENT</span>   <span class="n">This</span> <span class="n">specifies</span> <span class="nb">all</span> <span class="n">parameters</span> <span class="n">that</span> <span class="n">are</span> <span class="n">used</span> <span class="n">to</span> <span class="n">create</span>
+                              <span class="n">permutations</span> <span class="n">of</span> <span class="n">them</span><span class="o">.</span>
+                              <span class="n">They</span> <span class="n">are</span> <span class="n">comma</span> <span class="n">separated</span> <span class="n">key</span> <span class="n">value</span> <span class="n">pairs</span>
+    <span class="o">--</span><span class="n">mode</span><span class="o">=</span><span class="n">MODE</span>               <span class="n">one</span> <span class="n">of</span> <span class="s2">&quot;flat&quot;</span><span class="p">,</span> <span class="s2">&quot;debug&quot;</span><span class="p">,</span> <span class="s2">&quot;hierachical&quot;</span> <span class="n">can</span> <span class="n">also</span> <span class="n">just</span>
+                              <span class="n">use</span> <span class="s2">&quot;f&quot;</span><span class="o">.</span> <span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span> <span class="p">[</span><span class="n">default</span><span class="p">:</span> <span class="n">h</span><span class="p">]</span>
+    <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">NAME</span>               <span class="n">name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">experiment</span> <span class="n">configuration</span> <span class="n">file</span>
+    <span class="o">--</span><span class="n">os</span><span class="o">=</span><span class="n">OS</span>                   <span class="n">Selected</span> <span class="n">OS</span> <span class="n">variables</span>
+    <span class="o">--</span><span class="n">flat</span>                    <span class="n">produce</span> <span class="n">flatdict</span>
+    <span class="o">--</span><span class="n">dryrun</span>                  <span class="n">flag</span> <span class="n">to</span> <span class="n">do</span> <span class="n">a</span> <span class="n">dryrun</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">create</span> <span class="n">files</span> <span class="ow">and</span>
+                              <span class="n">directories</span> <span class="p">[</span><span class="n">default</span><span class="p">:</span> <span class="kc">False</span><span class="p">]</span>
+    <span class="o">--</span><span class="n">verbose</span>                 <span class="n">Print</span> <span class="n">more</span> <span class="n">information</span> <span class="n">when</span> <span class="n">executing</span> <span class="p">[</span><span class="n">default</span><span class="p">:</span> <span class="kc">False</span><span class="p">]</span>
+
+<span class="n">Description</span><span class="p">:</span>
+
+  <span class="o">&gt;</span> <span class="n">Examples</span><span class="p">:</span>
+  <span class="o">&gt;</span>
+  <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">slurm</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">verbose</span> \\
+  <span class="o">&gt;</span>     <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">py</span><span class="p">,</span><span class="n">b</span><span class="o">.</span><span class="n">json</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">yaml</span> \\
+  <span class="o">&gt;</span>     <span class="o">--</span><span class="n">attributes</span><span class="o">=</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="mi">4</span> \\
+  <span class="o">&gt;</span>     <span class="o">--</span><span class="n">dryrun</span> <span class="o">--</span><span class="n">noos</span> <span class="o">--</span><span class="n">input_dir</span><span class="o">=</span><span class="n">example</span> \\
+  <span class="o">&gt;</span>     <span class="o">--</span><span class="n">experiment</span><span class="o">=</span>\<span class="s2">&quot;epoch=[1-3] x=[1,4] y=[10,11]</span><span class="se">\&quot;</span><span class="s2"> </span><span class="se">\\</span>
+  <span class="o">&gt;</span>     <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">a</span> <span class="o">--</span><span class="n">mode</span><span class="o">=</span><span class="n">h</span>
+  <span class="o">&gt;</span>
+  <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">slurm</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">py</span><span class="p">,</span><span class="n">b</span><span class="o">.</span><span class="n">json</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">yaml</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">attributes</span><span class="o">=</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="mi">4</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">noos</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">input_dir</span><span class="o">=</span><span class="n">example</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">experiment</span><span class="o">=</span>\<span class="s2">&quot;epoch=[1-3] x=[1,4] y=[10,11]</span><span class="se">\&quot;</span><span class="s2"> </span><span class="se">\\</span>
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">a</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">mode</span><span class="o">=</span><span class="n">h</span>
+  <span class="o">&gt;</span>
+  <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">slurm</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">verbose</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">py</span><span class="p">,</span><span class="n">b</span><span class="o">.</span><span class="n">json</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">yaml</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">attributes</span><span class="o">=</span><span class="n">name</span><span class="o">=</span><span class="n">gregor</span><span class="p">,</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="mi">4</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">noos</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">input_dir</span><span class="o">=</span><span class="n">example</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">experiment</span><span class="o">=</span><span class="s2">&quot;epoch=[1-3] x=[1,4] y=[10,11]&quot;</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">mode</span><span class="o">=</span><span class="n">f</span> \\
+  <span class="o">&gt;</span>    <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">a</span>
+  <span class="o">&gt;</span>
+  <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">slurm</span><span class="o">.</span><span class="ow">in</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">experiments</span><span class="o">-</span><span class="n">file</span><span class="o">=</span><span class="n">experiments</span><span class="o">.</span><span class="n">yaml</span> <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">a</span>
+  <span class="o">&gt;</span>
+  <span class="o">&gt;</span> <span class="n">cms</span> <span class="n">sbatch</span> <span class="n">generate</span> <span class="n">submit</span> <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">a</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </dd></dl>
