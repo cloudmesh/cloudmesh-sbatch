@@ -145,6 +145,7 @@ class SbatchCommand(PluginCommand):
                        "filename",
                        "gpu",
                        "os",
+                       "job_type",
                        "flat",
                        "dryrun")
 

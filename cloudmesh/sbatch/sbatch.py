@@ -181,7 +181,12 @@ class SBatch:
         import munch
         variables = re.findall(r"\{\w.+\}", spec)
 
+        banner("GGGGGGGGGGGGGGGGGGGGGGG")
+
         data = yaml.load(spec, Loader=yaml.SafeLoader)
+
+        pprint(data)
+        banner("RRRRRRRRRRRRRRRRRRRRRRRRR")
         m = munch.DefaultMunch.fromDict(data)
 
         for i in range(0, len(variables)):
@@ -195,6 +200,10 @@ class SBatch:
                         spec = spec.replace(text, value)
                 except:  # noqa: E722
                     value = variable
+
+
+        banner("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU")
+        pprint(spec)
         return spec
 
     def update_from_os(self, variables):
