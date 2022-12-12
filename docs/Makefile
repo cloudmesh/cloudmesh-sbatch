@@ -8,6 +8,11 @@ SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
 
+man:
+	mkdir -p source/manual
+	cms help sbatch | grep -v "# Timer" | grep -v "patch enabled so applying the patch" | grep -v "Alpha Channel fix" > source/manual/sbatch.rst
+
+
 # Put it first so that "make" without argument is like "make help".
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
@@ -21,7 +26,7 @@ help:
 	sphinx-apidoc -o source ../cloudmesh
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-man:
-	mkdir -p source/manual
-	cms help sbatch | grep -v "# Timer" > source/manual/sbatch.rst
+#man:
+#	mkdir -p source/manual
+#	cms help sbatch | grep -v "# Timer" > source/manual/sbatch.rst
 

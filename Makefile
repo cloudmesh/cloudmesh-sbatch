@@ -8,6 +8,9 @@ else
 detected_OS := $(shell sh -c 'uname 2>/dev/null || echo Unknown')
 endif
 
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+mkfile_dir := $(dir $(mkfile_path))
+
 .PHONY: conda doc view
 
 define banner
@@ -22,7 +25,7 @@ source:
 	pip install -e . -U
 
 doc:
-	cd docs; make clean; make html
+	cd docs; make clean; make man; make html
 
 
 view:
@@ -142,6 +145,9 @@ log:
 	gitchangelog | fgrep -v ":dev:" | fgrep -v ":new:" > ChangeLog
 	git commit -m "chg: dev: Update ChangeLog" ChangeLog
 	git push
+
+man:
+	cd docs; make man
 
 # bump:
 #	git checkout main
