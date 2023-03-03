@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>cloudmesh.sbatch package &mdash; cloudmesh-sbatch 4.3.9 documentation</title>
@@ -14,10 +14,8 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
         <script src="_static/clipboard.min.js"></script>
@@ -34,11 +32,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> cloudmesh-sbatch
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            cloudmesh-sbatch
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -79,7 +81,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="api.html">Cloudmesh sbatch</a></li>
           <li class="breadcrumb-item"><a href="modules.html">cloudmesh</a></li>
           <li class="breadcrumb-item"><a href="cloudmesh.html">cloudmesh package</a></li>
@@ -125,7 +127,7 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Initialize the SBatch Object</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>verbose</strong> (<em>bool</em>) – If true prints additional infromation when SBatch methods are called</p>
 </dd>
 </dl>
@@ -134,17 +136,17 @@
 <span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">script</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fences</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('{',</span> <span class="pre">'}')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.generate" title="Permalink to this definition"></a></dt>
 <dd><p>Expands the script template given the passed configuration.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>script</strong> (<em>str</em>) – The string contents of the script file.</p></li>
 <li><p><strong>variables</strong> (<em>dict</em>) – the variables to be replaced, if ommitted uses the internal variables found</p></li>
 <li><p><strong>fences</strong> (<em>(</em><em>str</em><em>,</em><em>str</em><em>)</em>) – A 2 position tuple, that encloses template variables (start and end).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The script that has expanded its values based on <cite>data</cite>.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
 </dd>
 </dl>
@@ -156,13 +158,13 @@
 <dd><p>Utility method to genrerate either hierarchical or flat outputs; or debug.</p>
 <p>NOte the falt mode is no longer supported</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>out_mode</strong> (<em>string</em>) – The mode of operation.  One of: “debug”, “flat”, “hierarchical”</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>generates the batch scripts</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
 </dl>
@@ -173,13 +175,13 @@
 <span class="sig-name descname"><span class="pre">generate_experiment_permutations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.generate_experiment_permutations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.generate_experiment_permutations" title="Permalink to this definition"></a></dt>
 <dd><p>Generates experiment permutations based on the passed string and appends it to the current instance.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>variable_str</strong> (<em>str</em>) – A Parameter.expand string (such as epoch=[1-3] x=[1,4] y=[10,11])</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>list with permutations over the experiment variables</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list</p>
 </dd>
 </dl>
@@ -195,7 +197,7 @@
 <span class="sig-name descname"><span class="pre">generate_submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">job_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'slurm'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.generate_submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.generate_submit" title="Permalink to this definition"></a></dt>
 <dd><p>Generates a list of commands based on the permutations for submission</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – Name of the experiments</p></li>
 <li><p><strong>job_type</strong> (<em>str</em>) – name of the job type used at submission such as
@@ -203,10 +205,10 @@ sbatch, slurm, jsrun, mpirun, sh, bash</p></li>
 <li><p><strong>verbose</strong> (<em>bool</em>) – prints the generated command lines</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>prepars the internal data for the experiments, if set to verbose, prints them</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
 </dl>
@@ -222,13 +224,13 @@ sbatch, slurm, jsrun, mpirun, sh, bash</p></li>
 <span class="sig-name descname"><span class="pre">info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.info" title="Permalink to this definition"></a></dt>
 <dd><p>Prints information about the SBatch object for debugging purposes</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>verbose</strong> (<em>bool</em>) – if True prints even more information</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
 </dl>
@@ -240,13 +242,13 @@ sbatch, slurm, jsrun, mpirun, sh, bash</p></li>
 <dd><p>Registers and reads the template script in for processing</p>
 <p>This method must be run at least once prior to generating the batch script output.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>script</strong> (<em>str</em>) – A string that is the path to the template script.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The text of the template file unaltered.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
 </dd>
 </dl>
@@ -265,13 +267,13 @@ sbatch, slurm, jsrun, mpirun, sh, bash</p></li>
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">permutation_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exp_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.permutation_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.permutation_generator" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a cartisian product of a {key: list, …} object.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>exp_dict</strong> (<em>dict</em>) – The dictionary to process</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A list of dictionaries containing the resulting cartisian product.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list</p>
 </dd>
 </dl>
@@ -293,13 +295,13 @@ out # [{“key1”: “value1”, “key2”: ‘value3”},</p>
 <span class="sig-name descname"><span class="pre">save_experiment_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.save_experiment_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.save_experiment_configuration" title="Permalink to this definition"></a></dt>
 <dd><p>Saves the experiment configuration in a json file</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – name of the configuration file</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>writes into the file with given name the json content</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
 </dl>
@@ -316,13 +318,13 @@ with the value of</p>
 </dl>
 <p>if it is defined in the yaml file</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>spec</strong> (<em>str</em>) – yaml string</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>replaced yaml file</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
 </dd>
 </dl>
@@ -333,13 +335,13 @@ with the value of</p>
 <span class="sig-name descname"><span class="pre">update_from_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_from_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_from_attributes" title="Permalink to this definition"></a></dt>
 <dd><p>attributes are of the form “a=1,b=3”</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>attributes</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – A string to expand into key-value pairs</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>self.data with updated dict</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
@@ -350,13 +352,13 @@ with the value of</p>
 <span class="sig-name descname"><span class="pre">update_from_cm_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">load</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_from_cm_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_from_cm_variables" title="Permalink to this definition"></a></dt>
 <dd><p>Adds Cloudmesh variables to the class’s data parameter as a flat dict.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>load</strong> (<em>bool</em>) – Toggles execution; if false, method does nothing.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>self.data with updated cloudmesh variables</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
@@ -367,13 +369,13 @@ with the value of</p>
 <span class="sig-name descname"><span class="pre">update_from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_from_dict" title="Permalink to this definition"></a></dt>
 <dd><p>Add a dict to self. data</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>d</strong> (<em>dict</em>) – dictionary</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>self.data with updated dict</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
@@ -384,13 +386,13 @@ with the value of</p>
 <span class="sig-name descname"><span class="pre">update_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_from_file" title="Permalink to this definition"></a></dt>
 <dd><p>Updates the configuration self.data with the data within the passed file.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – The path to the configuration file (yaml, json, py, ipynb)</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>self.data with updated cloudmesh variables from the specified file</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
@@ -401,13 +403,13 @@ with the value of</p>
 <span class="sig-name descname"><span class="pre">update_from_os</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variables</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_from_os"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_from_os" title="Permalink to this definition"></a></dt>
 <dd><p>LOads all variables from os.environ into self.data with os.name</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>variables</strong> (<em>[</em><em>str</em><em>]</em>) – tha name of the variables such as “HOME”</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>self.data with all variaples added with os.name: value</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
@@ -418,10 +420,10 @@ with the value of</p>
 <span class="sig-name descname"><span class="pre">update_from_os_environ</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_from_os_environ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_from_os_environ" title="Permalink to this definition"></a></dt>
 <dd><p>Updates the config file output to include OS environment variables</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The current value of the data configuration variable</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>dict</p>
 </dd>
 </dl>
@@ -432,16 +434,16 @@ with the value of</p>
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">update_with_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cloudmesh/sbatch/sbatch.html#SBatch.update_with_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cloudmesh.sbatch.sbatch.SBatch.update_with_directory" title="Permalink to this definition"></a></dt>
 <dd><p>prefix with the directory if the filename is not starting with . / ~</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>directory</strong> (<em>str</em>) – the string value of the directory</p></li>
 <li><p><strong>filename</strong> (<em>str</em>) – the filename</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>directory/filename</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
 </dd>
 </dl>
