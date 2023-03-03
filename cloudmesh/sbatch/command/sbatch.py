@@ -16,7 +16,8 @@ class SbatchCommand(PluginCommand):
     # noinspection PyUnusedLocal
     @command
     def do_sbatch(self, args, arguments):
-        """::
+        r"""
+        ::
 
           Usage:
                 sbatch generate submit --name=NAME [--job_type=JOB_TYPE] [--verbose]
@@ -39,16 +40,16 @@ class SbatchCommand(PluginCommand):
                 sbatch slurm info
 
           sbatch allows the creation of parameterized batch
-          scripts. The initioal support includes slurm, but we intend
+          scripts. The initial support includes slurm, but we intend
           also to support LSF. Parameters can be specified on the
           commandline or in configuration files. Configuration files
           can be formulated as json,yaml, python, or jupyter
           notebooks.
 
-          Parameters defined in this file arethen used in the slur
-          batc script and substituted with their values. A special
+          Parameters defined in this file are then used in the slurm
+          batch script and substituted with their values. A special
           parameter called experiment defines a number of variables
-          thet are permuted on when used allowing mutliple batch
+          that are permuted on when used allowing multiple batch
           scripts to be defined easily to conduct parameter studies.
 
           Please note that the setup flag is deprecated and is in
@@ -145,6 +146,7 @@ class SbatchCommand(PluginCommand):
                        "filename",
                        "gpu",
                        "os",
+                       "job_type",
                        "flat",
                        "dryrun")
 
