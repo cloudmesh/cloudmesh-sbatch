@@ -1,4 +1,4 @@
-Mac OS Version is 12.6 and patch enabled so applying the patch
+Mac OS Version is 13.0 and patch enabled so applying the patch
 Applyting Mac OS 12.3+ Alpha Channel fix.  Your default Alpha Channel is now 0.99
 Command sbatch
 ==============

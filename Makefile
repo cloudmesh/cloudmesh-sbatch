@@ -22,7 +22,7 @@ source:
 	pip install -e . -U
 
 doc:
-	cd docs; make clean; make html
+	cd docs; make clean; make man; make html
 
 
 view:
