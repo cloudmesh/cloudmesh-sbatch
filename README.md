@@ -233,7 +233,8 @@ sudo chmod 755 /etc/slurm-llnl/
 ```
 sudo systemctl start slurmctld
 sudo systemctl start slurmd
-sudo scontrol update nodename=localhost state=idle
+# sudo scontrol update nodename=$HOSTNAME state=idle
+sudo scontrol update nodename=$HOSTNAME state=resume
 ```
 
 ### Stop
@@ -247,6 +248,8 @@ sudo systemctl stop slurmctld
 
 ```
 sinfo
+sinfo -R
+sinfo -a
 ```
 
 ### Job
