@@ -1,2 +1,2 @@
 """Management of custom batch script for experiments while exploring parameter sets."""
-__version__ = "4.3.14"
+__version__ = "4.3.15"
