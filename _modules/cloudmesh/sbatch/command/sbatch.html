@@ -91,6 +91,7 @@
 <span class="kn">from</span> <span class="nn">cloudmesh.shell.command</span> <span class="kn">import</span> <span class="n">PluginCommand</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.shell.command</span> <span class="kn">import</span> <span class="n">command</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.shell.command</span> <span class="kn">import</span> <span class="n">map_parameters</span>
+<span class="kn">from</span> <span class="nn">cloudmesh.common.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
 
 
 <div class="viewcode-block" id="SbatchCommand"><a class="viewcode-back" href="../../../../cloudmesh.sbatch.command.html#cloudmesh.sbatch.command.sbatch.SbatchCommand">[docs]</a><span class="k">class</span> <span class="nc">SbatchCommand</span><span class="p">(</span><span class="n">PluginCommand</span><span class="p">):</span>
@@ -117,6 +118,7 @@
 <span class="sd">                                [--source_dir=SOURCE_DIR]</span>
 <span class="sd">                                [--experiment=EXPERIMENT]</span>
 <span class="sd">                                [--flat]</span>
+<span class="sd">                                [--copycode=CODE]</span>
 <span class="sd">                sbatch slurm start</span>
 <span class="sd">                sbatch slurm stop</span>
 <span class="sd">                sbatch slurm info</span>
@@ -149,8 +151,8 @@
 
 <span class="sd">          Options:</span>
 <span class="sd">              -h                        help</span>
-<span class="sd">              --config=CONFIG...        a list of comma seperated configuration</span>
-<span class="sd">                                        files in yaml or json format.</span>
+<span class="sd">              --copycode=CODE               a list of files to be copied into the destination dir</span>
+<span class="sd">              --config=CONFIG...        a list of comma seperated configuration files in yaml or json format.</span>
 <span class="sd">                                        The endings must be .json or .yaml</span>
 <span class="sd">              --type=JOB_TYPE           The method to generate submission scripts.</span>
 <span class="sd">                                        One of slurm, lsf. [default: slurm]</span>
@@ -227,6 +229,7 @@
                        <span class="s2">&quot;account&quot;</span><span class="p">,</span>
                        <span class="s2">&quot;filename&quot;</span><span class="p">,</span>
                        <span class="s2">&quot;gpu&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;copycode&quot;</span><span class="p">,</span>
                        <span class="s2">&quot;os&quot;</span><span class="p">,</span>
                        <span class="s2">&quot;job_type&quot;</span><span class="p">,</span>
                        <span class="s2">&quot;flat&quot;</span><span class="p">,</span>
@@ -278,6 +281,7 @@
             <span class="n">sbatch</span><span class="o">.</span><span class="n">input_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Shell</span><span class="o">.</span><span class="n">map_filename</span><span class="p">(</span><span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;source_dir&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
             <span class="n">sbatch</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Shell</span><span class="o">.</span><span class="n">map_filename</span><span class="p">(</span><span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;output_dir&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
             <span class="n">sbatch</span><span class="o">.</span><span class="n">script_in</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sbatch</span><span class="o">.</span><span class="n">input_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">sbatch</span><span class="o">.</span><span class="n">source</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">sbatch</span><span class="o">.</span><span class="n">copycode</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">copycode</span><span class="p">)</span>
 
             <span class="c1">#</span>
             <span class="c1"># set source and name</span>
@@ -285,8 +289,8 @@
 
             <span class="n">sbatch</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">name</span>
             <span class="n">sbatch</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">source</span>
-            <span class="n">sbatch</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">SBatch</span><span class="o">.</span><span class="n">update_with_directory</span><span class="p">(</span><span class="n">sbatch</span><span class="o">.</span><span class="n">input_dir</span><span class="p">,</span> <span class="n">sbatch</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
-
+            <span class="n">sbatch</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">SBatch</span><span class="o">.</span><span class="n">update_with_directory</span><span class="p">(</span><span class="n">sbatch</span><span class="o">.</span><span class="n">input_dir</span><span class="p">,</span>
+                                                         <span class="n">sbatch</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
             <span class="c1">#</span>
             <span class="c1"># set output_script</span>
             <span class="c1">#</span>

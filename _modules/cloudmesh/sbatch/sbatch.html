@@ -109,6 +109,10 @@
 
 <div class="viewcode-block" id="SBatch"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch">[docs]</a><span class="k">class</span> <span class="nc">SBatch</span><span class="p">:</span>
 
+<div class="viewcode-block" id="SBatch.config_read"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.config_read">[docs]</a>    <span class="k">def</span> <span class="nf">config_read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;./config.yaml&quot;</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the SBatch Object</span>
@@ -167,7 +171,8 @@
             <span class="s2">&quot;script_in&quot;</span><span class="p">,</span>
             <span class="s2">&quot;script_out&quot;</span><span class="p">,</span>
             <span class="s2">&quot;os_variables&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;experiments&quot;</span>
+            <span class="s2">&quot;experiments&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;copy&quot;</span>
         <span class="p">]:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
@@ -292,7 +297,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        LOads all variables from os.environ into self.data with os.name</span>
 
-<span class="sd">        :param variables: tha name of the variables such as &quot;HOME&quot;</span>
+<span class="sd">        :param variables: the name of the variables such as &quot;HOME&quot;</span>
 <span class="sd">        :type variables:  [str]</span>
 <span class="sd">        :return: self.data with all variaples added with os.name: value</span>
 <span class="sd">        :rtype: dict</span>
@@ -593,6 +598,7 @@
     <span class="c1">#             &quot;script&quot;: script,</span>
     <span class="c1">#             &quot;config&quot;: config,</span>
     <span class="c1">#             &quot;variables&quot;: variables</span>
+    <span class="c1">#             &quot;copycode&quot;: list of files to copy</span>
     <span class="c1">#         }</span>
     <span class="c1">#     return configuration</span>
 
@@ -643,9 +649,13 @@
                 <span class="s2">&quot;experiment&quot;</span><span class="p">:</span> <span class="n">assignments</span><span class="p">,</span>
                 <span class="s2">&quot;script&quot;</span><span class="p">:</span> <span class="n">script</span><span class="p">,</span>
                 <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="n">config</span><span class="p">,</span>
-                <span class="s2">&quot;variables&quot;</span><span class="p">:</span> <span class="n">variables</span>
+                <span class="s2">&quot;variables&quot;</span><span class="p">:</span> <span class="n">variables</span><span class="p">,</span>
+                <span class="s2">&quot;copycode&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">copycode</span>
             <span class="p">}</span>
         <span class="k">return</span> <span class="n">configuration</span>
+
+
+
 
 <div class="viewcode-block" id="SBatch.generate_experiment_batch_scripts"><a class="viewcode-back" href="../../../cloudmesh.sbatch.html#cloudmesh.sbatch.sbatch.SBatch.generate_experiment_batch_scripts">[docs]</a>    <span class="k">def</span> <span class="nf">generate_experiment_batch_scripts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -750,13 +760,17 @@
                 <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
                 <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;We had issues with our check for the config.yaml file&quot;</span><span class="p">)</span>
 
-            <span class="n">content_script</span><span class="p">,</span> <span class="n">replaced</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template_content</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">])</span>
+            <span class="n">content_script</span><span class="p">,</span> <span class="n">replaced</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template_content</span><span class="p">,</span>
+                                                     <span class="n">variables</span><span class="o">=</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">])</span>
 
             <span class="c1"># if self.verbose:</span>
             <span class="c1">#    for attribute, value in replaced.items():</span>
             <span class="c1">#        print (f&quot;- replaced {attribute}={value}&quot;)</span>
 
-            <span class="n">writefile</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;script&quot;</span><span class="p">],</span> <span class="n">content_script</span><span class="p">)</span></div>
+            <span class="n">writefile</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;script&quot;</span><span class="p">],</span> <span class="n">content_script</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">copycode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">copycode</span><span class="p">:</span>
+                    <span class="n">Shell</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;directory&quot;</span><span class="p">])</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">now</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

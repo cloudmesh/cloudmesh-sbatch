@@ -19,6 +19,7 @@ Command sbatch
                         [--source_dir=SOURCE_DIR]
                         [--experiment=EXPERIMENT]
                         [--flat]
+                        [--copycode=CODE]
         sbatch slurm start
         sbatch slurm stop
         sbatch slurm info
@@ -51,8 +52,8 @@ Command sbatch
 
   Options:
       -h                        help
-      --config=CONFIG...        a list of comma seperated configuration
-                                files in yaml or json format.
+      --copycode=CODE               a list of files to be copied into the destination dir
+      --config=CONFIG...        a list of comma seperated configuration files in yaml or json format.
                                 The endings must be .json or .yaml
       --type=JOB_TYPE           The method to generate submission scripts.
                                 One of slurm, lsf. [default: slurm]
