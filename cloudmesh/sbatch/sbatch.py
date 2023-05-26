@@ -27,6 +27,10 @@ OptStr = typing.Optional[str]
 
 class SBatch:
 
+    def config_read(self, path="./config.yaml"):
+        print (path)
+        return None
+
     def __init__(self, verbose=False):
         """
         Initialize the SBatch Object
@@ -85,7 +89,8 @@ class SBatch:
             "script_in",
             "script_out",
             "os_variables",
-            "experiments"
+            "experiments",
+            "copy"
         ]:
             try:
                 result = getattr(self, a)
@@ -210,7 +215,7 @@ class SBatch:
         """
         LOads all variables from os.environ into self.data with os.name
 
-        :param variables: tha name of the variables such as "HOME"
+        :param variables: the name of the variables such as "HOME"
         :type variables:  [str]
         :return: self.data with all variaples added with os.name: value
         :rtype: dict
@@ -511,6 +516,7 @@ class SBatch:
     #             "script": script,
     #             "config": config,
     #             "variables": variables
+    #             "copycode": list of files to copy
     #         }
     #     return configuration
 
@@ -561,9 +567,13 @@ class SBatch:
                 "experiment": assignments,
                 "script": script,
                 "config": config,
-                "variables": variables
+                "variables": variables,
+                "copycode": self.copycode
             }
         return configuration
+
+
+
 
     def generate_experiment_batch_scripts(self, out_mode=None):
         """
@@ -668,13 +678,17 @@ class SBatch:
                 print(e)
                 Console.error("We had issues with our check for the config.yaml file")
 
-            content_script, replaced = self.generate(self.template_content, variables=experiment["variables"])
+            content_script, replaced = self.generate(self.template_content,
+                                                     variables=experiment["variables"])
 
             # if self.verbose:
             #    for attribute, value in replaced.items():
             #        print (f"- replaced {attribute}={value}")
 
             writefile(experiment["script"], content_script)
+            if self.copycode is not None:
+                for code in self.copycode:
+                    Shell.copy(source=code, destination=experiment["directory"])
 
     @property
     def now(self):

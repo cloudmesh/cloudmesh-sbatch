@@ -9,6 +9,7 @@ from cloudmesh.sbatch.slurm import Slurm
 from cloudmesh.shell.command import PluginCommand
 from cloudmesh.shell.command import command
 from cloudmesh.shell.command import map_parameters
+from cloudmesh.common.parameter import Parameter
 
 
 class SbatchCommand(PluginCommand):
@@ -35,6 +36,7 @@ class SbatchCommand(PluginCommand):
                                 [--source_dir=SOURCE_DIR]
                                 [--experiment=EXPERIMENT]
                                 [--flat]
+                                [--copycode=CODE]
                 sbatch slurm start
                 sbatch slurm stop
                 sbatch slurm info
@@ -67,8 +69,8 @@ class SbatchCommand(PluginCommand):
 
           Options:
               -h                        help
-              --config=CONFIG...        a list of comma seperated configuration
-                                        files in yaml or json format.
+              --copycode=CODE               a list of files to be copied into the destination dir
+              --config=CONFIG...        a list of comma seperated configuration files in yaml or json format.
                                         The endings must be .json or .yaml
               --type=JOB_TYPE           The method to generate submission scripts.
                                         One of slurm, lsf. [default: slurm]
@@ -145,6 +147,7 @@ class SbatchCommand(PluginCommand):
                        "account",
                        "filename",
                        "gpu",
+                       "copycode",
                        "os",
                        "job_type",
                        "flat",
@@ -196,6 +199,7 @@ class SbatchCommand(PluginCommand):
             sbatch.input_dir = str(Shell.map_filename(arguments["source_dir"]).path)
             sbatch.output_dir = str(Shell.map_filename(arguments["output_dir"]).path)
             sbatch.script_in = f"{sbatch.input_dir}/{sbatch.source}"
+            sbatch.copycode = Parameter.expand(arguments.copycode)
 
             #
             # set source and name
@@ -203,8 +207,8 @@ class SbatchCommand(PluginCommand):
 
             sbatch.name = arguments.name
             sbatch.source = arguments.source
-            sbatch.source = SBatch.update_with_directory(sbatch.input_dir, sbatch.source)
-
+            sbatch.source = SBatch.update_with_directory(sbatch.input_dir,
+                                                         sbatch.source)
             #
             # set output_script
             #
