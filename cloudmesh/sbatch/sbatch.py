@@ -11,6 +11,7 @@ from pprint import pprint
 import yaml
 from nbconvert.exporters import PythonExporter
 
+from cloudmesh.rivanna.rivanna import Rivanna
 from cloudmesh.common.FlatDict import FlatDict
 from cloudmesh.common.Printer import Printer
 from cloudmesh.common.Shell import Shell
@@ -670,6 +671,23 @@ class SBatch:
             # Generate UUID for each perm
             experiment["variables"]['sbatch']['uuid'] = str(uuid.uuid4())
 
+            #
+            # CREATE SLURM SBATCH PARAMETERS FORM A KEY based on experiment.card_name
+            #
+            host = experiment["variables"]["system"]["host"]
+            key =  experiment["variables"]["experiment"]["card_name"]
+            rivanna = Rivanna(host=host)
+
+            experiment["variables"]["slurm"] = {
+                "directive": rivanna.directive[host][key],
+                "sbatch": rivanna.create_slurm_directives(host=host, key=key).strip()
+            }
+            #
+            # END GENERATE SLURM SBATCH
+            #
+
+
+
             writefile(experiment["config"], yaml.dump(experiment["variables"], indent=2))
             content_config = readfile(experiment["config"])
             try:
@@ -678,8 +696,12 @@ class SBatch:
                 print(e)
                 Console.error("We had issues with our check for the config.yaml file")
 
-            content_script, replaced = self.generate(self.template_content,
-                                                     variables=experiment["variables"])
+
+
+            content_script, replaced = self.generate(
+                self.template_content,
+                variables=experiment["variables"])
+
 
             # if self.verbose:
             #    for attribute, value in replaced.items():
@@ -689,6 +711,7 @@ class SBatch:
             if self.copycode is not None:
                 for code in self.copycode:
                     Shell.copy(source=code, destination=experiment["directory"])
+
 
     @property
     def now(self):
