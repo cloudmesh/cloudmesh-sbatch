@@ -93,6 +93,7 @@
 <span class="kn">import</span> <span class="nn">yaml</span>
 <span class="kn">from</span> <span class="nn">nbconvert.exporters</span> <span class="kn">import</span> <span class="n">PythonExporter</span>
 
+<span class="kn">from</span> <span class="nn">cloudmesh.rivanna.rivanna</span> <span class="kn">import</span> <span class="n">Rivanna</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.FlatDict</span> <span class="kn">import</span> <span class="n">FlatDict</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.Printer</span> <span class="kn">import</span> <span class="n">Printer</span>
 <span class="kn">from</span> <span class="nn">cloudmesh.common.Shell</span> <span class="kn">import</span> <span class="n">Shell</span>
@@ -752,6 +753,23 @@
             <span class="c1"># Generate UUID for each perm</span>
             <span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">][</span><span class="s1">&#39;sbatch&#39;</span><span class="p">][</span><span class="s1">&#39;uuid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
 
+            <span class="c1">#</span>
+            <span class="c1"># CREATE SLURM SBATCH PARAMETERS FORM A KEY based on experiment.card_name</span>
+            <span class="c1">#</span>
+            <span class="n">host</span> <span class="o">=</span> <span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">][</span><span class="s2">&quot;system&quot;</span><span class="p">][</span><span class="s2">&quot;host&quot;</span><span class="p">]</span>
+            <span class="n">key</span> <span class="o">=</span>  <span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">][</span><span class="s2">&quot;experiment&quot;</span><span class="p">][</span><span class="s2">&quot;card_name&quot;</span><span class="p">]</span>
+            <span class="n">rivanna</span> <span class="o">=</span> <span class="n">Rivanna</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">)</span>
+
+            <span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">][</span><span class="s2">&quot;slurm&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;directive&quot;</span><span class="p">:</span> <span class="n">rivanna</span><span class="o">.</span><span class="n">directive</span><span class="p">[</span><span class="n">host</span><span class="p">][</span><span class="n">key</span><span class="p">],</span>
+                <span class="s2">&quot;sbatch&quot;</span><span class="p">:</span> <span class="n">rivanna</span><span class="o">.</span><span class="n">create_slurm_directives</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="p">}</span>
+            <span class="c1">#</span>
+            <span class="c1"># END GENERATE SLURM SBATCH</span>
+            <span class="c1">#</span>
+
+
+
             <span class="n">writefile</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">],</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">],</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
             <span class="n">content_config</span> <span class="o">=</span> <span class="n">readfile</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">])</span>
             <span class="k">try</span><span class="p">:</span>
@@ -760,8 +778,12 @@
                 <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
                 <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;We had issues with our check for the config.yaml file&quot;</span><span class="p">)</span>
 
-            <span class="n">content_script</span><span class="p">,</span> <span class="n">replaced</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template_content</span><span class="p">,</span>
-                                                     <span class="n">variables</span><span class="o">=</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">])</span>
+
+
+            <span class="n">content_script</span><span class="p">,</span> <span class="n">replaced</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">template_content</span><span class="p">,</span>
+                <span class="n">variables</span><span class="o">=</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">])</span>
+
 
             <span class="c1"># if self.verbose:</span>
             <span class="c1">#    for attribute, value in replaced.items():</span>
@@ -771,6 +793,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">copycode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">copycode</span><span class="p">:</span>
                     <span class="n">Shell</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;directory&quot;</span><span class="p">])</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">now</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
