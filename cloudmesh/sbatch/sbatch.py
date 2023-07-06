@@ -656,7 +656,7 @@ class SBatch:
             parameters = experiment["experiment"]
             directory = experiment["directory"]
             script = os.path.basename(experiment["script"])
-            print(f"{parameters} cd {directory} && {cmd} {script}")
+            print(f"{parameters} ; cd {directory} && {cmd} {script}")
 
     def generate_setup_from_configuration(self, configuration):
         for identifier in configuration:
