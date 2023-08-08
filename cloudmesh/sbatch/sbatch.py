@@ -194,19 +194,19 @@ class SBatch:
         :rtype: str
         """
 
-        # banner("AAAA")
-        # print(spec)
-        # banner("BBBB")
-        #
-        # data = FlatDict()
-        # data.loads(spec)
-        #
-        # print(data)
-        # banner("CCCCC")
-        #
-        # pprint(data)
-        # return data
+        banner("AAAA")
+        print(spec)
+        banner("BBBB")
 
+        data = FlatDict()
+        data.loads(spec)
+
+        print(dict(data))
+        banner("CCCCC")
+
+        pprint(data.__dict__)
+
+        banner("DDDD")
 
         import re
         import munch
@@ -505,49 +505,6 @@ class SBatch:
         identifier = "_".join(values)
         return identifier, assignments, values
 
-    # def _generate_flat_config(self):
-    #     """
-    #     deprecated. IT is no longer supported
-    #
-    #     Creates a flat configuration file.
-    #
-    #     :return: dict with information where the variables are a flatdict
-    #     :rtype: dict
-    #     """
-    #
-    #     configuration = dict()
-    #     # self.script_variables = list()
-    #     suffix = self._suffix(self.script_out)
-    #     spec = yaml.dump(self.data, indent=2)
-    #     spec = self.spec_replace(spec)
-    #
-    #     directory = self.output_dir
-    #     for permutation in self.permutations:
-    #         identifier, assignments, values = self._generate_bootstrapping(permutation)
-    #
-    #         spec = yaml.dump(self.data, indent=2)
-    #         spec = self.spec_replace(spec)
-    #
-    #         variables = yaml.safe_load(spec)
-    #
-    #         name = os.path.basename(self.script_out)
-    #         script = f"{directory}/{name}_{identifier}{suffix}"
-    #         config = f"{directory}/config_{identifier}.yaml"
-    #
-    #         variables.update({'experiment': permutation})
-    #         variables["sbatch"]["idenitfier"] = identifier
-    #
-    #         configuration[identifier] = {
-    #             "id": identifier,
-    #             "directory": directory,
-    #             "experiment": assignments,
-    #             "script": script,
-    #             "config": config,
-    #             "variables": variables
-    #             "copycode": list of files to copy
-    #         }
-    #     return configuration
-
     def _generate_hierarchical_config(self):
         """
         Creates a hierarchical directory with configuration yaml files, and shell script
@@ -622,10 +579,7 @@ class SBatch:
                 script = f"{self.output_dir}/{self.script_out}{values}".replace("=", "_")
         else:
             configuration = None
-            if mode.startswith("f"):
-                Console.error("Flat mode is no longer supported", traceflag=True)
-                # configuration = self._generate_flat_config()
-            elif mode.startswith("h"):
+            if mode.startswith("h"):
                 configuration = self._generate_hierarchical_config()
             else:
                 raise RuntimeError(f"Invalid generator mode {mode}")
@@ -742,6 +696,11 @@ class SBatch:
                     c = FlatDict()
                     c.load(experiment["config"])
                     c.apply(experiment["script"])
+                    c.apply(experiment["config"])
+
+                    name = experiment["config"]
+                    print("XXXXX", name)
+
             except Exception as e:
                 print (e)
                 raise ValueError
@@ -766,3 +725,4 @@ class SBatch:
         if name is not None:
             content = json.dumps(self.configuration_parameters, indent=2)
             writefile(name, content)
+

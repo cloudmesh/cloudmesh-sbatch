@@ -88,9 +88,9 @@ class SbatchCommand(PluginCommand):
               --experiment=EXPERIMENT   This specifies all parameters that are used to create
                                         permutations of them.
                                         They are comma separated key value pairs
-              --mode=MODE               one of "flat", "debug", "hierachical" can also just
-                                        use "f". "d", "h" [default: h]
-              --name=NAME               name of the experiment configuration file
+              --mode=MODE               one of "debug", "hierachical". One can also just
+                                        use "d", "h" [default: h]
+              --name=NAME               Name of the experiment configuration file
               --os=OS                   Selected OS variables
               --flat                    produce flatdict
               --dryrun                  flag to do a dryrun and not create files and
@@ -116,17 +116,7 @@ class SbatchCommand(PluginCommand):
             >    --experiment=\"epoch=[1-3] x=[1,4] y=[10,11]\" \\
             >    --name=a \\
             >    --mode=h
-            >
-            > cms sbatch generate slurm.in.sh \\
-            >    --verbose \\
-            >    --config=a.py,b.json,c.yaml \\
-            >    --attributes=name=gregor,a=1,b=4 \\
-            >    --noos \\
-            >    --input_dir=example \\
-            >    --experiment="epoch=[1-3] x=[1,4] y=[10,11]" \\
-            >    --mode=f \\
-            >    --name=a
-            >
+            >            >
             > cms sbatch generate slurm.in.sh --experiments-file=experiments.yaml --name=a
             >
             > cms sbatch generate submit --name=a
