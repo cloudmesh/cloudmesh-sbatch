@@ -69,7 +69,7 @@ class SbatchCommand(PluginCommand):
 
           Options:
               -h                        help
-              --copycode=CODE               a list of files to be copied into the destination dir
+              --copycode=CODE           a list including files and directories to be copied into the destination dir
               --config=CONFIG...        a list of comma seperated configuration files in yaml or json format.
                                         The endings must be .json or .yaml
               --type=JOB_TYPE           The method to generate submission scripts.

@@ -710,7 +710,8 @@ class SBatch:
             writefile(experiment["script"], content_script)
             if self.copycode is not None:
                 for code in self.copycode:
-                    Shell.copy(source=code, destination=experiment["directory"])
+                    Shell.copy_source(source=code, destination=experiment["directory"])
+
 
 
     @property
