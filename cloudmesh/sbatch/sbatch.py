@@ -194,30 +194,28 @@ class SBatch:
         :rtype: str
         """
 
-        banner("AAAA")
+        banner("SPECIFICATION")
         print(spec)
-        banner("BBBB")
 
         data = FlatDict()
         data.loads(spec)
 
-        print(dict(data))
-        banner("CCCCC")
-
+        banner("FLATDICT")
         pprint(data.__dict__)
 
-        banner("DDDD")
+        spec1 = str(data.__dict__)
+        print(str(spec1[1:-1]))
 
+        banner("MUNCH")
+        #
+        # should be replaced with flatdct aplied on config.yaml file
+        #
         import re
         import munch
         variables = re.findall(r"\{\w.+\}", spec)
-
-        banner("GGGGGGGGGGGGGGGGGGGGGGG")
-
         data = yaml.load(spec, Loader=yaml.SafeLoader)
 
-        pprint(data)
-        banner("RRRRRRRRRRRRRRRRRRRRRRRRR")
+
         m = munch.DefaultMunch.fromDict(data)
 
         for o in range(0,4):
@@ -234,8 +232,7 @@ class SBatch:
                     except:  # noqa: E722
                         value = variable
 
-        banner("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU")
-        pprint(spec)
+        banner("END MUNCH")
         return spec
 
     def update_from_os(self, variables):
@@ -536,8 +533,13 @@ class SBatch:
 
             spec = yaml.dump(self.data, indent=2)
             spec = self.spec_replace(spec)
+            print (type(spec))
 
             variables = yaml.safe_load(spec)
+
+            print ("VARIABLES")
+            pprint (variables)
+            print ("END VARIABLES")
 
             name = os.path.basename(self.script_out)
             script = f"{directory}/{identifier}/{name}"
@@ -690,7 +692,6 @@ class SBatch:
             if self.copycode is not None:
                 for code in self.copycode:
                     Shell.copy_source(source=code, destination=experiment["directory"])
-
             try:
                 if replace_all:
                     c = FlatDict()
