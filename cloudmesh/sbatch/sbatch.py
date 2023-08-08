@@ -55,6 +55,7 @@ class SBatch:
         self.configuration_parameters = None
         self.script_out = None
         # self.gpu = None
+        self.copycode = None
 
     def info(self, verbose=None):
         """
@@ -192,6 +193,21 @@ class SBatch:
         :return: replaced yaml file
         :rtype: str
         """
+
+        # banner("AAAA")
+        # print(spec)
+        # banner("BBBB")
+        #
+        # data = FlatDict()
+        # data.loads(spec)
+        #
+        # print(data)
+        # banner("CCCCC")
+        #
+        # pprint(data)
+        # return data
+
+
         import re
         import munch
         variables = re.findall(r"\{\w.+\}", spec)
@@ -204,18 +220,19 @@ class SBatch:
         banner("RRRRRRRRRRRRRRRRRRRRRRRRR")
         m = munch.DefaultMunch.fromDict(data)
 
-        for i in range(0, len(variables)):
+        for o in range(0,4):
+            for i in range(0, len(variables)):
 
-            for variable in variables:
-                text = variable
-                variable = variable[1:-1]
-                # noinspection PyBroadException
-                try:
-                    value = eval("m.{variable}".format(**locals()))
-                    if "{" not in value:
-                        spec = spec.replace(text, value)
-                except:  # noqa: E722
-                    value = variable
+                for variable in variables:
+                    text = variable
+                    variable = variable[1:-1]
+                    # noinspection PyBroadException
+                    try:
+                        value = eval("m.{variable}".format(**locals()))
+                        if "{" not in value:
+                            spec = spec.replace(text, value)
+                    except:  # noqa: E722
+                        value = variable
 
         banner("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU")
         pprint(spec)
@@ -384,7 +401,7 @@ class SBatch:
 
             for key, value in experiments.items():
                 print(key, value)
-                # noinspection PyBroadException
+                # noinspection PyBroadException,PyPep8
                 try:
                     experiments[key] = Parameter.expand(value)
                 except:
@@ -583,7 +600,7 @@ class SBatch:
             }
         return configuration
 
-    def generate_experiment_batch_scripts(self, out_mode=None):
+    def generate_experiment_batch_scripts(self, out_mode=None, replace_all=True):
         """
         Utility method to genrerate either hierarchical or flat outputs; or debug.
 
@@ -619,7 +636,7 @@ class SBatch:
 
             self.configuration_parameters = configuration
 
-            self.generate_setup_from_configuration(configuration)
+            self.generate_setup_from_configuration(configuration, replace_all)
 
     def generate_submit(self, name=None, job_type='slurm'):
         """
@@ -664,7 +681,7 @@ class SBatch:
             script = os.path.basename(experiment["script"])
             print(f"{parameters} cd {directory} && {cmd} {script}")
 
-    def generate_setup_from_configuration(self, configuration):
+    def generate_setup_from_configuration(self, configuration, replace_all=True):
         """
         generates a setup directory from the configuration parameters
         :param configuration: the configuration dict
@@ -720,7 +737,14 @@ class SBatch:
                 for code in self.copycode:
                     Shell.copy_source(source=code, destination=experiment["directory"])
 
-
+            try:
+                if replace_all:
+                    c = FlatDict()
+                    c.load(experiment["config"])
+                    c.apply(experiment["script"])
+            except Exception as e:
+                print (e)
+                raise ValueError
     @property
     def now(self):
         """
