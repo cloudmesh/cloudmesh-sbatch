@@ -11,3 +11,4 @@ cloudmesh-rivanna
 #    pip-compile setup.py
 #
 nbconvert
+munch

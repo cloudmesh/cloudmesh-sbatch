@@ -28,9 +28,9 @@ OptStr = typing.Optional[str]
 
 class SBatch:
 
-    def config_read(self, path="./config.yaml"):
-        print (path)
-        return None
+    # def config_read(self, path="./config.yaml"):
+    #     print (path)
+    #     return None
 
     def __init__(self, verbose=False):
         """
@@ -93,6 +93,7 @@ class SBatch:
             "experiments",
             "copy"
         ]:
+            # noinspection PyBroadException
             try:
                 result = getattr(self, a)
             except:  # noqa: E722
@@ -159,6 +160,14 @@ class SBatch:
             return filename
 
     def get_data(self, flat=False):
+        """
+        converts the data from the yaml file with the flatdict
+
+        :param flat: if set to true uses flatdict
+        :type flat: boolen
+        :return: result of flatdict without the seperator
+        :rtype: dict
+        """
         result = self.data
 
         if flat:
@@ -170,8 +179,8 @@ class SBatch:
 
     def spec_replace(self, spec):
         """
-        given a spec in yaml format, replaces all values in the yaml file taht are of the form "{a.b}"
-        with the value of
+        given a spec in yaml format, replaces all values in the yaml file that
+        are of the form "{a.b}" with the value of
 
         a:
            b: value
@@ -200,13 +209,13 @@ class SBatch:
             for variable in variables:
                 text = variable
                 variable = variable[1:-1]
+                # noinspection PyBroadException
                 try:
                     value = eval("m.{variable}".format(**locals()))
                     if "{" not in value:
                         spec = spec.replace(text, value)
                 except:  # noqa: E722
                     value = variable
-
 
         banner("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU")
         pprint(spec)
@@ -374,7 +383,8 @@ class SBatch:
             experiments = values['experiment']
 
             for key, value in experiments.items():
-                print (key, value)
+                print(key, value)
+                # noinspection PyBroadException
                 try:
                     experiments[key] = Parameter.expand(value)
                 except:
@@ -573,9 +583,6 @@ class SBatch:
             }
         return configuration
 
-
-
-
     def generate_experiment_batch_scripts(self, out_mode=None):
         """
         Utility method to genrerate either hierarchical or flat outputs; or debug.
@@ -597,6 +604,7 @@ class SBatch:
                     values = values + f"{attribute}={value} "
                 script = f"{self.output_dir}/{self.script_out}{values}".replace("=", "_")
         else:
+            configuration = None
             if mode.startswith("f"):
                 Console.error("Flat mode is no longer supported", traceflag=True)
                 # configuration = self._generate_flat_config()
@@ -622,8 +630,6 @@ class SBatch:
         :param job_type: name of the job type used at submission such as
                          sbatch, slurm, jsrun, mpirun, sh, bash
         :type job_type: str
-        :param verbose: prints the generated command lines
-        :type verbose: bool
         :return: prepars the internal data for the experiments, if set to verbose, prints them
         :rtype: None
         """
@@ -643,7 +649,7 @@ class SBatch:
 
         experiments = json.loads(readfile(name))
 
-       #  print (experiments)
+        #  print (experiments)
 
         if experiments is None:
             Console.error("please define the experiment parameters")
@@ -659,6 +665,13 @@ class SBatch:
             print(f"{parameters} cd {directory} && {cmd} {script}")
 
     def generate_setup_from_configuration(self, configuration):
+        """
+        generates a setup directory from the configuration parameters
+        :param configuration: the configuration dict
+        :type configuration: dict
+        :return:
+        :rtype:
+        """
         for identifier in configuration:
             experiment = configuration[identifier]
             Shell.mkdir(experiment["directory"])
@@ -675,7 +688,7 @@ class SBatch:
             # CREATE SLURM SBATCH PARAMETERS FORM A KEY based on experiment.card_name
             #
             host = experiment["variables"]["system"]["host"]
-            key =  experiment["variables"]["experiment"]["card_name"]
+            key = experiment["variables"]["experiment"]["card_name"]
             rivanna = Rivanna(host=host)
 
             experiment["variables"]["slurm"] = {
@@ -686,8 +699,6 @@ class SBatch:
             # END GENERATE SLURM SBATCH
             #
 
-
-
             writefile(experiment["config"], yaml.dump(experiment["variables"], indent=2))
             content_config = readfile(experiment["config"])
             try:
@@ -696,12 +707,9 @@ class SBatch:
                 print(e)
                 Console.error("We had issues with our check for the config.yaml file")
 
-
-
             content_script, replaced = self.generate(
                 self.template_content,
                 variables=experiment["variables"])
-
 
             # if self.verbose:
             #    for attribute, value in replaced.items():
@@ -711,7 +719,6 @@ class SBatch:
             if self.copycode is not None:
                 for code in self.copycode:
                     Shell.copy(source=code, destination=experiment["directory"])
-
 
     @property
     def now(self):
