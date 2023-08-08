@@ -697,10 +697,6 @@ class SBatch:
                     c.load(experiment["config"])
                     c.apply(experiment["script"])
                     c.apply(experiment["config"])
-
-                    name = experiment["config"]
-                    print("XXXXX", name)
-
             except Exception as e:
                 print (e)
                 raise ValueError
