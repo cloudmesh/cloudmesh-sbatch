@@ -276,19 +276,19 @@
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># banner(&quot;AAAA&quot;)</span>
-        <span class="c1"># print(spec)</span>
-        <span class="c1"># banner(&quot;BBBB&quot;)</span>
-        <span class="c1">#</span>
-        <span class="c1"># data = FlatDict()</span>
-        <span class="c1"># data.loads(spec)</span>
-        <span class="c1">#</span>
-        <span class="c1"># print(data)</span>
-        <span class="c1"># banner(&quot;CCCCC&quot;)</span>
-        <span class="c1">#</span>
-        <span class="c1"># pprint(data)</span>
-        <span class="c1"># return data</span>
+        <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;AAAA&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+        <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;BBBB&quot;</span><span class="p">)</span>
 
+        <span class="n">data</span> <span class="o">=</span> <span class="n">FlatDict</span><span class="p">()</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+        <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;CCCCC&quot;</span><span class="p">)</span>
+
+        <span class="n">pprint</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+
+        <span class="n">banner</span><span class="p">(</span><span class="s2">&quot;DDDD&quot;</span><span class="p">)</span>
 
         <span class="kn">import</span> <span class="nn">re</span>
         <span class="kn">import</span> <span class="nn">munch</span>
@@ -587,49 +587,6 @@
         <span class="n">identifier</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">assignments</span><span class="p">,</span> <span class="n">values</span>
 
-    <span class="c1"># def _generate_flat_config(self):</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     deprecated. IT is no longer supported</span>
-    <span class="c1">#</span>
-    <span class="c1">#     Creates a flat configuration file.</span>
-    <span class="c1">#</span>
-    <span class="c1">#     :return: dict with information where the variables are a flatdict</span>
-    <span class="c1">#     :rtype: dict</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#</span>
-    <span class="c1">#     configuration = dict()</span>
-    <span class="c1">#     # self.script_variables = list()</span>
-    <span class="c1">#     suffix = self._suffix(self.script_out)</span>
-    <span class="c1">#     spec = yaml.dump(self.data, indent=2)</span>
-    <span class="c1">#     spec = self.spec_replace(spec)</span>
-    <span class="c1">#</span>
-    <span class="c1">#     directory = self.output_dir</span>
-    <span class="c1">#     for permutation in self.permutations:</span>
-    <span class="c1">#         identifier, assignments, values = self._generate_bootstrapping(permutation)</span>
-    <span class="c1">#</span>
-    <span class="c1">#         spec = yaml.dump(self.data, indent=2)</span>
-    <span class="c1">#         spec = self.spec_replace(spec)</span>
-    <span class="c1">#</span>
-    <span class="c1">#         variables = yaml.safe_load(spec)</span>
-    <span class="c1">#</span>
-    <span class="c1">#         name = os.path.basename(self.script_out)</span>
-    <span class="c1">#         script = f&quot;{directory}/{name}_{identifier}{suffix}&quot;</span>
-    <span class="c1">#         config = f&quot;{directory}/config_{identifier}.yaml&quot;</span>
-    <span class="c1">#</span>
-    <span class="c1">#         variables.update({&#39;experiment&#39;: permutation})</span>
-    <span class="c1">#         variables[&quot;sbatch&quot;][&quot;idenitfier&quot;] = identifier</span>
-    <span class="c1">#</span>
-    <span class="c1">#         configuration[identifier] = {</span>
-    <span class="c1">#             &quot;id&quot;: identifier,</span>
-    <span class="c1">#             &quot;directory&quot;: directory,</span>
-    <span class="c1">#             &quot;experiment&quot;: assignments,</span>
-    <span class="c1">#             &quot;script&quot;: script,</span>
-    <span class="c1">#             &quot;config&quot;: config,</span>
-    <span class="c1">#             &quot;variables&quot;: variables</span>
-    <span class="c1">#             &quot;copycode&quot;: list of files to copy</span>
-    <span class="c1">#         }</span>
-    <span class="c1">#     return configuration</span>
-
     <span class="k">def</span> <span class="nf">_generate_hierarchical_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a hierarchical directory with configuration yaml files, and shell script</span>
@@ -704,10 +661,7 @@
                 <span class="n">script</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">script_out</span><span class="si">}{</span><span class="n">values</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">configuration</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="n">mode</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;f&quot;</span><span class="p">):</span>
-                <span class="n">Console</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Flat mode is no longer supported&quot;</span><span class="p">,</span> <span class="n">traceflag</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="c1"># configuration = self._generate_flat_config()</span>
-            <span class="k">elif</span> <span class="n">mode</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;h&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">mode</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;h&quot;</span><span class="p">):</span>
                 <span class="n">configuration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_hierarchical_config</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid generator mode </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -824,6 +778,11 @@
                     <span class="n">c</span> <span class="o">=</span> <span class="n">FlatDict</span><span class="p">()</span>
                     <span class="n">c</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">])</span>
                     <span class="n">c</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;script&quot;</span><span class="p">])</span>
+                    <span class="n">c</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">])</span>
+
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">experiment</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;XXXXX&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="nb">print</span> <span class="p">(</span><span class="n">e</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span></div>
@@ -848,6 +807,7 @@
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">content</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration_parameters</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
             <span class="n">writefile</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span></div></div>
+
 </pre></div>
 
            </div>
