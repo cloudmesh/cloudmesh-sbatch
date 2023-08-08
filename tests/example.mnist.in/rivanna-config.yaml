@@ -8,8 +8,13 @@ run:
   branch: main
 
 system:
-  python: "3.10.2"
-  num_cpus: 6
+  host: "rivanna"
+  python: "3.10.8"
+  num_cpus: 1
+  platform: rivanna
+  accelerators_per_node: 1
+  constraint: ""
+  reservation: ""
   partition: "gpu"
 
 config:

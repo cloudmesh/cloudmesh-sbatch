@@ -14,6 +14,15 @@ mode: h
 dir: project
 
 # test comment 1 should be passed
+system:
+  host: "rivanna"
+  python: "3.10.8"
+  num_cpus: 1
+  platform: rivanna
+  accelerators_per_node: 1
+  constraint: ""
+  reservation: ""
+  partition: "gpu"
 
 experiment:
   # test comment 2 should be passed
