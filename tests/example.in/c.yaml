@@ -1,5 +1,8 @@
 name: "Gregor"
 
+experiment:
+  card_name: "a100"
+
 system:
   host: "rivanna"
   python: "3.10.8"
