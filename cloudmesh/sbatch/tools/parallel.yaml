@@ -1,0 +1,29 @@
+steps:
+  - name: "Fetch Data"
+    type: "fetch"
+    label: "data-fetch"
+    command: "python fetch_data.py"
+    host: "host1"
+
+  - name: "Preprocessing"
+    type: "prepare"
+    label: "data-prep"
+    command: "python preprocess.py"
+    host: "host1"
+    dependencies: ["data-fetch"]
+
+  - name: "Training"
+    type: "run"
+    label: "model-train"
+    command: "python train.py {parameters}"
+    host: "host2"
+    parameters: "--data-path data/processed_dataset.csv --model-type cnn"
+    dependencies: ["data-prep"]
+
+  - name: "Evaluation"
+    type: "run"
+    label: "model-eval"
+    command: "python evaluate.py {parameters}"
+    host: "host1"
+    parameters: "--data-path data/processed_dataset.csv --model-type cnn"
+    dependencies: ["model-train"]

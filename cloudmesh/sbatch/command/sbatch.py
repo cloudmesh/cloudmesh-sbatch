@@ -1,5 +1,6 @@
 import pathlib
 
+import cloudmesh.sbatch.tools.sequential_executor
 from cloudmesh.common.Shell import Shell
 from cloudmesh.common.console import Console
 from cloudmesh.common.debug import VERBOSE
@@ -40,6 +41,7 @@ class SbatchCommand(PluginCommand):
                 sbatch slurm start
                 sbatch slurm stop
                 sbatch slurm info
+                sbatch seq --yaml=YAML|--json=JSON
 
           sbatch allows the creation of parameterized batch
           scripts. The initial support includes slurm, but we intend
@@ -135,6 +137,8 @@ class SbatchCommand(PluginCommand):
                        "source_dir",
                        "experiment",
                        "account",
+                       "yaml",
+                       "json",
                        "filename",
                        "gpu",
                        "copycode",
@@ -146,6 +150,26 @@ class SbatchCommand(PluginCommand):
         verbose = arguments["--verbose"]
         if verbose:
             banner("experiment batch generator")
+
+
+        if arguments.seq or arguments.sequential:
+
+            Console.warning("THIS IS JUST A NON FUNCTIONING EXAMPLE")
+
+            yaml_file = args['--yaml']
+            json_file = args['--json']
+
+            from cloudmesh.sbatch.tools.sequential_executor import SequentialExecutor
+
+            executor = SequentialExecutor()
+
+            if yaml_file:
+                executor.execute_with_yaml(yaml_file)
+
+            if json_file:
+                executor.execute_with_json(json_file)
+
+            executor.execute()
 
         if arguments.slurm:
             if arguments.start:
