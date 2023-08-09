@@ -23,6 +23,7 @@ Command sbatch
         sbatch slurm start
         sbatch slurm stop
         sbatch slurm info
+        sbatch seq --yaml=YAML|--json=JSON
 
   sbatch allows the creation of parameterized batch
   scripts. The initial support includes slurm, but we intend
